@@ -1,0 +1,134 @@
+.header-container {
+  padding-inline: 20px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  padding-top: 10px;
+  z-index: 10;
+  gap: 5px;
+  margin-bottom: 20px;
+  background-color: #1e1e2e;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-actions button {
+  margin-left: 10px;
+}
+
+.heading {
+  display: flex;
+  align-items: baseline;
+  align-items: center;
+  gap: 10px;
+
+  img {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  font-size: 0.875rem;
+  margin-bottom: 10px;
+}
+
+.legend-item {
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #000;
+  display: inline-block;
+}
+
+/* Search bar styling */
+.search-bar {
+  flex-grow: 1; /* This ensures the search bar takes up available space */
+  margin: 0 20px; /* Spacing between the heading and actions */
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #74c7ec;
+  background-color: #2c2e3e;
+  color: #cdd6f4;
+  font-size: 14px;
+}
+
+.search-bar input::placeholder {
+  color: #cdd6f4;
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: #89dceb;
+}
+
+.user-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.user {
+  position: relative;
+  width: 40px; /* Adjust as per your needs */
+  height: 40px;
+}
+
+.user img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%; /* This makes the avatar a circle */
+  object-fit: cover; /* Ensures the image fits well inside the circle */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: adds a subtle shadow */
+}
+
+.user span {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 12px; /* Adjust font size as needed */
+  color: white;
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
+  padding: 2px 0;
+  border-bottom-left-radius: 50%;
+  border-bottom-right-radius: 50%; /* Curve the text background to follow the circle */
+}
+
+.command-dropdown {
+  position: absolute;
+  background-color: #2c2e3e;
+  color: #cdd6f4;
+  border: 1px solid #74c7ec;
+  border-radius: 8px;
+  padding: 5px;
+  max-height: 200px;
+  min-width: 200px;
+  overflow-y: auto;
+  margin-top: 5px;
+  z-index: 999; /* Ensure it appears on top */
+}
+
+.command-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.command-item:hover {
+  background-color: #74c7ec;
+}

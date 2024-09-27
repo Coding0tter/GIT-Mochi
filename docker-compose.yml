@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  kanban-board:
+    build: ./kanban-board
+    ports:
+      - '3005:3005'
+    volumes:
+      - ./kanban-board:/app  # Mount local directory for hot-reloading
+    depends_on:
+      - backend
+
+  backend:
+    build: .
+    volumes:
+      - ./:/app
+    ports:
+      - '5000:5000'
+    command: ["bun", "run", "--watch", "index.ts"]
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - '27018:27017'
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

@@ -1,0 +1,34 @@
+.priority-flag,
+.custom-flag {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background-color: #fab387;
+  color: #1e1e2e;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 12px;
+  display: inline-block;
+  margin-top: 5px;
+  margin-right: 5px;
+}
+
+.priority-flag.medium {
+  background-color: #f38ba8;
+}
+
+.priority-flag.high {
+  color: white;
+  background-color: #e74c3c;
+}
+
+.priority-flag.low {
+  background-color: #74c7ec;
+}
+
+.priority-flag.issue {
+  background-color: #f5e0dc;
+  color: #1e1e2e;
+}
+
