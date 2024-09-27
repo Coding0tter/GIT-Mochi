@@ -8,11 +8,11 @@ import {
 import { InputMode } from "../App";
 import { CommandHandler } from "../services/commandHandler";
 import { addNotification } from "../services/notificationService";
-import logo from "../assets/git-mochi.png";
+import logo from "../assets/logo.svg";
 
 interface HeaderProps {
   loading: boolean;
-  onSync: () => void;
+  onSync: () => Promise<void>;
   onToggleCreateTask: () => void;
   showCreateTask: boolean;
   onSearch: (query: string) => void;
@@ -267,7 +267,7 @@ const Header = (props: HeaderProps): JSX.Element => {
       <div class="legend-row">
         <span>
           active project:{" "}
-          <strong>{currentProject()?.name_with_namespace}</strong>
+          <strong>{currentProject()?.name_with_namespace ?? "none"}</strong>
         </span>
         <span
           class="legend-item"

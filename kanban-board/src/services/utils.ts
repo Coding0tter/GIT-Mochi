@@ -49,5 +49,6 @@ export const getProject = async () => {
     return response.json();
   } catch (error) {
     console.error("Error getting project:", error);
+    return null;
   }
 };

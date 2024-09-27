@@ -1,4 +1,5 @@
 import { BACKEND_URL } from "../constants";
+import { addNotification } from "./notificationService";
 
 export interface Task {
   _id: string;
@@ -30,7 +31,20 @@ export const fetchTasksAsync = async (
   showDeleted: boolean = false
 ): Promise<Task[]> => {
   const res = await fetch(`${BACKEND_URL}/tasks?showDeleted=${showDeleted}`);
-  return await res.json();
+  const response = await res.json();
+
+  if(response.error) {
+    addNotification({
+      title: "Error",
+      description: response.error,
+      type: "error",
+      duration:5000,
+    });
+
+    return [];
+  }
+
+  return response;
 };
 
 export const restoreTaskAsync = async (taskId: string) => {

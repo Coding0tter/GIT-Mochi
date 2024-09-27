@@ -1,6 +1,6 @@
 # Mochi - GitLab-Integrated Kanban Board
 
-![Mochi Logo](./git-mochi.png)
+<img src="./logo.svg" alt="Mochi Logo" class="logo" style="width:300px;height:auto">
 
 Mochi is a **keyboard-friendly Kanban-style task management tool** integrated with **GitLab**. Manage your GitLab issues and tasks seamlessly with efficient keyboard-driven commands, modal interactions, and GitLab synchronization.
 

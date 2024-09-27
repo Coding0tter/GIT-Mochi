@@ -153,7 +153,6 @@ const App = () => {
 
   onMount(async () => {
     await loadTasksAsync();
-
     window.addEventListener("keydown", keydownHandler);
   });
 

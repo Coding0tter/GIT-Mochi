@@ -11,7 +11,10 @@ export const createTask = async (
     const { title, status, description } = req.body as Partial<TaskDto>;
 
     const currentProjectId = await Setting.findOne({ key: "currentProject" });
-    if (!currentProjectId) throw new Error("No project selected");
+    if (!currentProjectId) {
+      res.status(404).json({ error: "No project selected" });
+      return;
+    }
 
     const task = new Task({
       title,
@@ -32,7 +35,10 @@ export const getTasks = async (req: Request, res: Response) => {
   const { showDeleted } = req.query;
 
   const currentProjectId = await Setting.findOne({ key: "currentProject" });
-  if (!currentProjectId) throw new Error("No project selected");
+  if (!currentProjectId) {
+    res.status(404).json({ error: "No project selected" });
+    return;
+  }
 
   const tasks = await Task.find({ projectId: currentProjectId.value });
   const filteredTasks =
