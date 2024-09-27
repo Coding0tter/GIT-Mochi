@@ -4,20 +4,13 @@
 
 Mochi is a **keyboard-friendly Kanban-style task management tool** integrated with **GitLab**. Manage your GitLab issues and tasks seamlessly with efficient keyboard-driven commands, modal interactions, and GitLab synchronization.
 
----
+## Support Me
 
-## Table of Contents
+If you like this project, consider [buying me a coffee](https://www.buymeacoffee.com/maxikriegl)!
 
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Keyboard Shortcuts](#keyboard-shortcuts)
-- [Syncing with GitLab](#syncing-with-gitlab)
-- [Development](#development)
-- [Contributing](#contributing)
-- [License](#license)
-
----
+<a href="https://www.buymeacoffee.com/maxikriegl" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >
+</a>
 
 ## Features
 
