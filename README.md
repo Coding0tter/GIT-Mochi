@@ -112,3 +112,36 @@ To sync with GitLab, ensure your **GitLab Personal Access Token** is set in the 
 GITLAB_API_URL=https://gitlab.com/api/v4
 GITLAB_ACCESS_TOKEN=your_personal_access_token
 ```
+
+## Development
+
+### Prerequisites
+
+- **Node.js** and **bun**
+
+### Running the app locally
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/Coding0tter/GIT-Mochi.git
+cd GIT-Mochi
+```
+
+2. Install dependencies:
+
+```bash
+bun i
+```
+
+3. Start the app
+
+```
+docker-compose up --build
+```
+
+## Contribution
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for more details.
