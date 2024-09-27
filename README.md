@@ -1,8 +1,10 @@
 # Mochi - GitLab-Integrated Kanban Board
 
-<img src="./logo.svg" alt="Mochi Logo" class="logo" style="width:300px;height:auto">
+<img src="./logo.svg" alt="Mochi Logo" class="logo" style="width:300px;height:auto;border-radius:10px;">
 
 Mochi is a **keyboard-friendly Kanban-style task management tool** integrated with **GitLab**. Manage your GitLab issues and tasks seamlessly with efficient keyboard-driven commands, modal interactions, and GitLab synchronization.
+
+<img src="./docs/dashboard.png" alt="Mochi Dashboard" style="width:1000px; height:auto">
 
 ## Support Me
 
@@ -73,6 +75,8 @@ Mochi syncs your tasks, merge requests, and issues directly with GitLab. You can
 ## Keyboard Shortcuts
 
 Here are the keybindings for controlling Mochi:
+
+<img src="./docs/help.png" alt="Mochi Help" style="width:1000px; height:auto; border-radius:10px;">
 
 | Key Combination             | Action                                      |
 | --------------------------- | ------------------------------------------- |
