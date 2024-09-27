@@ -50,7 +50,7 @@ const TaskCard = (props: TaskCardProps) => {
         </span>
       )}
       {props.commentsCount > 0 && (
-        <div class="comments-count">{props.commentsCount} comments</div>
+        <div class="comments-count">{props.commentsCount}</div>
       )}
     </div>
   );

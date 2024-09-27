@@ -226,7 +226,8 @@ const App = () => {
                     .includes(searchQuery().toLowerCase()) ||
                   task.labels.some((label) =>
                     label.toLowerCase().includes(searchQuery().toLowerCase())
-                  )
+                  ) ||
+                  task.branch?.toString().includes(searchQuery())
               )}
             selectedTaskIndex={selectedTaskIndex()}
             selectedColumnIndex={selectedColumnIndex()}

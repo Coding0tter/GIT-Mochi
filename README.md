@@ -121,13 +121,7 @@ git clone https://github.com/Coding0tter/GIT-Mochi.git
 cd GIT-Mochi
 ```
 
-2. Install dependencies:
-
-```bash
-bun i
-```
-
-3. Start the app
+2. Start the app
 
 ```
 docker-compose up --build

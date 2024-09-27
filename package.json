@@ -1,5 +1,9 @@
 {
-  "name": "git-mochi",
+  "author": {
+    "name": "Coding0tter",
+    "url": "https://github.com/Coding0tter"
+  },
+  "name": "gitlab-mochi",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {

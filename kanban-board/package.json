@@ -1,7 +1,10 @@
 {
-  "name": "vite-template-solid",
+  "author": {
+    "name": "Coding0tter",
+    "url": "https://github.com/Coding0tter"
+  },
+  "name": "gitlab-mochi-kanban-board",
   "version": "0.0.0",
-  "description": "",
   "type": "module",
   "scripts": {
     "start": "vite",

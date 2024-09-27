@@ -103,3 +103,19 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
 }
+
+.comments-count {
+  background-color: #f38ba8;
+  position: absolute;
+  height: 24px; /* Set the height for the circle */
+  width: 24px; /* Set the width for the circle */
+  border-radius: 50%; /* Makes it a circle */
+  color: #1e1e2e;
+  top: -10px; /* Positions it at the top */
+  right: -10px; /* Positions it at the right */
+  display: flex; /* Flexbox for centering text */
+  justify-content: center; /* Horizontally center text */
+  align-items: center; /* Vertically center text */
+  font-size: 12px; /* Adjust text size to fit within the circle */
+  font-weight: bold; /* Optional: Make the text bold */
+}

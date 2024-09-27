@@ -21,4 +21,4 @@ app.use("/api/git", gitlabRoutes);
 periodicallySyncComments();
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => logInfo(`GIT-Mochi backend running on port ${PORT}`));
+app.listen(PORT, () => logInfo(`Gitlab-Mochi backend running on port ${PORT}`));

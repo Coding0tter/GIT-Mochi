@@ -207,8 +207,8 @@ const Header = (props: HeaderProps): JSX.Element => {
     <div class="header-container">
       <div class="header-row">
         <div class="heading">
-          <img src={logo} alt="Git-Mochi Logo"></img>
-          <h1>Git-Mochi</h1>
+          <img src={logo} alt="GitLab-Mochi Logo"></img>
+          <h1>GitLab-Mochi</h1>
           <div class="wave-text">
             {"keyboard-friendly".split("").map((char, index) => (
               <span class="wave-char" style={{ "--index": index }}>
@@ -269,7 +269,10 @@ const Header = (props: HeaderProps): JSX.Element => {
           active project:{" "}
           <strong>{currentProject()?.name_with_namespace}</strong>
         </span>
-        <span class="legend-item" style={{ background: "#e74c3c" }}>
+        <span
+          class="legend-item"
+          style={{ background: "#e74c3c", color: "white" }}
+        >
           Deleted
         </span>
         <span class="legend-item" style={{ background: "#fab387" }}>

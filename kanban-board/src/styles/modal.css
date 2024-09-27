@@ -122,16 +122,6 @@
   color: #cdd6f4;
 }
 
-.comments-count {
-  background-color: #f38ba8;
-  position: absolute;
-  padding-inline: 10px;
-  padding-block: 2px;
-  border-radius: 10px;
-  color: #1e1e2e;
-  bottom: 5px;
-  right: 5px;
-}
 
 .comment-image {
   max-width: 100%;
