@@ -1,5 +1,6 @@
-import { getMergeRequestComments } from "../kanban-board/src/services/utils";
+import { Setting } from "../models/setting";
 import { Task } from "../models/task";
+import { getMergeRequestComments } from "../services/gitlabService";
 import { logError, logInfo } from "./logger";
 
 const periodicallySyncComments = async () => {
@@ -15,6 +16,21 @@ const periodicallySyncComments = async () => {
 
         if (comments) {
           mr.comments = comments;
+
+          mr.comments.forEach((comment) => {
+            const imageRegex = /!\[.*?\]\((.*?)\)/g;
+            const matches = [...comment.body.matchAll(imageRegex)];
+            const images = matches.map(
+              (match) =>
+                `${process.env.GIT_URL}/-/project/${mr.projectId}` + match[1]
+            );
+
+            const cleanedText = comment.body.replace(imageRegex, "").trim();
+
+            comment.body = cleanedText;
+            comment.images = images;
+          });
+
           await mr.save();
         }
       }

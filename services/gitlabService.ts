@@ -3,6 +3,8 @@ import { Task } from "../models/task";
 import { User, type IUser } from "../models/user";
 import { Setting } from "../models/setting";
 
+const GIT_API_URL = process.env.GIT_URL + "/api/v4";
+
 // Sync GitLab merge requests data
 export const syncGitLabData = async (): Promise<void> => {
   await syncMergeRequests();
@@ -21,7 +23,7 @@ export const createGitLabMergeRequest = async (
   if (!issue) throw new Error("Issue not found");
 
   const createBranchResponse = await fetch(
-    `${process.env.GIT_API_URL}/projects/${currentProjectId.value}/repository/branches`,
+    `${GIT_API_URL}/projects/${currentProjectId.value}/repository/branches`,
     {
       method: "POST",
       headers: {
@@ -45,7 +47,7 @@ export const createGitLabMergeRequest = async (
   if (!user) throw new Error("No current user found");
 
   const createMergeRequestResponse = await fetch(
-    `${process.env.GIT_API_URL}/projects/${currentProjectId.value}/merge_requests`,
+    `${GIT_API_URL}/projects/${currentProjectId.value}/merge_requests`,
     {
       method: "POST",
       headers: {
@@ -74,7 +76,7 @@ export const createGitLabMergeRequest = async (
 };
 
 export const getUserByPersonalAccessTokenAsync = async (): Promise<IUser> => {
-  const response = await axios.get(`${process.env.GIT_API_URL}/user`, {
+  const response = await axios.get(`${GIT_API_URL}/user`, {
     headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
   });
 
@@ -97,7 +99,7 @@ export const getUserByPersonalAccessTokenAsync = async (): Promise<IUser> => {
 };
 
 export const getProjectsAsync = async () => {
-  const projectsResponse = await fetch(`${process.env.GIT_API_URL}/projects`, {
+  const projectsResponse = await fetch(`${GIT_API_URL}/projects`, {
     headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
   });
 
@@ -105,12 +107,9 @@ export const getProjectsAsync = async () => {
 };
 
 export const getProjectAsync = async (projectId: string) => {
-  const projectResponse = await fetch(
-    `${process.env.GIT_API_URL}/projects/${projectId}`,
-    {
-      headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
-    }
-  );
+  const projectResponse = await fetch(`${GIT_API_URL}/projects/${projectId}`, {
+    headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
+  });
 
   return projectResponse.json();
 };
@@ -131,7 +130,7 @@ export const setProjectAsync = async (projectId: string) => {
 
 const syncMergeRequests = async () => {
   const mergeRequestResponse = await fetch(
-    `${process.env.GIT_API_URL}/merge_requests?scope=assigned_to_me`,
+    `${GIT_API_URL}/merge_requests?scope=assigned_to_me`,
     {
       headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
     }
@@ -166,7 +165,7 @@ const syncMergeRequests = async () => {
 
 const syncIssues = async () => {
   const issuesResponse = await fetch(
-    `${process.env.GIT_API_URL}/issues?scope=assigned_to_me`,
+    `${GIT_API_URL}/issues?scope=assigned_to_me`,
     {
       headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
     }
@@ -199,14 +198,14 @@ const syncIssues = async () => {
   }
 };
 
-const getMergeRequestComments = async (mergeRequestIid: string) => {
+export const getMergeRequestComments = async (mergeRequestIid: string) => {
   try {
     const currentProjectId = await Setting.findOne({ key: "currentProject" });
 
     if (!currentProjectId) throw new Error("No project selected");
 
     const commentsResponse = await axios.get(
-      `${process.env.GIT_API_URL}/projects/${currentProjectId.value}/merge_requests/${mergeRequestIid}/notes`,
+      `${GIT_API_URL}/projects/${currentProjectId.value}/merge_requests/${mergeRequestIid}/notes`,
       {
         headers: {
           "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN,

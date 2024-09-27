@@ -14,8 +14,8 @@ connect("mongodb://mongo:27017/kanban", {})
   .then(() => logInfo("MongoDB connected"))
   .catch((err) => logError(err));
 
-app.use("/tasks", taskRoutes);
-app.use("/git", gitlabRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/git", gitlabRoutes);
 
 // Sync comments every minute
 periodicallySyncComments();

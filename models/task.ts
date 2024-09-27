@@ -17,6 +17,7 @@ export interface ITask extends Document {
   deleted?: boolean;
   comments: Array<{
     body: string;
+    images?: string[];
     resolved: boolean;
     author: {
       name: string;
@@ -45,6 +46,7 @@ const TaskSchema = new Schema<ITask>({
   comments: [
     {
       body: { type: String, required: true },
+      images: [String],
       resolved: { type: Boolean, default: false },
       author: {
         name: { type: String, required: true },

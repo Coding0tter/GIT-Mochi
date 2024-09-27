@@ -1,10 +1,5 @@
 import { createSignal, onMount, onCleanup } from "solid-js";
 import { Task } from "../../services/taskService";
-import {
-  getMergeRequestComments,
-  Comment,
-  parseMarkdownForImages,
-} from "../../services/utils";
 import BaseModal, { BaseModalProps } from "./BaseModal";
 
 interface TaskDetailsModalProps extends BaseModalProps {
@@ -63,16 +58,12 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
           {props.task.comments
             ?.filter((comment) => showResolved() || !comment.resolved)
             .map((comment) => {
-              const { cleanedText, images } = parseMarkdownForImages(
-                comment.body
-              );
-
               return (
                 <div class="comment">
                   <p>
-                    <strong>{comment.author.name}:</strong> {cleanedText}
+                    <strong>{comment.author.name}:</strong> {comment.body}
                   </p>
-                  {images.map((src) => (
+                  {comment.images?.map((src) => (
                     <img src={src} alt="comment image" class="comment-image" />
                   ))}
                 </div>

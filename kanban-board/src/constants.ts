@@ -5,3 +5,5 @@ export const STATES = [
   { display_name: "Review", id: "review" },
   { display_name: "Closed", id: "closed" },
 ];
+
+export const BACKEND_URL = "http://localhost:5000/api";

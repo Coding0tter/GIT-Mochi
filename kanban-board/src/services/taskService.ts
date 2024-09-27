@@ -1,3 +1,5 @@
+import { BACKEND_URL } from "../constants";
+
 export interface Task {
   _id: string;
   gitlabId?: string;
@@ -9,6 +11,7 @@ export interface Task {
   type?: string;
   comments: Array<{
     body: string;
+    images?: string[];
     resolved: boolean;
     author: {
       name: string;
@@ -26,20 +29,18 @@ export interface Task {
 export const fetchTasksAsync = async (
   showDeleted: boolean = false
 ): Promise<Task[]> => {
-  const res = await fetch(
-    `http://localhost:5000/tasks?showDeleted=${showDeleted}`
-  );
+  const res = await fetch(`${BACKEND_URL}/tasks?showDeleted=${showDeleted}`);
   return await res.json();
 };
 
 export const restoreTaskAsync = async (taskId: string) => {
-  await fetch(`http://localhost:5000/tasks/${taskId}/restore`, {
+  await fetch(`${BACKEND_URL}/tasks/${taskId}/restore`, {
     method: "PUT",
   });
 };
 
 export const createTaskAsync = async (task: Partial<Task>) => {
-  const res = await fetch("http://localhost:5000/tasks", {
+  const res = await fetch(`${BACKEND_URL}/tasks`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -54,7 +55,7 @@ export const createTaskAsync = async (task: Partial<Task>) => {
 
 export const updateTaskAsync = async (taskId: string, task: Partial<Task>) => {
   try {
-    const res = await fetch(`http://localhost:5000/tasks/${taskId}`, {
+    const res = await fetch(`${BACKEND_URL}/tasks/${taskId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(task),
@@ -66,18 +67,18 @@ export const updateTaskAsync = async (taskId: string, task: Partial<Task>) => {
 };
 
 export const deleteTaskAsync = async (taskId: string) => {
-  await fetch(`http://localhost:5000/tasks/${taskId}`, { method: "DELETE" });
+  await fetch(`${BACKEND_URL}/tasks/${taskId}`, { method: "DELETE" });
 };
 
 export const syncGitLabAsync = async () => {
-  const res = await fetch("http://localhost:5000/git/sync", {
+  const res = await fetch(`${BACKEND_URL}/git/sync`, {
     method: "POST",
   });
   return res.ok;
 };
 
 export const createMergeRequestAsync = async (issueId: string) => {
-  const res = await fetch("http://localhost:5000/git/create-merge-request", {
+  const res = await fetch(`${BACKEND_URL}/git/create-merge-request`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ issueId }),
