@@ -9,9 +9,14 @@ const periodicallySyncComments = async () => {
       logInfo("Syncing comments...");
       const merge_requests = await Task.find({ type: "merge_request" });
 
+      if(merge_requests.length === 0) {
+        logInfo("No merge requests found. Skipping sync...");
+        return;
+      }
+
       for (const mr of merge_requests) {
         const comments = await getMergeRequestComments(
-          mr.gitlabIid?.toString()!
+          mr.gitlabIid?.toString()!, mr.projectId
         );
 
         if (comments) {

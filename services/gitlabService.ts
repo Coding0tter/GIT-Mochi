@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import { Task } from "../models/task";
 import { User, type IUser } from "../models/user";
 import { Setting } from "../models/setting";
@@ -140,7 +140,7 @@ const syncMergeRequests = async () => {
 
   for (const mr of gitlabMergeRequests) {
     const existingTask = await Task.findOne({ gitlabId: mr.id });
-    const comments = await getMergeRequestComments(mr.iid);
+    const comments = await getMergeRequestComments(mr.iid, mr.project_id);
 
     const taskData = { labels: mr.labels, branch: mr.source_branch, comments };
 
@@ -198,14 +198,10 @@ const syncIssues = async () => {
   }
 };
 
-export const getMergeRequestComments = async (mergeRequestIid: string) => {
+export const getMergeRequestComments = async (mergeRequestIid: string, projectId: string) => {
   try {
-    const currentProjectId = await Setting.findOne({ key: "currentProject" });
-
-    if (!currentProjectId) throw new Error("No project selected");
-
     const commentsResponse = await axios.get(
-      `${GIT_API_URL}/projects/${currentProjectId.value}/merge_requests/${mergeRequestIid}/notes`,
+      `${GIT_API_URL}/projects/${projectId}/merge_requests/${mergeRequestIid}/notes`,
       {
         headers: {
           "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN,
@@ -221,8 +217,8 @@ export const getMergeRequestComments = async (mergeRequestIid: string) => {
           !comment.system && comment.author.username !== "merge_train"
       );
     }
-  } catch (error) {
-    console.error("Failed to fetch comments:", error);
+  } catch (error: AxiosError) {
+    console.error(`Failed to fetch comments: ${error?.message} ${error?.config?.url}`);
     return [];
   }
 };

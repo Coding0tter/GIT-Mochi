@@ -173,19 +173,27 @@ const Header = (props: HeaderProps): JSX.Element => {
 
   const handleKeydown = (event: KeyboardEvent) => {
     if (props.inputMode === InputMode.Commandline) {
+      let newSelectedCommand = selectedCommand();
       if (event.key === "ArrowDown") {
-        setSelectedCommand((prev) => (prev + 1) % COMMANDS.length);
+        newSelectedCommand = (selectedCommand() + 1) % dropDownValues().length;
       } else if (event.key === "ArrowUp") {
-        setSelectedCommand(
-          (prev) => (prev - 1 + COMMANDS.length) % COMMANDS.length
-        );
+        newSelectedCommand =
+          (selectedCommand() - 1 + dropDownValues().length) %
+          dropDownValues().length;
       } else if (event.key === "Enter") {
         handleCommand(
           dropDownValues().filter((item) => item.text.includes(inputValue()))[
             selectedCommand()
           ]
         );
+        return;
       }
+
+      setSelectedCommand(newSelectedCommand);
+      // Scroll the newly selected item into view
+      document
+        .getElementById(`command-item-${newSelectedCommand}`)
+        ?.scrollIntoView({ block: "nearest" });
     }
   };
 
@@ -232,6 +240,7 @@ const Header = (props: HeaderProps): JSX.Element => {
                 .filter((item) => item.text.includes(inputValue()))
                 .map((item, index) => (
                   <li
+                    id={`command-item-${index}`} // Add unique ID for each item
                     class="command-item"
                     onClick={() => handleCommand(item)}
                     style={{
@@ -241,7 +250,7 @@ const Header = (props: HeaderProps): JSX.Element => {
                           : "none",
                     }}
                   >
-                    {item.text}({item.description})
+                    {item.text} ({item.description})
                   </li>
                 ))}
             </ul>
