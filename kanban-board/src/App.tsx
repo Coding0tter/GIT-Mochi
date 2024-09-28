@@ -3,11 +3,8 @@ import Header from "./components/Header";
 import TaskColumn from "./components/TaskColumn";
 import DeleteModal from "./components/modals/DeleteModal";
 import {
-  fetchTasksAsync,
   createTaskAsync,
   deleteTaskAsync,
-  syncGitLabAsync,
-  Task,
   updateTaskAsync,
 } from "./services/taskService";
 import { STATES } from "./constants";
@@ -17,74 +14,31 @@ import HelpModal from "./components/modals/HelpModal";
 import NotificationManager from "./components/NotificationManager";
 import { addNotification } from "./services/notificationService";
 import EditOrCreateTaskModal from "./components/modals/EditOrCreateTaskModal";
-import { CommandHandler } from "./services/commandHandler";
-
-export enum ModalType {
-  CreateTask,
-  DeleteTask,
-  TaskDetails,
-  Help,
-  None,
-}
-
-export enum InputMode {
-  None,
-  Search,
-  Commandline,
-}
+import { fetchTasksAsync, taskStore } from "./stores/taskStore";
+import {
+  handleCloseModal,
+  modalStore,
+  ModalType,
+  setActiveModal,
+  setSelectedTaskForModal,
+} from "./stores/modalStore";
+import { InputMode, uiStore } from "./stores/uiStore";
 
 const App = () => {
-  const [tasks, setTasks] = createSignal<Task[]>([]);
-  const [loading, setLoading] = createSignal(false);
-  const [editTask, setEditTask] = createSignal<Task | null>(null);
-  const [closingModal, setClosingModal] = createSignal(false);
-  const [searchRef, setSearchRef] = createSignal<HTMLInputElement | null>(null);
-  const [searchQuery, setSearchQuery] = createSignal("");
-  const [inputMode, setInputMode] = createSignal(InputMode.None);
-
-  const [showDeletedTasks, setShowDeletedTasks] = createSignal(false);
-
-  const [activeModal, setActiveModal] = createSignal(ModalType.None);
-
-  const [selectedTaskForDetails, setSelectedTaskForDetails] =
-    createSignal<Task | null>(null);
-  const [selectedTaskForDeletion, setSelectedTaskForDeletion] =
-    createSignal<Task | null>(null);
-  const [selectedTaskIndex, setSelectedTaskIndex] = createSignal<number>(0);
-  const [selectedColumnIndex, setSelectedColumnIndex] = createSignal<number>(0);
-
-  const loadTasksAsync = async (showDeleted = false) => {
+  const handleCreateOrUpdateTask = async () => {
     try {
-      const data = await fetchTasksAsync(showDeleted);
-      setTasks(data);
-      return data;
-    } catch (error) {
-      addNotification({
-        title: "Error",
-        description: "Failed to load tasks",
-        type: "error",
-      });
-    }
-  };
+      if (!modalStore.selectedTask) return;
 
-  const toggleShowDeleted = async () => {
-    setLoading(true);
-    await loadTasksAsync(!showDeletedTasks());
-    setShowDeletedTasks((prev) => !prev);
-    setLoading;
-  };
-
-  const handleCreateTask = async () => {
-    try {
-      if (!editTask()) return;
-
-      if (editTask()!._id) {
-        await updateTaskAsync(editTask()!._id, editTask()!);
+      if (modalStore.selectedTask!._id) {
+        await updateTaskAsync(
+          modalStore.selectedTask!._id,
+          modalStore.selectedTask!
+        );
       } else {
-        await createTaskAsync(editTask()!);
+        await createTaskAsync(modalStore.selectedTask!);
       }
-      await loadTasksAsync();
-      setEditTask(null);
+      await fetchTasksAsync();
+      setSelectedTaskForModal(null);
       setActiveModal(ModalType.None);
 
       addNotification({
@@ -103,8 +57,8 @@ const App = () => {
 
   const handleDeleteTask = async () => {
     try {
-      await deleteTaskAsync(selectedTaskForDeletion()?._id || "");
-      await loadTasksAsync();
+      await deleteTaskAsync(modalStore.selectedTask?._id || "");
+      await fetchTasksAsync();
       setActiveModal(ModalType.None);
 
       addNotification({
@@ -121,39 +75,11 @@ const App = () => {
     }
   };
 
-  const handleCloseModal = () => {
-    setClosingModal(true);
-    setTimeout(() => {
-      setActiveModal(ModalType.None);
-      setEditTask(null);
-      setClosingModal(false);
-    }, 300);
-  };
-
-  const commandHandler = new CommandHandler({
-    tasks,
-    selectedColumnIndex,
-    selectedTaskIndex,
-    setLoading,
-    setSelectedColumnIndex,
-    setSelectedTaskIndex,
-    loadTasksAsync: loadTasksAsync as () => Promise<Task[]>,
-    setSelectedTaskForDeletion,
-    setActiveModal,
-    setSelectedTaskForDetails,
-    setEditTask,
-    handleCloseModal,
-    setInputMode,
-    toggleShowDeleted,
-    searchRef,
-  });
-
-  const keydownHandler = (event: KeyboardEvent) =>
-    handleKeyDown(event, activeModal(), commandHandler);
+  const keydownHandler = (event: KeyboardEvent) => handleKeyDown(event);
 
   onMount(async () => {
-    await loadTasksAsync();
     window.addEventListener("keydown", keydownHandler);
+    await fetchTasksAsync();
   });
 
   onCleanup(() => {
@@ -163,80 +89,52 @@ const App = () => {
   return (
     <div>
       <Header
-        loading={loading()}
-        onSync={async () => {
-          setLoading(true);
-          await syncGitLabAsync();
-          await loadTasksAsync();
-          setLoading(false);
-        }}
-        inputMode={inputMode()}
         onToggleCreateTask={() => {
-          if (activeModal() === ModalType.CreateTask) {
+          if (modalStore.activeModal === ModalType.CreateTask) {
             setActiveModal(ModalType.None);
           } else {
             setActiveModal(ModalType.CreateTask);
           }
         }}
-        showCreateTask={activeModal() === ModalType.CreateTask}
-        onSearch={(query) => {
-          setSearchQuery(query);
-        }}
-        setSearchRef={(ref) => setSearchRef(ref)}
-        commandHandler={commandHandler}
+        showCreateTask={modalStore.activeModal === ModalType.CreateTask}
       />
       <NotificationManager />
-      {activeModal() === ModalType.CreateTask && (
+      {modalStore.activeModal === ModalType.CreateTask && (
         <EditOrCreateTaskModal
-          task={editTask()}
-          onSubmit={handleCreateTask}
+          onSubmit={handleCreateOrUpdateTask}
           onClose={handleCloseModal}
-          closing={closingModal()}
         />
       )}
-      {activeModal() === ModalType.DeleteTask && (
-        <DeleteModal
-          task={selectedTaskForDeletion()}
-          onSubmit={handleDeleteTask}
-          onClose={handleCloseModal}
-          closing={closingModal()}
-        />
+      {modalStore.activeModal === ModalType.DeleteTask && (
+        <DeleteModal onSubmit={handleDeleteTask} onClose={handleCloseModal} />
       )}
-      {activeModal() === ModalType.TaskDetails && (
-        <TaskDetailsModal
-          task={selectedTaskForDetails()}
-          onClose={handleCloseModal}
-          closing={closingModal()}
-        />
+      {modalStore.activeModal === ModalType.TaskDetails && (
+        <TaskDetailsModal onClose={handleCloseModal} />
       )}
-      {activeModal() === ModalType.Help && (
-        <HelpModal onClose={handleCloseModal} closing={closingModal()} />
+      {modalStore.activeModal === ModalType.Help && (
+        <HelpModal onClose={handleCloseModal} />
       )}
       <div class="kanban">
         {STATES.map((status, columnIndex) => (
           <TaskColumn
             status={status}
-            tasks={tasks()
+            tasks={taskStore.tasks
               .filter((task) => task.status === status.id)
-              .filter(
-                (task) =>
-                  task.title
-                    .toLowerCase()
-                    .includes(searchQuery().toLowerCase()) ||
-                  task.labels.some((label) =>
-                    label.toLowerCase().includes(searchQuery().toLowerCase())
-                  ) ||
-                  task.branch?.toString().includes(searchQuery())
-              )}
-            selectedTaskIndex={selectedTaskIndex()}
-            selectedColumnIndex={selectedColumnIndex()}
+              .filter((task) => {
+                // Only filter if inputMode is Search
+                if (uiStore.inputMode === InputMode.Search) {
+                  const searchQuery = uiStore.commandInputValue.toLowerCase();
+                  return (
+                    task.title.toLowerCase().includes(searchQuery) ||
+                    task.labels.some((label) =>
+                      label.toLowerCase().includes(searchQuery)
+                    ) ||
+                    task.branch?.toString().includes(searchQuery)
+                  );
+                }
+                return true; // Don't filter if not in Search mode
+              })}
             columnIndex={columnIndex}
-            setSelectedTaskIndex={setSelectedTaskIndex}
-            setSelectedColumnIndex={setSelectedColumnIndex}
-            setSelectedTaskForDetails={setSelectedTaskForDetails}
-            setShowTaskDetailsModal={() =>
-              setActiveModal(ModalType.TaskDetails)
-            }
           />
         ))}
       </div>

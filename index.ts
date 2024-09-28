@@ -3,6 +3,7 @@ import cors from "cors";
 import { connect } from "mongoose";
 import taskRoutes from "./routes/taskRoutes";
 import gitlabRoutes from "./routes/gitlabRoutes";
+import customProjectRoutes from "./routes/customProjectRoutes";
 import { periodicallySyncComments } from "./utils/commentSync";
 import { logError, logInfo } from "./utils/logger";
 
@@ -16,6 +17,7 @@ connect("mongodb://mongo:27017/kanban", {})
 
 app.use("/api/tasks", taskRoutes);
 app.use("/api/git", gitlabRoutes);
+app.use("/api/custom-projects", customProjectRoutes);
 
 // Sync comments every minute
 periodicallySyncComments();

@@ -1,10 +1,8 @@
 import { createSignal, onMount, onCleanup } from "solid-js";
-import { Task } from "../../services/taskService";
 import BaseModal, { BaseModalProps } from "./BaseModal";
+import { modalStore } from "../../stores/modalStore";
 
-interface TaskDetailsModalProps extends BaseModalProps {
-  task: Task | null;
-}
+interface TaskDetailsModalProps extends BaseModalProps {}
 
 const TaskDetailsModal = (props: TaskDetailsModalProps) => {
   const [showResolved, setShowResolved] = createSignal(false);
@@ -28,18 +26,16 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
     setShowResolved(!showResolved());
   };
 
-  if (!props.task) return null;
-
   return (
     <BaseModal {...props}>
       <h2>Task Details</h2>
       <p>
-        <strong>Title:</strong> {props.task.title}
+        <strong>Title:</strong> {modalStore.selectedTask?.title}
       </p>
       <p>
-        <strong>Status:</strong> {props.task.status}
+        <strong>Status:</strong> {modalStore.selectedTask?.status}
       </p>
-      {props.task.custom && (
+      {modalStore.selectedTask?.custom && (
         <p>
           <strong>Custom Task:</strong> Yes
         </p>
@@ -55,7 +51,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
           </button>
         </div>
         <div class="comment-wrapper">
-          {props.task.comments
+          {modalStore.selectedTask?.comments
             ?.filter((comment) => showResolved() || !comment.resolved)
             .map((comment) => {
               return (

@@ -1,56 +1,36 @@
-import { BACKEND_URL } from "../constants";
+import { BACKEND_URL, STATES } from "../constants";
+import {
+  keyboardNavigationStore,
+  setSelectedColumnIndex,
+  setSelectedTaskIndex,
+} from "../stores/keyboardNavigationStore";
+import { fetchTasksAsync, getColumnTasks, Task } from "../stores/taskStore";
 import { addNotification } from "./notificationService";
+import { Direction } from "./taskNavigationService";
 
-export interface Task {
-  _id: string;
-  gitlabId?: string;
-  gitlabIid?: string;
-  title: string;
-  description: string;
-  web_url: string;
-  status: string;
-  type?: string;
-  comments: Array<{
-    body: string;
-    images?: string[];
-    resolved: boolean;
-    author: {
-      name: string;
-      username: string;
-    };
-    system: boolean;
-  }>;
-  custom?: boolean;
-  branch: string;
-  deleted: boolean;
-  labels: string[];
-  milestoneName?: string;
-}
+export const restoreSelectedTaskAsync = async () => {
+  try {
+    const taskId =
+      getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]._id;
 
-export const fetchTasksAsync = async (
-  showDeleted: boolean = false
-): Promise<Task[]> => {
-  const res = await fetch(`${BACKEND_URL}/tasks?showDeleted=${showDeleted}`);
-  const response = await res.json();
-
-  if(response.error) {
-    addNotification({
-      title: "Error",
-      description: response.error,
-      type: "error",
-      duration:5000,
+    await fetch(`${BACKEND_URL}/tasks/${taskId}/restore`, {
+      method: "PUT",
     });
 
-    return [];
+    await fetchTasksAsync();
+
+    addNotification({
+      title: "Task restored",
+      description: "Task has been restored",
+      type: "success",
+    });
+  } catch (error) {
+    addNotification({
+      title: "Error",
+      description: "Failed to restore task",
+      type: "error",
+    });
   }
-
-  return response;
-};
-
-export const restoreTaskAsync = async (taskId: string) => {
-  await fetch(`${BACKEND_URL}/tasks/${taskId}/restore`, {
-    method: "PUT",
-  });
 };
 
 export const createTaskAsync = async (task: Partial<Task>) => {
@@ -84,23 +64,34 @@ export const deleteTaskAsync = async (taskId: string) => {
   await fetch(`${BACKEND_URL}/tasks/${taskId}`, { method: "DELETE" });
 };
 
-export const syncGitLabAsync = async () => {
-  const res = await fetch(`${BACKEND_URL}/git/sync`, {
-    method: "POST",
-  });
-  return res.ok;
-};
+export const moveTaskAsync = async (direction: Direction) => {
+  const columnTasks = getColumnTasks();
+  const newStatusIndex =
+    direction === Direction.Right
+      ? Math.min(
+          keyboardNavigationStore.selectedColumnIndex + 1,
+          STATES.length - 1
+        )
+      : Math.max(keyboardNavigationStore.selectedColumnIndex - 1, 0);
 
-export const createMergeRequestAsync = async (issueId: string) => {
-  const res = await fetch(`${BACKEND_URL}/git/create-merge-request`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ issueId }),
-  });
+  const taskToMove = columnTasks[keyboardNavigationStore.selectedTaskIndex];
+  if (
+    (
+      await updateTaskAsync(taskToMove._id, {
+        status: STATES[newStatusIndex].id,
+      })
+    )?.ok
+  ) {
+    const result = await fetchTasksAsync();
 
-  if (!res.ok) {
-    throw new Error("Failed to create merge request");
+    const newColumnTasks = result.filter(
+      (task) => task.status === STATES[newStatusIndex].id
+    );
+    const movedTaskIndex = newColumnTasks.findIndex(
+      (task) => task._id === taskToMove._id
+    );
+
+    setSelectedColumnIndex(newStatusIndex);
+    setSelectedTaskIndex(movedTaskIndex);
   }
-
-  return await res.json();
 };

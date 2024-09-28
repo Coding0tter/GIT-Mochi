@@ -1,17 +1,17 @@
 import { createEffect, createSignal, For } from "solid-js";
-import { Task } from "../services/taskService";
 import TaskCard from "./TaskCard";
+import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
+import { Task } from "../stores/taskStore";
+import {
+  ModalType,
+  setActiveModal,
+  setSelectedTaskForModal,
+} from "../stores/modalStore";
 
 interface TaskColumnProps {
   status: { display_name: string; id: string };
   tasks: Task[];
-  selectedTaskIndex: number;
-  selectedColumnIndex: number;
   columnIndex: number;
-  setSelectedTaskIndex: (index: number) => void;
-  setSelectedColumnIndex: (index: number) => void;
-  setSelectedTaskForDetails: (task: Task) => void;
-  setShowTaskDetailsModal: () => void;
 }
 
 const TaskColumn = (props: TaskColumnProps) => {
@@ -19,11 +19,11 @@ const TaskColumn = (props: TaskColumnProps) => {
 
   createEffect(() => {
     if (
-      props.selectedColumnIndex === props.columnIndex &&
-      taskRefs[props.selectedTaskIndex]
+      keyboardNavigationStore.selectedColumnIndex === props.columnIndex &&
+      taskRefs[keyboardNavigationStore.selectedTaskIndex]
     ) {
       setTimeout(() => {
-        taskRefs[props.selectedTaskIndex].scrollIntoView({
+        taskRefs[keyboardNavigationStore.selectedTaskIndex].scrollIntoView({
           behavior: "smooth",
           block: "center",
         });
@@ -40,12 +40,13 @@ const TaskColumn = (props: TaskColumnProps) => {
             <TaskCard
               task={task}
               isSelected={
-                props.selectedColumnIndex === props.columnIndex &&
-                props.selectedTaskIndex === taskIndex()
+                keyboardNavigationStore.selectedColumnIndex ===
+                  props.columnIndex &&
+                keyboardNavigationStore.selectedTaskIndex === taskIndex()
               }
               onClick={() => {
-                props.setSelectedTaskForDetails(task);
-                props.setShowTaskDetailsModal();
+                setSelectedTaskForModal(task);
+                setActiveModal(ModalType.TaskDetails);
               }}
               taskIndex={taskIndex()}
               setTaskRef={(el) => (taskRefs[taskIndex()] = el)}

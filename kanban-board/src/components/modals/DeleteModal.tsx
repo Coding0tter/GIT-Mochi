@@ -1,10 +1,8 @@
-import { JSX, createEffect, onCleanup, onMount } from "solid-js";
+import { JSX, onCleanup, onMount } from "solid-js";
 import BaseModal, { BaseModalProps } from "./BaseModal";
-import { Task } from "../../services/taskService";
+import { modalStore } from "../../stores/modalStore";
 
-interface DeleteModalProps extends BaseModalProps {
-  task: Task | null;
-}
+interface DeleteModalProps extends BaseModalProps {}
 
 const DeleteModal = (props: DeleteModalProps): JSX.Element => {
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -27,7 +25,7 @@ const DeleteModal = (props: DeleteModalProps): JSX.Element => {
     <BaseModal {...props}>
       <h2>Delete Task</h2>
       <p>Are you sure you want to delete this task?</p>
-      <p>{props.task?.title}</p>
+      <p>{modalStore.selectedTask?.title}</p>
       <button onClick={props.onSubmit}>(Y)es, Delete</button>
       <button onClick={props.onClose}>(N)o, keep it</button>
     </BaseModal>

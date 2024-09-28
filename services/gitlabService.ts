@@ -1,4 +1,4 @@
-import axios, {AxiosError} from "axios";
+import axios, { AxiosError } from "axios";
 import { Task } from "../models/task";
 import { User, type IUser } from "../models/user";
 import { Setting } from "../models/setting";
@@ -114,18 +114,18 @@ export const getProjectAsync = async (projectId: string) => {
   return projectResponse.json();
 };
 
-export const setProjectAsync = async (projectId: string) => {
+export const setProjectAsync = async (value: string) => {
   const currentProject = await Setting.findOne({ key: "currentProject" });
 
   if (currentProject) {
     await Setting.findByIdAndUpdate(currentProject._id, {
-      value: projectId,
+      value,
     });
   } else {
-    await Setting.create({ key: "currentProject", value: projectId });
+    await Setting.create({ key: "currentProject", value });
   }
 
-  return projectId;
+  return value;
 };
 
 const syncMergeRequests = async () => {
@@ -198,7 +198,10 @@ const syncIssues = async () => {
   }
 };
 
-export const getMergeRequestComments = async (mergeRequestIid: string, projectId: string) => {
+export const getMergeRequestComments = async (
+  mergeRequestIid: string,
+  projectId: string
+) => {
   try {
     const commentsResponse = await axios.get(
       `${GIT_API_URL}/projects/${projectId}/merge_requests/${mergeRequestIid}/notes`,
@@ -217,8 +220,14 @@ export const getMergeRequestComments = async (mergeRequestIid: string, projectId
           !comment.system && comment.author.username !== "merge_train"
       );
     }
-  } catch (error: AxiosError) {
-    console.error(`Failed to fetch comments: ${error?.message} ${error?.config?.url}`);
-    return [];
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error(
+        `Failed to fetch comments: ${error?.message} ${error?.config?.url}`
+      );
+      return [];
+    }
+
+    console.error(`Failed to fetch comments: ${error}`);
   }
 };

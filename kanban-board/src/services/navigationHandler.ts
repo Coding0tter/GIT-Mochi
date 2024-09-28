@@ -1,20 +1,32 @@
-import { ModalType } from "../App";
-import { CommandHandler, CommandHandlerProps } from "./commandHandler";
+import { modalStore, ModalType } from "../stores/modalStore";
+import { toggleShowDeletedTasksAsync } from "../stores/taskStore";
+import { InputMode } from "../stores/uiStore";
+import {
+  createMergeRequestAndBranchForSelectedTaskAsync,
+  openSelectedTaskLink,
+  syncGitlabAsync,
+} from "./gitlabService";
+import {
+  openCreateModal,
+  openDeleteModal,
+  openDetailsModal,
+  openEditModal,
+  openHelpModal,
+} from "./modalService";
+import { Direction, moveSelection } from "./taskNavigationService";
+import { moveTaskAsync, restoreSelectedTaskAsync } from "./taskService";
+import { closeModalAndUnfocus, focusInput } from "./uiService";
 
-export const handleKeyDown = async (
-  event: KeyboardEvent,
-  activeModal: ModalType,
-  commandHandler: CommandHandler
-) => {
+export const handleKeyDown = async (event: KeyboardEvent) => {
   if (event.key === "Escape") {
-    commandHandler.closeModalAndUnfocus();
+    closeModalAndUnfocus();
   }
 
   if (
     document.activeElement?.tagName === "INPUT" ||
     document.activeElement?.tagName === "TEXTAREA" ||
     document.activeElement?.tagName === "SELECT" ||
-    activeModal !== ModalType.None
+    modalStore.activeModal !== ModalType.None
   ) {
     return;
   }
@@ -24,12 +36,12 @@ export const handleKeyDown = async (
       case "p":
         event.preventDefault();
         event.stopPropagation();
-        commandHandler.openCommandline();
+        focusInput(InputMode.Commandline);
         break;
       case "f":
         event.preventDefault();
         event.stopPropagation();
-        commandHandler.openSearch();
+        focusInput(InputMode.Search);
         break;
       default:
         break;
@@ -42,28 +54,28 @@ export const handleKeyDown = async (
     switch (event.key) {
       case "A":
       case "ArrowLeft":
-        await commandHandler.moveTaskAsync("previous");
+        await moveTaskAsync(Direction.Left);
         break;
 
       case "D":
       case "ArrowRight":
-        await commandHandler.moveTaskAsync("next");
+        await moveTaskAsync(Direction.Right);
         break;
 
       case "S":
-        commandHandler.syncGitlab();
+        await syncGitlabAsync();
         break;
 
       case "O":
-        commandHandler.openLink();
+        openSelectedTaskLink();
         break;
 
       case "M":
-        commandHandler.createMergeRequestForSelectedAsync();
+        await createMergeRequestAndBranchForSelectedTaskAsync();
         break;
 
       case "R":
-        commandHandler.restoreTaskAsync();
+        restoreSelectedTaskAsync();
         break;
 
       default:
@@ -76,54 +88,54 @@ export const handleKeyDown = async (
   switch (event.key) {
     case "w":
     case "ArrowUp":
-      commandHandler.moveSelection("up");
+      moveSelection(Direction.Up);
       break;
 
     case "s":
     case "ArrowDown":
-      commandHandler.moveSelection("down");
+      moveSelection(Direction.Down);
       break;
 
     case "a":
     case "ArrowLeft":
-      commandHandler.moveSelection("left");
+      moveSelection(Direction.Left);
       break;
 
     case "d":
     case "ArrowRight":
-      commandHandler.moveSelection("right");
+      moveSelection(Direction.Right);
       break;
 
     case "n":
-      await commandHandler.moveTaskAsync("next");
+      await moveTaskAsync(Direction.Right);
       break;
 
     case "p":
-      await commandHandler.moveTaskAsync("previous");
+      await moveTaskAsync(Direction.Left);
       break;
 
     case "h":
-      commandHandler.openHelp();
+      openHelpModal();
       break;
 
     case "x":
-      commandHandler.openDelete();
+      openDeleteModal();
       break;
 
     case "c":
-      commandHandler.openCreate();
+      openCreateModal();
       break;
 
     case "e":
-      commandHandler.openEdit();
+      openEditModal();
       break;
 
     case "o":
-      commandHandler.openDetails();
+      openDetailsModal();
       break;
 
     case "v":
-      commandHandler.toggleShowDeleted();
+      await toggleShowDeletedTasksAsync();
       break;
     default:
       break;

@@ -1,24 +1,26 @@
 import { createEffect, createSignal, JSX, onMount } from "solid-js";
-import {
-  getProject,
-  getUser,
-  loadProjectsAsync,
-  setProject,
-} from "../services/utils";
-import { InputMode } from "../App";
-import { CommandHandler } from "../services/commandHandler";
-import { addNotification } from "../services/notificationService";
+import { getProject, getUser } from "../services/utils";
 import logo from "../assets/logo.svg";
+import { useCommandProcessor } from "../services/commandProcessor";
+import {
+  InputMode,
+  setCommandInputRef,
+  uiStore,
+  setCommandInputValue,
+  setCurrentProject,
+} from "../stores/uiStore";
+import { handleGitlabSyncAsync } from "../stores/taskStore";
+import { COMMANDS } from "../commands";
+import {
+  commandStore,
+  filteredDropdownValues,
+  setActiveDropdownIndex,
+  setDropdownValues,
+} from "../stores/commandStore";
 
 interface HeaderProps {
-  loading: boolean;
-  onSync: () => Promise<void>;
   onToggleCreateTask: () => void;
   showCreateTask: boolean;
-  onSearch: (query: string) => void;
-  setSearchRef: (el: HTMLInputElement) => void;
-  inputMode: InputMode;
-  commandHandler: CommandHandler;
 }
 
 interface IUser {
@@ -29,50 +31,11 @@ interface IUser {
   avatar_url: string;
 }
 
-interface IProject {
-  id: string;
-  name_with_namespace: string;
-  description: string;
-}
-
-type Command = {
-  text: string;
-  description: string;
-  value?: string;
-  action?: string;
-  nextAction?: Command;
-};
-
-const COMMANDS = [
-  {
-    text: "select project",
-    description: "Select a project to view its tasks",
-    action: "loadProjects",
-    nextAction: {
-      action: "setProject",
-    },
-  },
-  {
-    text: "create task",
-    description: "Open the create task form",
-    action: "openCreateTask",
-  },
-] as Command[];
-
 const Header = (props: HeaderProps): JSX.Element => {
   const [user, setUser] = createSignal<IUser | null>(null);
-  const [inputValue, setInputValue] = createSignal("");
-  const [selectedCommand, setSelectedCommand] = createSignal<number>(0);
   const [placeholder, setPlaceholder] = createSignal<string>("");
-  const [currentProject, setCurrentProject] = createSignal<IProject>();
-  const [dropDownValues, setDropDownValues] = createSignal<
-    {
-      text: string;
-      description: string;
-    }[]
-  >([]);
-  const [currentCommand, setCurrentCommand] = createSignal<Command>();
-  const [loading, setLoading] = createSignal(false);
+
+  const { handleCommand } = useCommandProcessor();
 
   onMount(async () => {
     setUser(await getUser());
@@ -80,116 +43,50 @@ const Header = (props: HeaderProps): JSX.Element => {
   });
 
   createEffect(() => {
-    if (props.inputMode === InputMode.Commandline) {
-      setInputValue("");
-      setDropDownValues(COMMANDS);
+    if (uiStore.inputMode === InputMode.Commandline) {
+      setCommandInputValue("");
+      setDropdownValues(
+        COMMANDS.filter((command) => command.display).map((command) => ({
+          value: command.action,
+          text: command.text,
+          description: command.description,
+          action: command.action,
+        }))
+      );
     }
 
     getPlaceholder();
-  }, [props.inputMode]);
+  }, [uiStore.inputMode]);
 
   const handleInput = (event: Event) => {
     const input = event.target as HTMLInputElement;
-    setInputValue(input.value);
-    if (props.inputMode === InputMode.Search) {
-      props.onSearch(input.value);
-    }
-  };
-
-  const handleCommand = async (command: Partial<Command>) => {
-    setLoading(true);
-    try {
-      if (currentCommand()?.nextAction) {
-        const nextAction = currentCommand()?.nextAction;
-        setCurrentCommand(currentCommand()!.nextAction);
-
-        handleCommand({
-          ...nextAction,
-          value: command.value,
-        });
-        return;
-      }
-
-      switch (command.action) {
-        case "openCreateTask":
-          props.commandHandler.openCreate();
-          break;
-        case "loadProjects":
-          try {
-            setCurrentCommand(command as Command);
-            const projects = await loadProjectsAsync();
-            setDropDownValues(
-              projects.map(
-                (project: {
-                  id: any;
-                  name_with_namespace: any;
-                  description: any;
-                }) => ({
-                  text: `(${project.id}): ${project.name_with_namespace}`,
-                  description: project.description,
-                  value: project.id,
-                })
-              )
-            );
-            setInputValue("");
-          } catch (error) {
-            addNotification({
-              title: "Error",
-              description: "Failed to load projects",
-              type: "error",
-            });
-            props.commandHandler.closeModalAndUnfocus();
-          }
-          break;
-        case "setProject":
-          try {
-            setCurrentCommand();
-            await setProject(command.value!);
-            await props.onSync();
-            setCurrentProject(await getProject());
-
-            addNotification({
-              title: "Success",
-              description: "Project set successfully",
-              type: "success",
-            });
-
-            setInputValue("");
-          } catch (error) {
-            addNotification({
-              title: "Error",
-              description: "Failed to set project",
-              type: "error",
-            });
-          } finally {
-            props.commandHandler.closeModalAndUnfocus();
-          }
-          break;
-      }
-    } finally {
-      setLoading(false);
+    setCommandInputValue(input.value);
+    if (uiStore.inputMode === InputMode.Search) {
+      setCommandInputValue(input.value);
     }
   };
 
   const handleKeydown = (event: KeyboardEvent) => {
-    if (props.inputMode === InputMode.Commandline) {
-      let newSelectedCommand = selectedCommand();
+    if (uiStore.inputMode === InputMode.Commandline) {
+      let newSelectedCommand = commandStore.activeDropdownIndex;
       if (event.key === "ArrowDown") {
-        newSelectedCommand = (selectedCommand() + 1) % dropDownValues().length;
+        newSelectedCommand =
+          (commandStore.activeDropdownIndex + 1) %
+          filteredDropdownValues().length;
       } else if (event.key === "ArrowUp") {
         newSelectedCommand =
-          (selectedCommand() - 1 + dropDownValues().length) %
-          dropDownValues().length;
+          (commandStore.activeDropdownIndex -
+            1 +
+            filteredDropdownValues().length) %
+          filteredDropdownValues().length;
       } else if (event.key === "Enter") {
         handleCommand(
-          dropDownValues().filter((item) => item.text.includes(inputValue()))[
-            selectedCommand()
-          ]
+          filteredDropdownValues()[commandStore.activeDropdownIndex]
         );
         return;
       }
 
-      setSelectedCommand(newSelectedCommand);
+      setActiveDropdownIndex(newSelectedCommand);
       // Scroll the newly selected item into view
       document
         .getElementById(`command-item-${newSelectedCommand}`)
@@ -198,7 +95,7 @@ const Header = (props: HeaderProps): JSX.Element => {
   };
 
   const getPlaceholder = () => {
-    switch (props.inputMode) {
+    switch (uiStore.inputMode) {
       case InputMode.Search:
         setPlaceholder("Search tasks...");
         break;
@@ -227,38 +124,40 @@ const Header = (props: HeaderProps): JSX.Element => {
         </div>
         <div class="search-bar">
           <input
-            ref={(el) => props.setSearchRef(el)}
+            ref={(el) => setCommandInputRef(el)}
             type="text"
-            value={!loading() ? inputValue() : "Loading..."}
+            value={!uiStore.loading ? uiStore.commandInputValue : "Loading..."}
             placeholder={placeholder()}
             onKeyDown={handleKeydown}
             onInput={handleInput}
           />
-          {props.inputMode === InputMode.Commandline && (
+          {uiStore.inputMode === InputMode.Commandline && (
             <ul class="command-dropdown">
-              {dropDownValues()
-                .filter((item) => item.text.includes(inputValue()))
-                .map((item, index) => (
-                  <li
-                    id={`command-item-${index}`} // Add unique ID for each item
-                    class="command-item"
-                    onClick={() => handleCommand(item)}
-                    style={{
-                      background:
-                        selectedCommand() === index
-                          ? "rgba(255, 255, 255, 0.1)"
-                          : "none",
-                    }}
-                  >
-                    {item.text} ({item.description})
-                  </li>
-                ))}
+              {filteredDropdownValues().map((item, index) => (
+                <li
+                  id={`command-item-${index}`} // Add unique ID for each item
+                  class="command-item"
+                  onClick={() => handleCommand(item)}
+                  style={{
+                    background:
+                      commandStore.activeDropdownIndex === index
+                        ? "rgba(255, 255, 255, 0.1)"
+                        : "none",
+                  }}
+                >
+                  {item.text}
+                  {item.description !== "" && " - (" + item.description + ")"}
+                </li>
+              ))}
             </ul>
           )}
         </div>
         <div class="header-actions">
-          <button onClick={props.onSync} disabled={props.loading}>
-            {props.loading ? "Syncing..." : "(S)ync Gitlab"}
+          <button
+            onClick={async () => await handleGitlabSyncAsync()}
+            disabled={uiStore.loading}
+          >
+            {uiStore.loading ? "Syncing..." : "(S)ync Gitlab"}
           </button>
           <button onClick={props.onToggleCreateTask}>
             {props.showCreateTask ? "Close Create New" : "(C)reate New"}
@@ -276,7 +175,9 @@ const Header = (props: HeaderProps): JSX.Element => {
       <div class="legend-row">
         <span>
           active project:{" "}
-          <strong>{currentProject()?.name_with_namespace ?? "none"}</strong>
+          <strong>
+            {uiStore.currentProject?.name_with_namespace ?? "none"}
+          </strong>
         </span>
         <span
           class="legend-item"
