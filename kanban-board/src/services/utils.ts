@@ -20,35 +20,3 @@ export const getUser = async () => {
     return;
   }
 };
-
-export const loadProjectsAsync = async () => {
-  try {
-    const projectsResponse = await fetch(`${BACKEND_URL}/git/projects`);
-    return projectsResponse.json();
-  } catch (error) {
-    console.error("Error getting projects:", error);
-    return;
-  }
-};
-
-export const setProject = async (projectId: string) => {
-  try {
-    const response = await fetch(`${BACKEND_URL}/git/project/${projectId}`, {
-      method: "PATCH",
-    });
-    return response.json();
-  } catch (error) {
-    console.error("Error setting project:", error);
-    return;
-  }
-};
-
-export const getProject = async () => {
-  try {
-    const response = await fetch(`${BACKEND_URL}/git/project`);
-    return response.json();
-  } catch (error) {
-    console.error("Error getting project:", error);
-    return null;
-  }
-};

@@ -1,9 +1,11 @@
 import { openCreateModal } from "../services/modalService";
-import { Command } from "../stores/commandStore";
+import { resetCommandline } from "../stores/commandStore";
 import { registerCommand } from "./commandRegistry";
 
-export const execute = async (_command: Partial<Command>) => {
+export const execute = async () => {
   openCreateModal();
+
+  resetCommandline();
 };
 
 registerCommand({

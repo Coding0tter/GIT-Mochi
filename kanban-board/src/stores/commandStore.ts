@@ -1,5 +1,6 @@
 import { createStore } from "solid-js/store";
-import { uiStore } from "./uiStore";
+import { setCommandReadonly, uiStore } from "./uiStore";
+import { cloneDeep } from "lodash";
 
 export type Command = {
   text: string;
@@ -7,32 +8,25 @@ export type Command = {
   action: string;
   value?: string;
   beforeAction?: string;
+  nextAction?: string;
   display: boolean;
-  execute: (command: Partial<Command>, value?: string) => Promise<void>;
+  execute: () => Promise<void>;
+  createOptions?: () => Promise<void>;
 };
 
 export type DropdownValue = {
-  action?: string;
-  value?: string;
-  showAlways?: boolean;
   text: string;
-  description: string;
+  description?: string;
+  value?: any;
+  showAlways?: boolean;
 };
 
 export const [commandStore, setCommandStore] = createStore({
-  currentCommand: null as Command | null,
-  pendingCommand: null as Command | null,
   dropdownValues: [] as DropdownValue[],
+  waitingForInput: false,
   activeDropdownIndex: 0,
+  buffer: null as any,
 });
-
-export const setCurrentCommand = (command: Command | null) => {
-  setCommandStore("currentCommand", command);
-};
-
-export const setPendingCommand = (command: Command | null) => {
-  setCommandStore("pendingCommand", command);
-};
 
 export const setDropdownValues = (values: DropdownValue[]) => {
   setCommandStore("dropdownValues", values);
@@ -42,6 +36,14 @@ export const setActiveDropdownIndex = (index: number) => {
   setCommandStore("activeDropdownIndex", index);
 };
 
+export const setWaitingForInput = (value: boolean) => {
+  setCommandStore("waitingForInput", value);
+};
+
+export const setBuffer = (value: any) => {
+  setCommandStore("buffer", value);
+};
+
 export const filteredDropdownValues = () => {
   return commandStore.dropdownValues.filter(
     (value) =>
@@ -49,4 +51,16 @@ export const filteredDropdownValues = () => {
       value.text?.toLowerCase().includes(uiStore.commandInputValue) ||
       value.description?.toLowerCase().includes(uiStore.commandInputValue)
   );
+};
+
+export const getActiveDropdownValue = () => {
+  return filteredDropdownValues()[commandStore.activeDropdownIndex];
+};
+
+export const resetCommandline = () => {
+  setWaitingForInput(false);
+  setActiveDropdownIndex(0);
+  setDropdownValues([]);
+  setCommandReadonly(false);
+  setBuffer(null);
 };

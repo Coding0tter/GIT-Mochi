@@ -20,7 +20,9 @@
     "vite-plugin-solid": "^2.8.2"
   },
   "dependencies": {
+    "@types/lodash": "^4.17.9",
     "axios": "^1.7.7",
+    "lodash": "^4.17.21",
     "solid-js": "^1.8.11"
   }
 }

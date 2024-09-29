@@ -25,7 +25,7 @@ export interface ITask extends Document {
     };
     system: boolean;
   }>;
-  projectId?: number;
+  projectId?: string;
 }
 
 const TaskSchema = new Schema<ITask>({
@@ -40,7 +40,7 @@ const TaskSchema = new Schema<ITask>({
   branch: String,
   status: String,
   type: String,
-  projectId: Number,
+  projectId: String,
   custom: { type: Boolean, default: false },
   deleted: { type: Boolean, default: false },
   comments: [

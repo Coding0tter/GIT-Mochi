@@ -2,6 +2,7 @@ import axios, { AxiosError } from "axios";
 import { Task } from "../models/task";
 import { User, type IUser } from "../models/user";
 import { Setting } from "../models/setting";
+import { logError } from "../utils/logger";
 
 const GIT_API_URL = process.env.GIT_URL + "/api/v4";
 
@@ -98,45 +99,34 @@ export const getUserByPersonalAccessTokenAsync = async (): Promise<IUser> => {
   return user;
 };
 
-export const getProjectsAsync = async () => {
-  const projectsResponse = await fetch(`${GIT_API_URL}/projects`, {
+export const getGitlabProjectsAsync = async () => {
+  const projectsResponse = await axios.get(`${GIT_API_URL}/projects`, {
     headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
   });
 
-  return projectsResponse.json();
+  return projectsResponse.data;
 };
 
-export const getProjectAsync = async (projectId: string) => {
-  const projectResponse = await fetch(`${GIT_API_URL}/projects/${projectId}`, {
-    headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
-  });
+export const getGitlabProjectAsync = async (projectId: string) => {
+  const projectResponse = await axios.get(
+    `${GIT_API_URL}/projects/${projectId}`,
+    {
+      headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
+    }
+  );
 
-  return projectResponse.json();
-};
-
-export const setProjectAsync = async (value: string) => {
-  const currentProject = await Setting.findOne({ key: "currentProject" });
-
-  if (currentProject) {
-    await Setting.findByIdAndUpdate(currentProject._id, {
-      value,
-    });
-  } else {
-    await Setting.create({ key: "currentProject", value });
-  }
-
-  return value;
+  return projectResponse.data;
 };
 
 const syncMergeRequests = async () => {
-  const mergeRequestResponse = await fetch(
+  const mergeRequestResponse = await axios.get(
     `${GIT_API_URL}/merge_requests?scope=assigned_to_me`,
     {
       headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
     }
   );
 
-  const gitlabMergeRequests = await mergeRequestResponse.json();
+  const gitlabMergeRequests = mergeRequestResponse.data;
 
   for (const mr of gitlabMergeRequests) {
     const existingTask = await Task.findOne({ gitlabId: mr.id });
@@ -222,12 +212,12 @@ export const getMergeRequestComments = async (
     }
   } catch (error) {
     if (error instanceof AxiosError) {
-      console.error(
+      logError(
         `Failed to fetch comments: ${error?.message} ${error?.config?.url}`
       );
       return [];
     }
 
-    console.error(`Failed to fetch comments: ${error}`);
+    logError(`Failed to fetch comments: ${error}`);
   }
 };

@@ -1,59 +1,90 @@
-import { setLoading, uiStore } from "../stores/uiStore";
+import { setCommandInputValue, setLoading } from "../stores/uiStore";
 import {
   Command,
   commandStore,
-  DropdownValue,
+  getActiveDropdownValue,
+  resetCommandline,
   setActiveDropdownIndex,
-  setCurrentCommand,
-  setPendingCommand,
+  setWaitingForInput,
 } from "../stores/commandStore";
-import { COMMANDS } from "../commands";
+import { getCommandByAction } from "../commands/commandRegistry";
+import { closeModalAndUnfocus } from "./uiService";
+import { createSignal } from "solid-js";
 
 export const useCommandProcessor = () => {
-  const handleCommand = async (input: Partial<DropdownValue>) => {
+  const [pendingCommand, setPendingCommand] = createSignal<Command | undefined>(
+    undefined
+  );
+
+  const handleCommand = async () => {
     setLoading(true);
 
-    let command;
-
-    if (input === undefined) {
-      command = commandStore.pendingCommand;
-      if (!command) {
-        throw new Error("No pending command found");
-      }
-      input = { value: uiStore.commandInputValue };
-    } else {
-      command = COMMANDS.find((cmd) => cmd.action === input.action);
-    }
-
-    if (!command) {
-      throw new Error("Command not found");
-    }
-
     try {
-      if (command.beforeAction && !commandStore.pendingCommand) {
-        const beforeCommand = COMMANDS.find(
-          (cmd) => cmd.action === command.beforeAction
-        );
-
-        if (!beforeCommand) {
-          throw new Error("Before command not found");
+      if (commandStore.waitingForInput) {
+        await executePendingCommand();
+      } else {
+        const command = getSelectedCommand();
+        if (!command) {
+          throw new Error("No command found");
         }
 
-        setPendingCommand(command as Command);
-        setCurrentCommand(beforeCommand);
+        if (command.createOptions) await command.createOptions();
 
-        await handleCommand({ action: beforeCommand.action! });
-
-        return;
+        await executeCommandFlow(command);
       }
-
-      await command.execute(command, input.value);
     } catch (error) {
       console.error(error);
+      resetCommandline();
+      closeModalAndUnfocus();
     } finally {
       setLoading(false);
       setActiveDropdownIndex(0);
     }
+  };
+
+  const executeCommandFlow = async (command: Command) => {
+    if (command.beforeAction && !pendingCommand()) {
+      const beforeCommand = getCommandByAction(command.beforeAction);
+      if (!beforeCommand) throw new Error("No before command found");
+
+      setPendingCommand(command);
+      await beforeCommand.execute();
+      setCommandInputValue("");
+      setWaitingForInput(true);
+      return;
+    }
+
+    await command.execute();
+    setCommandInputValue("");
+
+    if (command.nextAction) {
+      const nextCommand = getCommandByAction(command.nextAction);
+      if (!nextCommand) throw new Error("No next command found");
+
+      setPendingCommand(nextCommand);
+      if (nextCommand.createOptions) await nextCommand.createOptions();
+      setWaitingForInput(true);
+    } else {
+      setPendingCommand(undefined);
+    }
+  };
+
+  const executePendingCommand = async () => {
+    if (!pendingCommand()) {
+      throw new Error("No pending command found");
+    }
+
+    await executeCommandFlow(pendingCommand()!);
+    setWaitingForInput(false);
+  };
+
+  const getSelectedCommand = (): Command | undefined => {
+    if (pendingCommand()) return pendingCommand();
+
+    const dropdownValue = getActiveDropdownValue();
+    if (dropdownValue.value) return getCommandByAction(dropdownValue.value);
+
+    return undefined;
   };
 
   return {

@@ -1,41 +1,32 @@
+import { loadCustomProjectsAsync } from "../services/customProjectService";
+import { loadGitLabProjectsAsync } from "../services/gitlabService";
 import { addNotification } from "../services/notificationService";
-import { closeModalAndUnfocus } from "../services/uiService";
-import { loadProjectsAsync } from "../services/utils";
-import {
-  Command,
-  commandStore,
-  DropdownValue,
-  setCurrentCommand,
-  setDropdownValues,
-} from "../stores/commandStore";
-import { setCommandInputValue } from "../stores/uiStore";
+import { setDropdownValues } from "../stores/commandStore";
+import { Project, setCommandInputValue } from "../stores/uiStore";
 import { registerCommand } from "./commandRegistry";
 
-export const execute = async (command: Partial<Command>) => {
+export const execute = async () => {
   try {
-    setCurrentCommand(command as Command);
-    const projects = await loadProjectsAsync();
+    const gitlabProjects = await loadGitLabProjectsAsync();
+    const customProjects = await loadCustomProjectsAsync();
 
     setDropdownValues(
-      projects.map(
-        (project: { id: any; name_with_namespace: any; description: any }) => ({
-          text: `(${project.id}): ${project.name_with_namespace}`,
-          description: project.description,
-          value: project.id,
-          action: commandStore.pendingCommand?.action,
-        })
-      )
+      [...customProjects, ...gitlabProjects].map((project: Project) => ({
+        text: project.custom
+          ? `(custom) ${project.name}`
+          : `(${project.id}): ${project.name}`,
+        description: project.description,
+        value: project,
+      }))
     );
 
     setCommandInputValue("");
   } catch (error) {
-    console.error(error);
     addNotification({
       title: "Error",
       description: "Failed to load projects",
       type: "error",
     });
-    closeModalAndUnfocus();
   }
 };
 

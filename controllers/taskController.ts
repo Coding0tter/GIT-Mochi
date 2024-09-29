@@ -2,6 +2,7 @@ import type { TaskDto } from "../dtos/taskDto.js";
 import { Setting } from "../models/setting.js";
 import { Task } from "../models/task.js";
 import type { Request, Response } from "express";
+import { logError } from "../utils/logger.js";
 
 export const createTask = async (
   req: Request,
@@ -26,7 +27,7 @@ export const createTask = async (
     await task.save();
     res.status(201).json(task);
   } catch (error) {
-    console.error("Error creating task:", error);
+    logError("Error creating task: " + error);
     res.status(500).json({ error: "Failed to create task" });
   }
 };
@@ -64,7 +65,7 @@ export const updateTask = async (
     }
     res.status(200).json(updatedTask);
   } catch (error) {
-    console.error("Error updating task:", error);
+    logError("Error updating task: " + error);
     res.status(500).json({ error: "Failed to update task" });
   }
 };
@@ -86,7 +87,7 @@ export const restoreTask = async (
     }
     res.status(200).json(restoredTask);
   } catch (error) {
-    console.error("Error restoring task:", error);
+    logError("Error restoring task: " + error);
     res.status(500).json({ error: "Failed to restore task" });
   }
 };
@@ -108,7 +109,7 @@ export const deleteTask = async (
     }
     res.status(200).json({ message: "Task flagged as deleted" });
   } catch (error) {
-    console.error("Error deleting task:", error);
+    logError("Error deleting task: " + error);
     res.status(500).json({ error: "Failed to delete task" });
   }
 };

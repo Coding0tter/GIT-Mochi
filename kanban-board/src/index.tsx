@@ -11,8 +11,11 @@ import "./styles/modal.css";
 import "./styles/task-flags.css";
 
 import App from "./App";
+import axios from "axios";
 
 const root = document.getElementById("root");
+
+axios.defaults.baseURL = "http://localhost:5000/api";
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   throw new Error(

@@ -1,17 +1,34 @@
+import {
+  getProjectAsync,
+  setProjectAsync,
+} from "../services/customProjectService";
 import { addNotification } from "../services/notificationService";
 import { closeModalAndUnfocus } from "../services/uiService";
-import { getProject, setProject } from "../services/utils";
-import { Command, setCurrentCommand } from "../stores/commandStore";
-import { handleGitlabSyncAsync } from "../stores/taskStore";
-import { setCommandInputValue, setCurrentProject } from "../stores/uiStore";
+import {
+  getActiveDropdownValue,
+  resetCommandline,
+} from "../stores/commandStore";
+import { fetchTasksAsync, handleGitlabSyncAsync } from "../stores/taskStore";
+import { Project, setCurrentProject } from "../stores/uiStore";
 import { registerCommand } from "./commandRegistry";
 
-export const execute = async (_command: Partial<Command>, value?: string) => {
+export const execute = async () => {
   try {
-    setCurrentCommand(null);
-    await setProject(value!);
-    await handleGitlabSyncAsync();
-    setCurrentProject(await getProject());
+    const project = getActiveDropdownValue().value as Project;
+
+    let projectId = project.id;
+
+    if (project.custom) {
+      projectId = "custom_project/" + project.id;
+    }
+
+    await setProjectAsync(projectId);
+    if (!project.custom) {
+      await handleGitlabSyncAsync();
+    } else {
+      await fetchTasksAsync();
+    }
+    setCurrentProject(await getProjectAsync());
 
     addNotification({
       title: "Success",
@@ -19,15 +36,14 @@ export const execute = async (_command: Partial<Command>, value?: string) => {
       type: "success",
     });
 
-    setCommandInputValue("");
+    resetCommandline();
+    closeModalAndUnfocus();
   } catch (error) {
     addNotification({
       title: "Error",
       description: "Failed to set project",
       type: "error",
     });
-  } finally {
-    closeModalAndUnfocus();
   }
 };
 

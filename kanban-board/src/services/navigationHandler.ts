@@ -1,3 +1,4 @@
+import { resetCommandline } from "../stores/commandStore";
 import { modalStore, ModalType } from "../stores/modalStore";
 import { toggleShowDeletedTasksAsync } from "../stores/taskStore";
 import { InputMode } from "../stores/uiStore";
@@ -20,6 +21,7 @@ import { closeModalAndUnfocus, focusInput } from "./uiService";
 export const handleKeyDown = async (event: KeyboardEvent) => {
   if (event.key === "Escape") {
     closeModalAndUnfocus();
+    resetCommandline();
   }
 
   if (

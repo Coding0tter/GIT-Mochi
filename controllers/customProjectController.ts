@@ -1,6 +1,8 @@
 import { Project } from "../models/project";
 import type { Request, Response } from "express";
 import { Setting } from "../models/setting";
+import { getGitlabProjectAsync } from "../services/gitlabService";
+import { logError, logInfo } from "../utils/logger";
 
 export const createProjectAsync = async (
   req: Request,
@@ -11,7 +13,7 @@ export const createProjectAsync = async (
     const project = await Project.create({ name });
     res.status(200).json(project);
   } catch (error) {
-    console.error("Error creating project:", error);
+    logError("Error creating project: " + error);
     res.status(500).json({ error: "Failed to create project" });
   }
 };
@@ -30,7 +32,7 @@ export const updateProjectAsync = async (
     );
     res.status(200).json(project);
   } catch (error) {
-    console.error("Error updating project:", error);
+    logError("Error updating project: " + error);
     res.status(500).json({ error: "Failed to update project" });
   }
 };
@@ -44,7 +46,7 @@ export const deleteProjectAsync = async (
     await Project.findByIdAndUpdate(id, { deleted: true });
     res.status(200).json({ message: "Project deleted" });
   } catch (error) {
-    console.error("Error deleting project:", error);
+    logError("Error deleting project: " + error);
     res.status(500).json({ error: "Failed to delete project" });
   }
 };
@@ -57,7 +59,7 @@ export const getProjectsAsync = async (
     const projects = await Project.find({ deleted: false });
     res.status(200).json(projects);
   } catch (error) {
-    console.error("Error getting projects:", error);
+    logError("Error getting projects: " + error);
     res.status(500).json({ error: "Failed to get projects" });
   }
 };
@@ -71,7 +73,7 @@ export const getProjectAsync = async (
     const project = await Project.findById(id);
     res.status(200).json(project);
   } catch (error) {
-    console.error("Error getting project:", error);
+    logError("Error getting project: " + error);
     res.status(500).json({ error: "Failed to get project" });
   }
 };
@@ -81,20 +83,48 @@ export const setCurrentProjectAsync = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { projectId } = req.body;
     const currentProject = await Setting.findOne({ key: "currentProject" });
+
+    logInfo("Setting project: " + projectId);
 
     if (currentProject) {
       await Setting.findByIdAndUpdate(currentProject._id, {
-        value: `custom_${id}`,
+        value: projectId,
       });
     } else {
-      await Setting.create({ key: "currentProject", value: `custom_${id}` });
+      await Setting.create({ key: "currentProject", value: projectId });
+    }
+    res.status(200).json(projectId);
+  } catch (error) {
+    logError("Error setting project: " + error);
+    res.status(500).json({ error: "Failed to set project" });
+  }
+};
+
+export const getCurrentProjectAsync = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const currentProject = await Setting.findOne({ key: "currentProject" });
+
+    if (!currentProject) {
+      res.status(200).json(null);
+      return;
     }
 
-    res.status(200).json({ message: "Current project set" });
+    if (currentProject?.value.includes("custom_project")) {
+      const project = await Project.findById(
+        currentProject.value.split("/")[1]
+      );
+      res.status(200).json(project);
+    } else {
+      const project = await getGitlabProjectAsync(currentProject.value);
+      res.status(200).json(project);
+    }
   } catch (error) {
-    console.error("Error setting current project:", error);
-    res.status(500).json({ error: "Failed to set current project" });
+    logError("Error getting current project: " + error);
+    res.status(500).json({ error: "Failed to get current project" });
   }
 };

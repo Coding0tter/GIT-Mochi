@@ -1,5 +1,5 @@
 import { createEffect, createSignal, JSX, onMount } from "solid-js";
-import { getProject, getUser } from "../services/utils";
+import { getUser } from "../services/utils";
 import logo from "../assets/logo.svg";
 import { useCommandProcessor } from "../services/commandProcessor";
 import {
@@ -8,6 +8,7 @@ import {
   uiStore,
   setCommandInputValue,
   setCurrentProject,
+  setCommandPlaceholder,
 } from "../stores/uiStore";
 import { handleGitlabSyncAsync } from "../stores/taskStore";
 import { COMMANDS } from "../commands";
@@ -17,6 +18,7 @@ import {
   setActiveDropdownIndex,
   setDropdownValues,
 } from "../stores/commandStore";
+import { getProjectAsync } from "../services/customProjectService";
 
 interface HeaderProps {
   onToggleCreateTask: () => void;
@@ -33,13 +35,12 @@ interface IUser {
 
 const Header = (props: HeaderProps): JSX.Element => {
   const [user, setUser] = createSignal<IUser | null>(null);
-  const [placeholder, setPlaceholder] = createSignal<string>("");
 
   const { handleCommand } = useCommandProcessor();
 
   onMount(async () => {
     setUser(await getUser());
-    setCurrentProject(await getProject());
+    setCurrentProject(await getProjectAsync());
   });
 
   createEffect(() => {
@@ -50,7 +51,6 @@ const Header = (props: HeaderProps): JSX.Element => {
           value: command.action,
           text: command.text,
           description: command.description,
-          action: command.action,
         }))
       );
     }
@@ -80,9 +80,7 @@ const Header = (props: HeaderProps): JSX.Element => {
             filteredDropdownValues().length) %
           filteredDropdownValues().length;
       } else if (event.key === "Enter") {
-        handleCommand(
-          filteredDropdownValues()[commandStore.activeDropdownIndex]
-        );
+        handleCommand();
         return;
       }
 
@@ -97,13 +95,15 @@ const Header = (props: HeaderProps): JSX.Element => {
   const getPlaceholder = () => {
     switch (uiStore.inputMode) {
       case InputMode.Search:
-        setPlaceholder("Search tasks...");
+        setCommandPlaceholder("Search tasks...");
         break;
       case InputMode.Commandline:
-        setPlaceholder("Type a command...");
+        setCommandPlaceholder("Type a command...");
         break;
       default:
-        setPlaceholder("Strg + F to search / Strg + P to open commandline");
+        setCommandPlaceholder(
+          "Strg + F to search / Strg + P to open commandline"
+        );
         break;
     }
   };
@@ -126,31 +126,33 @@ const Header = (props: HeaderProps): JSX.Element => {
           <input
             ref={(el) => setCommandInputRef(el)}
             type="text"
+            readOnly={uiStore.commandReadonly}
             value={!uiStore.loading ? uiStore.commandInputValue : "Loading..."}
-            placeholder={placeholder()}
+            placeholder={uiStore.commandPlaceholder}
             onKeyDown={handleKeydown}
             onInput={handleInput}
           />
-          {uiStore.inputMode === InputMode.Commandline && (
-            <ul class="command-dropdown">
-              {filteredDropdownValues().map((item, index) => (
-                <li
-                  id={`command-item-${index}`} // Add unique ID for each item
-                  class="command-item"
-                  onClick={() => handleCommand(item)}
-                  style={{
-                    background:
-                      commandStore.activeDropdownIndex === index
-                        ? "rgba(255, 255, 255, 0.1)"
-                        : "none",
-                  }}
-                >
-                  {item.text}
-                  {item.description !== "" && " - (" + item.description + ")"}
-                </li>
-              ))}
-            </ul>
-          )}
+          {uiStore.inputMode === InputMode.Commandline &&
+            filteredDropdownValues().length > 0 && (
+              <ul class="command-dropdown">
+                {filteredDropdownValues().map((item, index) => (
+                  <li
+                    id={`command-item-${index}`} // Add unique ID for each item
+                    class="command-item"
+                    onClick={handleCommand}
+                    style={{
+                      background:
+                        commandStore.activeDropdownIndex === index
+                          ? "rgba(255, 255, 255, 0.1)"
+                          : "none",
+                    }}
+                  >
+                    {item.text}
+                    {item?.description && " - (" + item.description + ")"}
+                  </li>
+                ))}
+              </ul>
+            )}
         </div>
         <div class="header-actions">
           <button
@@ -175,9 +177,7 @@ const Header = (props: HeaderProps): JSX.Element => {
       <div class="legend-row">
         <span>
           active project:{" "}
-          <strong>
-            {uiStore.currentProject?.name_with_namespace ?? "none"}
-          </strong>
+          <strong>{uiStore.currentProject?.name || "none"}</strong>
         </span>
         <span
           class="legend-item"

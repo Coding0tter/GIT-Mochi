@@ -23,6 +23,13 @@ export const setSelectedTaskForModal = (task: Partial<Task> | null) => {
   setModalStore("selectedTask", task as Task);
 };
 
+export const setSelectedTaskValue = (key: string, value: string) => {
+  setModalStore("selectedTask", {
+    ...modalStore.selectedTask!,
+    [key]: value,
+  });
+};
+
 export const handleCloseModal = () => {
   setModalStore("closing", true);
   setTimeout(() => {

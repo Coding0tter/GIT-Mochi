@@ -1,7 +1,7 @@
 import { JSX, onMount } from "solid-js";
 import BaseModal, { BaseModalProps } from "./BaseModal";
 import { STATES } from "../../constants";
-import { modalStore } from "../../stores/modalStore";
+import { modalStore, setSelectedTaskValue } from "../../stores/modalStore";
 
 interface EditTaskModalProps extends BaseModalProps {}
 
@@ -31,23 +31,19 @@ const EditOrCreateTaskModal = (props: EditTaskModalProps): JSX.Element => {
           }
         }}
         ref={(el) => (inputRef = el)}
-        onInput={(e) =>
-          (modalStore.selectedTask!.title = e.currentTarget.value)
-        }
+        onInput={(e) => setSelectedTaskValue("title", e.currentTarget.value)}
         placeholder="Task Title"
       />
       <select
         value={modalStore.selectedTask?.status || "opened"}
-        onChange={(e) =>
-          (modalStore.selectedTask!.status = e.currentTarget.value)
-        }
+        onChange={(e) => setSelectedTaskValue("status", e.currentTarget.value)}
       >
         {STATES.map((item) => (
           <option value={item.id}>{item.display_name}</option>
         ))}
       </select>
       <textarea
-        onInput={(e) => (modalStore.selectedTask!.description = e.target.value)}
+        onInput={(e) => setSelectedTaskValue("description", e.target.value)}
         value={modalStore.selectedTask?.description || ""}
         onKeyDown={(e) => {
           if (e.key === "Enter") {

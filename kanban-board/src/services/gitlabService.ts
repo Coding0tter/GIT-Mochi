@@ -1,7 +1,8 @@
+import axios from "axios";
 import { BACKEND_URL } from "../constants";
 import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
 import { fetchTasksAsync, getColumnTasks } from "../stores/taskStore";
-import { setLoading } from "../stores/uiStore";
+import { Project, setLoading } from "../stores/uiStore";
 import { addNotification } from "./notificationService";
 
 export const syncGitlabAsync = async () => {
@@ -81,6 +82,19 @@ export const createMergeRequestAndBranchForSelectedTaskAsync = async () => {
       description: "Only issues can be converted to merge requests",
       type: "warning",
     });
+  }
+};
+
+export const loadGitLabProjectsAsync = async () => {
+  try {
+    const projectsResponse = await axios.get("/git/projects");
+    return projectsResponse.data.map((project: Project) => ({
+      ...project,
+      name: project.name_with_namespace,
+    }));
+  } catch (error) {
+    console.error("Error getting projects:", error);
+    return;
   }
 };
 

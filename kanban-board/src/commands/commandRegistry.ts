@@ -8,5 +8,9 @@ export const registerCommand = (command: Command) => {
 };
 
 export const getRegisteredCommands = () => {
-  return commandRegistry;
+  return [...commandRegistry];
+};
+
+export const getCommandByAction = (action: string) => {
+  return [...commandRegistry].find((cmd) => cmd.action === action);
 };
