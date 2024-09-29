@@ -5,7 +5,6 @@ import { Project } from "../stores/uiStore";
 export const createProjectAsync = async (name: string) => {
   try {
     const response = await axios.post("/projects", { name });
-
     if (response.status === 200) {
       addNotification({
         title: "Project created",

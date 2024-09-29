@@ -79,7 +79,7 @@ const Header = (props: HeaderProps): JSX.Element => {
             1 +
             filteredDropdownValues().length) %
           filteredDropdownValues().length;
-      } else if (event.key === "Enter") {
+      } else if (event.key === "Enter" && uiStore.commandInputValue !== "") {
         handleCommand();
         return;
       }

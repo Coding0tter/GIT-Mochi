@@ -5,8 +5,11 @@ import { createProjectAsync } from "../services/customProjectService";
 
 export const execute = async () => {
   const value = uiStore.commandInputValue;
+
+  if (value === "") return;
+
   const project = await createProjectAsync(value);
-  if (!project) return;
+  if (project === null) return;
   setBuffer(project._id);
 };
 
@@ -21,8 +24,8 @@ export const createOptions = async () => {
 };
 
 registerCommand({
-  text: "createProject",
-  description: "Create project",
+  text: "create project",
+  description: "Create a new local project",
   action: "createProject",
   beforeAction: "getInput",
   nextAction: "setNewProjectAsCurrent",

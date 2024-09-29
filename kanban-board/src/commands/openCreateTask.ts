@@ -9,8 +9,8 @@ export const execute = async () => {
 };
 
 registerCommand({
-  text: "createTask",
-  description: "Create task",
+  text: "create task",
+  description: "Open the create task modal",
   action: "openCreateTask",
   display: true,
   execute,

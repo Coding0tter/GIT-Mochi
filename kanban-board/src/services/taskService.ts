@@ -1,8 +1,10 @@
+import axios from "axios";
 import { BACKEND_URL, STATES } from "../constants";
 import {
   keyboardNavigationStore,
   setSelectedColumnIndex,
   setSelectedTaskIndex,
+  setSelectedTaskIndexes,
 } from "../stores/keyboardNavigationStore";
 import { fetchTasksAsync, getColumnTasks, Task } from "../stores/taskStore";
 import { addNotification } from "./notificationService";
@@ -49,11 +51,7 @@ export const createTaskAsync = async (task: Partial<Task>) => {
 
 export const updateTaskAsync = async (taskId: string, task: Partial<Task>) => {
   try {
-    const res = await fetch(`${BACKEND_URL}/tasks/${taskId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(task),
-    });
+    const res = await axios.put(`${BACKEND_URL}/tasks/${taskId}`, task);
     return res;
   } catch (error) {
     console.error("Failed to update task:", error);
@@ -64,7 +62,7 @@ export const deleteTaskAsync = async (taskId: string) => {
   await fetch(`${BACKEND_URL}/tasks/${taskId}`, { method: "DELETE" });
 };
 
-export const moveTaskAsync = async (direction: Direction) => {
+export const moveSelectedTasksAsync = async (direction: Direction) => {
   const columnTasks = getColumnTasks();
   const newStatusIndex =
     direction === Direction.Right
@@ -74,24 +72,31 @@ export const moveTaskAsync = async (direction: Direction) => {
         )
       : Math.max(keyboardNavigationStore.selectedColumnIndex - 1, 0);
 
-  const taskToMove = columnTasks[keyboardNavigationStore.selectedTaskIndex];
-  if (
-    (
-      await updateTaskAsync(taskToMove._id, {
-        status: STATES[newStatusIndex].id,
-      })
-    )?.ok
-  ) {
+  const tasksToMove = columnTasks.filter((_task, index) =>
+    keyboardNavigationStore.selectedTaskIndexes.includes(index)
+  );
+
+  const requests = tasksToMove.map((task) => {
+    return updateTaskAsync(task._id, {
+      status: STATES[newStatusIndex].id,
+    });
+  });
+
+  const results = await Promise.all(requests);
+
+  if (results.every((res) => res?.status === 200)) {
     const result = await fetchTasksAsync();
 
     const newColumnTasks = result.filter(
       (task) => task.status === STATES[newStatusIndex].id
     );
-    const movedTaskIndex = newColumnTasks.findIndex(
-      (task) => task._id === taskToMove._id
-    );
+
+    const movedTaskIndexes = newColumnTasks
+      .filter((task) => tasksToMove.some((t) => t._id === task._id))
+      .map((task) => newColumnTasks.indexOf(task));
 
     setSelectedColumnIndex(newStatusIndex);
-    setSelectedTaskIndex(movedTaskIndex);
+    setSelectedTaskIndex(movedTaskIndexes.at(0)!);
+    setSelectedTaskIndexes(movedTaskIndexes);
   }
 };

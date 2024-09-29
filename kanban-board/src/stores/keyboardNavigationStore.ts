@@ -4,6 +4,7 @@ export const [keyboardNavigationStore, setKeyboardNavigationStore] =
   createStore({
     selectedColumnIndex: 0,
     selectedTaskIndex: 0,
+    selectedTaskIndexes: [0] as number[],
   });
 
 export const setSelectedColumnIndex = (
@@ -23,5 +24,20 @@ export const setSelectedTaskIndex = (
 
   const newIndex = typeof updater === "function" ? updater(prevIndex) : updater;
 
+  if (isNaN(newIndex)) {
+    return;
+  }
+
   setKeyboardNavigationStore("selectedTaskIndex", newIndex);
+};
+
+export const setSelectedTaskIndexes = (
+  updater: number[] | ((prev: number[]) => number[])
+) => {
+  const prevIndexes = keyboardNavigationStore.selectedTaskIndexes;
+
+  const newIndexes =
+    typeof updater === "function" ? updater(prevIndexes) : updater;
+
+  setKeyboardNavigationStore("selectedTaskIndexes", newIndexes);
 };

@@ -42,7 +42,10 @@ const TaskColumn = (props: TaskColumnProps) => {
               isSelected={
                 keyboardNavigationStore.selectedColumnIndex ===
                   props.columnIndex &&
-                keyboardNavigationStore.selectedTaskIndex === taskIndex()
+                (keyboardNavigationStore.selectedTaskIndex === taskIndex() ||
+                  keyboardNavigationStore.selectedTaskIndexes.includes(
+                    taskIndex()
+                  ))
               }
               onClick={() => {
                 setSelectedTaskForModal(task);

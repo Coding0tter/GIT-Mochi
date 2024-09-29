@@ -48,8 +48,8 @@ export const execute = async () => {
 };
 
 registerCommand({
-  text: "setProject",
-  description: "Set project",
+  text: "select project",
+  description: "Set the acitve project for the board",
   action: "setProject",
   beforeAction: "loadProjects",
   display: true,

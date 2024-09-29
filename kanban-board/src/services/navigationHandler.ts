@@ -14,8 +14,15 @@ import {
   openEditModal,
   openHelpModal,
 } from "./modalService";
-import { Direction, moveSelection } from "./taskNavigationService";
-import { moveTaskAsync, restoreSelectedTaskAsync } from "./taskService";
+import {
+  addToSelection,
+  Direction,
+  moveSelection,
+} from "./taskNavigationService";
+import {
+  moveSelectedTasksAsync,
+  restoreSelectedTaskAsync,
+} from "./taskService";
 import { closeModalAndUnfocus, focusInput } from "./uiService";
 
 export const handleKeyDown = async (event: KeyboardEvent) => {
@@ -56,12 +63,20 @@ export const handleKeyDown = async (event: KeyboardEvent) => {
     switch (event.key) {
       case "A":
       case "ArrowLeft":
-        await moveTaskAsync(Direction.Left);
+        await moveSelectedTasksAsync(Direction.Left);
         break;
 
       case "D":
       case "ArrowRight":
-        await moveTaskAsync(Direction.Right);
+        await moveSelectedTasksAsync(Direction.Right);
+        break;
+
+      case "ArrowUp":
+        await addToSelection(Direction.Up);
+        break;
+
+      case "ArrowDown":
+        await addToSelection(Direction.Down);
         break;
 
       case "S":
@@ -109,11 +124,11 @@ export const handleKeyDown = async (event: KeyboardEvent) => {
       break;
 
     case "n":
-      await moveTaskAsync(Direction.Right);
+      await moveSelectedTasksAsync(Direction.Right);
       break;
 
     case "p":
-      await moveTaskAsync(Direction.Left);
+      await moveSelectedTasksAsync(Direction.Left);
       break;
 
     case "h":

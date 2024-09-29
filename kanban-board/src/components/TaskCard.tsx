@@ -1,4 +1,4 @@
-import { Task } from "../services/taskService";
+import { Task } from "../stores/taskStore";
 
 interface TaskCardProps {
   task: Task;

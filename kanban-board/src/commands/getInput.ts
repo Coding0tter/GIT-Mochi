@@ -1,14 +1,6 @@
-import {
-  Command,
-  setDropdownValues,
-  setWaitingForInput,
-} from "../stores/commandStore";
-import { setCommandInputValue } from "../stores/uiStore";
 import { registerCommand } from "./commandRegistry";
 
-export const execute = async () => {
-  setCommandInputValue("");
-};
+export const execute = async () => {};
 
 registerCommand({
   text: "getInput",
