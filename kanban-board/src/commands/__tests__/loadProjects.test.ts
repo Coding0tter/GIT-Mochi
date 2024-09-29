@@ -4,8 +4,8 @@ import {
   loadCustomProjectsAsyncSpy,
   loadGitLabProjectsAsyncSpy,
   setCommandInputValueSpy,
-  setDropdownValuesSpy,
 } from "../../../base.test";
+import { setDropdownValues } from "../../stores/commandStore";
 
 describe("loadProjects execute", () => {
   test("should load projects and set dropdown values", async () => {
@@ -30,7 +30,7 @@ describe("loadProjects execute", () => {
     expect(loadGitLabProjectsAsyncSpy).toHaveBeenCalled();
     expect(loadCustomProjectsAsyncSpy).toHaveBeenCalled();
 
-    expect(setDropdownValuesSpy).toHaveBeenCalledWith([
+    expect(setDropdownValues).toHaveBeenCalledWith([
       {
         text: "(custom) customProject",
         description: undefined,

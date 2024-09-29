@@ -1,4 +1,3 @@
-import { set } from "lodash";
 import { STATES } from "../constants";
 import {
   keyboardNavigationStore,

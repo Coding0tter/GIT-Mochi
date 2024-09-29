@@ -36,7 +36,7 @@ interface IUser {
 const Header = (props: HeaderProps): JSX.Element => {
   const [user, setUser] = createSignal<IUser | null>(null);
 
-  const { handleCommand } = useCommandProcessor();
+  const { handleCommand, resetPendingCommand } = useCommandProcessor();
 
   onMount(async () => {
     setUser(await getUser());
@@ -69,6 +69,7 @@ const Header = (props: HeaderProps): JSX.Element => {
   const handleKeydown = (event: KeyboardEvent) => {
     if (uiStore.inputMode === InputMode.Commandline) {
       let newSelectedCommand = commandStore.activeDropdownIndex;
+
       if (event.key === "ArrowDown") {
         newSelectedCommand =
           (commandStore.activeDropdownIndex + 1) %
@@ -79,7 +80,10 @@ const Header = (props: HeaderProps): JSX.Element => {
             1 +
             filteredDropdownValues().length) %
           filteredDropdownValues().length;
-      } else if (event.key === "Enter" && uiStore.commandInputValue !== "") {
+      } else if (
+        event.key === "Enter" &&
+        (uiStore.commandInputValue !== "" || !commandStore.waitingForInput)
+      ) {
         handleCommand();
         return;
       }
@@ -104,6 +108,7 @@ const Header = (props: HeaderProps): JSX.Element => {
         setCommandPlaceholder(
           "Strg + F to search / Strg + P to open commandline"
         );
+        resetPendingCommand();
         break;
     }
   };

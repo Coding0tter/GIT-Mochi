@@ -23,11 +23,13 @@ export const execute = async () => {
     }
 
     await setProjectAsync(projectId);
+
     if (!project.custom) {
       await handleGitlabSyncAsync();
     } else {
       await fetchTasksAsync();
     }
+
     setCurrentProject(await getProjectAsync());
 
     addNotification({

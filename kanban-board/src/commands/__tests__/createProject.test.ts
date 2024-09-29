@@ -4,8 +4,8 @@ import {
   createProjectSpy,
   setBufferSpy,
   setCommandPlaceholderSpy,
-  setDropdownValuesSpy,
 } from "../../../base.test";
+import { setDropdownValues } from "../../stores/commandStore";
 
 const setupTest = (
   projectName: string,
@@ -67,7 +67,7 @@ describe("createProject createOptions", () => {
     expect(setCommandPlaceholderSpy).toHaveBeenCalledWith(
       "Enter a name for the new project"
     );
-    expect(setDropdownValuesSpy).toHaveBeenCalledWith([
+    expect(setDropdownValues).toHaveBeenCalledWith([
       {
         text: "Enter a name for the new project",
         showAlways: true,

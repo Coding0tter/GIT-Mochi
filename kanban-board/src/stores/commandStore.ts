@@ -1,6 +1,5 @@
 import { createStore } from "solid-js/store";
 import { setCommandReadonly, uiStore } from "./uiStore";
-import { cloneDeep } from "lodash";
 
 export type Command = {
   text: string;

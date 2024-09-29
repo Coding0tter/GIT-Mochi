@@ -86,8 +86,6 @@ export const setCurrentProjectAsync = async (
     const { projectId } = req.body;
     const currentProject = await Setting.findOne({ key: "currentProject" });
 
-    logInfo("Setting project: " + projectId);
-
     if (currentProject) {
       await Setting.findByIdAndUpdate(currentProject._id, {
         value: projectId,

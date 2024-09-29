@@ -89,5 +89,6 @@ export const useCommandProcessor = () => {
 
   return {
     handleCommand,
+    resetPendingCommand: () => setPendingCommand(undefined),
   };
 };
