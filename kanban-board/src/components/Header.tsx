@@ -140,7 +140,7 @@ const Header = (props: HeaderProps): JSX.Element => {
       <div class="header-row">
         <div class="heading">
           <img src={logo} alt="GitLab-Mochi Logo"></img>
-          <h1>GitLab-Mochi</h1>
+          <h1>Mochi</h1>
           <div class="wave-text">
             {"keyboard-friendly".split("").map((char, index) => (
               <span class="wave-char" style={{ "--index": index }}>

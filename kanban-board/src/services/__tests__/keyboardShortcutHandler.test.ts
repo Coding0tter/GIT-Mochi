@@ -19,7 +19,7 @@ const getKeyboardEvent = (
   } as KeyboardEvent;
 };
 
-describe("NavigationHandler", () => {
+describe("KeyboardShortcutHandler", () => {
   test("should close and unfocus on escape", () => {
     const event = getKeyboardEvent("Escape");
 

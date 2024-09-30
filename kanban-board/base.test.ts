@@ -72,7 +72,9 @@ export const useSpies = () => {
     ).mockClear(),
 
     // Task Store Spies
-    fetchTasksAsyncSpy: spyOn(taskStore, "fetchTasksAsync").mockClear(),
+    fetchTasksAsyncSpy: spyOn(taskStore, "fetchTasksAsync")
+      .mockResolvedValue([])
+      .mockClear(),
     handleGitlabSyncAsyncSpy: spyOn(
       taskStore,
       "handleGitlabSyncAsync"
