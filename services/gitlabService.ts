@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import { Task } from "../models/task";
 import { User, type IUser } from "../models/user";
 import { Setting } from "../models/setting";
-import { logError } from "../utils/logger";
+import { logError, logInfo } from "../utils/logger";
 
 const GIT_API_URL = process.env.GIT_URL + "/api/v4";
 
@@ -205,11 +205,30 @@ export const getMergeRequestComments = async (
     const comments = commentsResponse.data;
 
     if (Array.isArray(comments)) {
-      return comments.filter(
-        (comment: { system: boolean; author: { username: string } }) =>
-          !comment.system && comment.author.username !== "merge_train"
-      );
+      const filteredAndProcessedComments = comments
+        .filter(
+          (comment: { system: boolean; author: { username: string } }) =>
+            !comment.system && comment.author.username !== "merge_train"
+        )
+        .map((comment) => {
+          const imageRegex = /!\[.*?\]\((.*?)\)/g;
+          const matches = [...comment.body.matchAll(imageRegex)];
+          const images = matches.map(
+            (match) =>
+              `${process.env.GIT_URL}/-/project/${projectId}` + match[1]
+          );
+
+          const cleanedText = comment.body.replace(imageRegex, "").trim();
+
+          comment.body = cleanedText;
+          comment.images = images;
+
+          return comment;
+        });
+
+      return filteredAndProcessedComments;
     }
+    return [];
   } catch (error) {
     if (error instanceof AxiosError) {
       logError(

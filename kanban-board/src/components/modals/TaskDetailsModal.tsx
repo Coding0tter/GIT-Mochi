@@ -35,6 +35,11 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
       <p>
         <strong>Status:</strong> {modalStore.selectedTask?.status}
       </p>
+      {modalStore.selectedTask?.branch && (
+        <p>
+          <strong>Branch:</strong> {modalStore.selectedTask?.branch}
+        </p>
+      )}
       {modalStore.selectedTask?.custom && (
         <p>
           <strong>Custom Task:</strong> Yes
@@ -59,9 +64,18 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
                   <p>
                     <strong>{comment.author.name}:</strong> {comment.body}
                   </p>
-                  {comment.images?.map((src) => (
-                    <img src={src} alt="comment image" class="comment-image" />
-                  ))}
+                  {comment.images?.map((src) => {
+                    if (src.includes(".webm")) {
+                      return <video src={src} class="comment-image" controls />;
+                    }
+                    return (
+                      <img
+                        src={src}
+                        alt="comment image"
+                        class="comment-image"
+                      />
+                    );
+                  })}
                 </div>
               );
             })}

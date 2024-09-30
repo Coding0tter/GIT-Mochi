@@ -5,18 +5,14 @@ import {
   getActiveDropdownValue,
   resetCommandline,
   setActiveDropdownIndex,
+  setPendingCommand,
   setWaitingForInput,
 } from "../stores/commandStore";
 import { getCommandByAction } from "../commands/commandRegistry";
 import { closeModalAndUnfocus } from "./uiService";
-import { createSignal } from "solid-js";
 
 export const useCommandProcessor = () => {
-  const [pendingCommand, setPendingCommand] = createSignal<Command | undefined>(
-    undefined
-  );
-
-  const handleCommand = async () => {
+  const handleCommandAsync = async () => {
     setLoading(true);
 
     try {
@@ -33,7 +29,6 @@ export const useCommandProcessor = () => {
         await executeCommandFlow(command);
       }
     } catch (error) {
-      console.error(error);
       resetCommandline();
       closeModalAndUnfocus();
     } finally {
@@ -43,7 +38,7 @@ export const useCommandProcessor = () => {
   };
 
   const executeCommandFlow = async (command: Command) => {
-    if (command.beforeAction && !pendingCommand()) {
+    if (command.beforeAction && !commandStore.pendingCommand) {
       const beforeCommand = getCommandByAction(command.beforeAction);
       if (!beforeCommand) throw new Error("No before command found");
 
@@ -70,16 +65,16 @@ export const useCommandProcessor = () => {
   };
 
   const executePendingCommand = async () => {
-    if (!pendingCommand()) {
+    if (!commandStore.pendingCommand) {
       throw new Error("No pending command found");
     }
 
-    await executeCommandFlow(pendingCommand()!);
+    await executeCommandFlow(commandStore.pendingCommand!);
     setWaitingForInput(false);
   };
 
   const getSelectedCommand = (): Command | undefined => {
-    if (pendingCommand()) return pendingCommand();
+    if (commandStore.pendingCommand) return commandStore.pendingCommand;
 
     const dropdownValue = getActiveDropdownValue();
     if (dropdownValue.value) return getCommandByAction(dropdownValue.value);
@@ -88,7 +83,7 @@ export const useCommandProcessor = () => {
   };
 
   return {
-    handleCommand,
+    handleCommandAsync,
     resetPendingCommand: () => setPendingCommand(undefined),
   };
 };

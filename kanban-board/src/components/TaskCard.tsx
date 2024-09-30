@@ -41,12 +41,17 @@ const TaskCard = (props: TaskCardProps) => {
       )}
       {!props.task.custom && props.task.type === "merge_request" && (
         <span title={props.task.branch} class="priority-flag">
-          {props.task.branch}
+          Branch: {props.task.branch}
         </span>
       )}
       {!props.task.custom && props.task.type === "issue" && (
         <span title={props.task.milestoneName} class="priority-flag">
           {props.task.milestoneName}
+        </span>
+      )}
+      {!props.task.custom && props.task.type === "issue" && (
+        <span title={props.task.gitlabIid} class="priority-flag">
+          Issue: {props.task.gitlabIid}
         </span>
       )}
       {props.commentsCount > 0 && (

@@ -14,3 +14,7 @@ export const getRegisteredCommands = () => {
 export const getCommandByAction = (action: string) => {
   return [...commandRegistry].find((cmd) => cmd.action === action);
 };
+
+export const resetCommandRegistry = () => {
+  commandRegistry.length = 0;
+};

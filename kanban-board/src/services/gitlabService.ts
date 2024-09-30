@@ -1,5 +1,4 @@
 import axios from "axios";
-import { BACKEND_URL } from "../constants";
 import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
 import { fetchTasksAsync, getColumnTasks } from "../stores/taskStore";
 import { Project, setLoading } from "../stores/uiStore";
@@ -9,15 +8,11 @@ export const syncGitlabAsync = async () => {
   try {
     setLoading(true);
 
-    const res = await fetch(`${BACKEND_URL}/git/sync`, {
-      method: "POST",
-    });
-
-    if (!res.ok) {
+    const res = await axios.post(`/git/sync`);
+    if (res.status !== 200) {
       throw new Error("Failed to sync with GitLab");
     }
     await fetchTasksAsync();
-    setLoading(false);
 
     addNotification({
       title: "Synced with GitLab",
@@ -30,6 +25,8 @@ export const syncGitlabAsync = async () => {
       description: "Failed to sync with GitLab",
       type: "error",
     });
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -94,20 +91,16 @@ export const loadGitLabProjectsAsync = async () => {
     }));
   } catch (error) {
     console.error("Error getting projects:", error);
-    return;
+    return [];
   }
 };
 
 export const createMergeRequestAndBranchAsync = async (issueId: string) => {
-  const res = await fetch(`${BACKEND_URL}/git/create-merge-request`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ issueId }),
-  });
+  const res = await axios.post(`/git/create-merge-request`, { issueId });
 
-  if (!res.ok) {
+  if (res.status !== 200) {
     throw new Error("Failed to create merge request");
   }
 
-  return await res.json();
+  return await res.data;
 };

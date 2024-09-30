@@ -1,5 +1,11 @@
 import { createStore } from "solid-js/store";
-import { setCommandReadonly, uiStore } from "./uiStore";
+import {
+  InputMode,
+  setCommandInputValue,
+  setCommandReadonly,
+  setInputMode,
+  uiStore,
+} from "./uiStore";
 
 export type Command = {
   text: string;
@@ -25,6 +31,7 @@ export const [commandStore, setCommandStore] = createStore({
   waitingForInput: false,
   activeDropdownIndex: 0,
   buffer: null as any,
+  pendingCommand: undefined as Command | undefined,
 });
 
 export const setDropdownValues = (values: DropdownValue[]) => {
@@ -41,6 +48,11 @@ export const setWaitingForInput = (value: boolean) => {
 
 export const setBuffer = (value: any) => {
   setCommandStore("buffer", value);
+};
+
+export const setPendingCommand = (command: Command | undefined) => {
+  setCommandStore("pendingCommand", undefined);
+  setCommandStore("pendingCommand", command);
 };
 
 export const filteredDropdownValues = () => {
@@ -62,4 +74,7 @@ export const resetCommandline = () => {
   setDropdownValues([]);
   setCommandReadonly(false);
   setBuffer(null);
+
+  setInputMode(InputMode.None);
+  setCommandInputValue("");
 };

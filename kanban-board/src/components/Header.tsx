@@ -10,7 +10,7 @@ import {
   setCurrentProject,
   setCommandPlaceholder,
 } from "../stores/uiStore";
-import { handleGitlabSyncAsync } from "../stores/taskStore";
+import { filteredTasks, handleGitlabSyncAsync } from "../stores/taskStore";
 import { COMMANDS } from "../commands";
 import {
   commandStore,
@@ -19,6 +19,14 @@ import {
   setDropdownValues,
 } from "../stores/commandStore";
 import { getProjectAsync } from "../services/customProjectService";
+import { closeModalAndUnfocus } from "../services/uiService";
+import { groupBy } from "lodash";
+import { STATES } from "../constants";
+import {
+  setSelectedColumnIndex,
+  setSelectedTaskIndex,
+  setSelectedTaskIndexes,
+} from "../stores/keyboardNavigationStore";
 
 interface HeaderProps {
   onToggleCreateTask: () => void;
@@ -36,7 +44,7 @@ interface IUser {
 const Header = (props: HeaderProps): JSX.Element => {
   const [user, setUser] = createSignal<IUser | null>(null);
 
-  const { handleCommand, resetPendingCommand } = useCommandProcessor();
+  const { handleCommandAsync, resetPendingCommand } = useCommandProcessor();
 
   onMount(async () => {
     setUser(await getUser());
@@ -61,6 +69,7 @@ const Header = (props: HeaderProps): JSX.Element => {
   const handleInput = (event: Event) => {
     const input = event.target as HTMLInputElement;
     setCommandInputValue(input.value);
+    setActiveDropdownIndex(0);
     if (uiStore.inputMode === InputMode.Search) {
       setCommandInputValue(input.value);
     }
@@ -80,11 +89,8 @@ const Header = (props: HeaderProps): JSX.Element => {
             1 +
             filteredDropdownValues().length) %
           filteredDropdownValues().length;
-      } else if (
-        event.key === "Enter" &&
-        (uiStore.commandInputValue !== "" || !commandStore.waitingForInput)
-      ) {
-        handleCommand();
+      } else if (event.key === "Enter") {
+        handleCommandAsync();
         return;
       }
 
@@ -93,6 +99,22 @@ const Header = (props: HeaderProps): JSX.Element => {
       document
         .getElementById(`command-item-${newSelectedCommand}`)
         ?.scrollIntoView({ block: "nearest" });
+    } else if (uiStore.inputMode === InputMode.Search) {
+      setTimeout(() => {
+        const statesWithTasks = Object.keys(groupBy(filteredTasks(), "status"));
+
+        const firstStateWithTasks = STATES.findIndex((state) => {
+          return statesWithTasks.includes(state.id);
+        });
+
+        setSelectedColumnIndex(firstStateWithTasks);
+        setSelectedTaskIndex(0);
+        setSelectedTaskIndexes([0]);
+      });
+
+      if (event.key === "Enter") {
+        closeModalAndUnfocus();
+      }
     }
   };
 
@@ -144,7 +166,7 @@ const Header = (props: HeaderProps): JSX.Element => {
                   <li
                     id={`command-item-${index}`} // Add unique ID for each item
                     class="command-item"
-                    onClick={handleCommand}
+                    onClick={handleCommandAsync}
                     style={{
                       background:
                         commandStore.activeDropdownIndex === index

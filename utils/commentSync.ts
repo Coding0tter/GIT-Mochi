@@ -9,34 +9,23 @@ const periodicallySyncComments = async () => {
       logInfo("Syncing comments...");
       const merge_requests = await Task.find({ type: "merge_request" });
 
-      if(merge_requests.length === 0) {
+      if (merge_requests.length === 0) {
         logInfo("No merge requests found. Skipping sync...");
         return;
       }
 
       for (const mr of merge_requests) {
         const comments = await getMergeRequestComments(
-          mr.gitlabIid?.toString()!, mr.projectId
+          mr.gitlabIid?.toString()!,
+          mr.projectId!
         );
 
         if (comments) {
           mr.comments = comments;
 
-          mr.comments.forEach((comment) => {
-            const imageRegex = /!\[.*?\]\((.*?)\)/g;
-            const matches = [...comment.body.matchAll(imageRegex)];
-            const images = matches.map(
-              (match) =>
-                `${process.env.GIT_URL}/-/project/${mr.projectId}` + match[1]
-            );
-
-            const cleanedText = comment.body.replace(imageRegex, "").trim();
-
-            comment.body = cleanedText;
-            comment.images = images;
-          });
-
           await mr.save();
+
+          logInfo(`Found ${comments.length} comments for MR #${mr.gitlabIid}`);
         }
       }
 

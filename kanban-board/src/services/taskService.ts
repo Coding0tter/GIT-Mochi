@@ -6,7 +6,12 @@ import {
   setSelectedTaskIndex,
   setSelectedTaskIndexes,
 } from "../stores/keyboardNavigationStore";
-import { fetchTasksAsync, getColumnTasks, Task } from "../stores/taskStore";
+import {
+  fetchTasksAsync,
+  filteredTasks,
+  getColumnTasks,
+  Task,
+} from "../stores/taskStore";
 import { addNotification } from "./notificationService";
 import { Direction } from "./taskNavigationService";
 
@@ -64,6 +69,7 @@ export const deleteTaskAsync = async (taskId: string) => {
 
 export const moveSelectedTasksAsync = async (direction: Direction) => {
   const columnTasks = getColumnTasks();
+
   const newStatusIndex =
     direction === Direction.Right
       ? Math.min(
@@ -85,9 +91,9 @@ export const moveSelectedTasksAsync = async (direction: Direction) => {
   const results = await Promise.all(requests);
 
   if (results.every((res) => res?.status === 200)) {
-    const result = await fetchTasksAsync();
+    await fetchTasksAsync();
 
-    const newColumnTasks = result.filter(
+    const newColumnTasks = filteredTasks().filter(
       (task) => task.status === STATES[newStatusIndex].id
     );
 

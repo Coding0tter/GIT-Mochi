@@ -39,6 +39,7 @@ export const loadCustomProjectsAsync = async () => {
         description: error.message,
         type: "error",
       });
+    return [];
   }
 };
 

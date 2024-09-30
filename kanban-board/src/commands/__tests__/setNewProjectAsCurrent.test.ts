@@ -4,17 +4,9 @@ import {
   setBuffer,
   setDropdownValues,
 } from "../../stores/commandStore";
-import {
-  addNotificationSpy,
-  closeModalAndUnfocusSpy,
-  fetchTasksAsyncSpy,
-  getProjectAsyncSpy,
-  resetCommandlineSpy,
-  setCurrentProjectSpy,
-  setProjectAsyncSpy,
-} from "../../../base.test";
 import { AxiosResponse } from "axios";
 import { setCommandPlaceholder } from "../../stores/uiStore";
+import { useSpies } from "../../../base.test";
 
 enum Choice {
   Yes,
@@ -39,6 +31,16 @@ describe("setNewProjectAsCurrent execute", () => {
   test("should set new project as current", async () => {
     setBuffer("newProject");
     setup(Choice.Yes);
+
+    const {
+      setProjectAsyncSpy,
+      getProjectAsyncSpy,
+      fetchTasksAsyncSpy,
+      resetCommandlineSpy,
+      addNotificationSpy,
+      setCurrentProjectSpy,
+      closeModalAndUnfocusSpy,
+    } = useSpies();
 
     setProjectAsyncSpy.mockImplementationOnce(async (projectId: string) => {
       return {} as AxiosResponse;
@@ -71,6 +73,14 @@ describe("setNewProjectAsCurrent execute", () => {
 
   test("should not set new project as current", async () => {
     setup(Choice.No);
+    const {
+      setProjectAsyncSpy,
+      fetchTasksAsyncSpy,
+      resetCommandlineSpy,
+      addNotificationSpy,
+      setCurrentProjectSpy,
+      closeModalAndUnfocusSpy,
+    } = useSpies();
 
     const { execute } = require("../setNewProjectAsCurrent");
     await execute();
@@ -88,9 +98,10 @@ describe("setNewProjectAsCurrent execute", () => {
 describe("setNewProjectAsCurrent createOptions", () => {
   test("should set dropdown values", async () => {
     const { createOptions } = require("../setNewProjectAsCurrent");
+    const { setCommandPlaceholderSpy } = useSpies();
     await createOptions();
 
-    expect(setCommandPlaceholder).toHaveBeenCalledWith(
+    expect(setCommandPlaceholderSpy).toHaveBeenCalledWith(
       "Do you want to set the new project as current?"
     );
     expect(setDropdownValues).toHaveBeenCalledWith([

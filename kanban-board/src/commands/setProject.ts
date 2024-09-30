@@ -8,6 +8,11 @@ import {
   getActiveDropdownValue,
   resetCommandline,
 } from "../stores/commandStore";
+import {
+  setSelectedColumnIndex,
+  setSelectedTaskIndex,
+  setSelectedTaskIndexes,
+} from "../stores/keyboardNavigationStore";
 import { fetchTasksAsync, handleGitlabSyncAsync } from "../stores/taskStore";
 import { Project, setCurrentProject } from "../stores/uiStore";
 import { registerCommand } from "./commandRegistry";
@@ -24,28 +29,30 @@ export const execute = async () => {
 
     await setProjectAsync(projectId);
 
-    if (!project.custom) {
-      await handleGitlabSyncAsync();
-    } else {
-      await fetchTasksAsync();
-    }
+    if (!project.custom) await handleGitlabSyncAsync();
+
+    await fetchTasksAsync();
 
     setCurrentProject(await getProjectAsync());
+
+    setSelectedTaskIndex(0);
+    setSelectedColumnIndex(0);
+    setSelectedTaskIndexes([0]);
 
     addNotification({
       title: "Success",
       description: "Project set successfully",
       type: "success",
     });
-
-    resetCommandline();
-    closeModalAndUnfocus();
   } catch (error) {
     addNotification({
       title: "Error",
       description: "Failed to set project",
       type: "error",
     });
+  } finally {
+    resetCommandline();
+    closeModalAndUnfocus();
   }
 };
 

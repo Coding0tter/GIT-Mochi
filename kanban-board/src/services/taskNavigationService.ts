@@ -1,3 +1,4 @@
+import { groupBy } from "lodash";
 import { STATES } from "../constants";
 import {
   keyboardNavigationStore,
@@ -5,7 +6,7 @@ import {
   setSelectedTaskIndex,
   setSelectedTaskIndexes,
 } from "../stores/keyboardNavigationStore";
-import { getColumnTasks } from "../stores/taskStore";
+import { filteredTasks, getColumnTasks } from "../stores/taskStore";
 
 export enum Direction {
   Up,
@@ -29,14 +30,18 @@ export const moveSelection = async (direction: Direction) => {
 
       break;
     case Direction.Left:
-      setSelectedColumnIndex(
-        (prev) => (prev - 1 + STATES.length) % STATES.length
-      );
+      do {
+        setSelectedColumnIndex(
+          (prev) => (prev - 1 + STATES.length) % STATES.length
+        );
+      } while (filteredTasks().length > 0 && getColumnTasks().length === 0);
       setSelectedTaskIndexes([0]);
       setSelectedTaskIndex(0);
       break;
     case Direction.Right:
-      setSelectedColumnIndex((prev) => (prev + 1) % STATES.length);
+      do {
+        setSelectedColumnIndex((prev) => (prev + 1) % STATES.length);
+      } while (filteredTasks().length > 0 && getColumnTasks().length === 0);
       setSelectedTaskIndex(0);
       setSelectedTaskIndexes([0]);
       break;

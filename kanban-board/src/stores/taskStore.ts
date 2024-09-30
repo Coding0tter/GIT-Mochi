@@ -1,9 +1,15 @@
 import { createStore } from "solid-js/store";
 import { BACKEND_URL, STATES } from "../constants";
 import { addNotification } from "../services/notificationService";
-import { setLoading } from "./uiStore";
-import { keyboardNavigationStore } from "./keyboardNavigationStore";
+import { InputMode, setLoading, uiStore } from "./uiStore";
+import {
+  keyboardNavigationStore,
+  setSelectedColumnIndex,
+  setSelectedTaskIndex,
+  setSelectedTaskIndexes,
+} from "./keyboardNavigationStore";
 import { syncGitlabAsync } from "../services/gitlabService";
+import { groupBy } from "lodash";
 
 export interface Task {
   _id: string;
@@ -37,7 +43,7 @@ export const [taskStore, setTaskStore] = createStore({
 });
 
 export const getColumnTasks = () => {
-  return taskStore.tasks.filter(
+  return filteredTasks().filter(
     (task) =>
       task.status === STATES[keyboardNavigationStore.selectedColumnIndex].id
   );
@@ -77,4 +83,23 @@ export const handleGitlabSyncAsync = async () => {
   await syncGitlabAsync();
   await fetchTasksAsync();
   setLoading(false);
+};
+
+export const filteredTasks = () => {
+  const searchQuery = uiStore.commandInputValue.toLowerCase();
+
+  if (uiStore.inputMode !== InputMode.Search) {
+    return taskStore.tasks;
+  }
+
+  const filteredTasks = taskStore.tasks.filter(
+    (task) =>
+      task.title.toLowerCase().includes(searchQuery) ||
+      task.labels.some((label) => label.toLowerCase().includes(searchQuery)) ||
+      task.branch?.toString().includes(searchQuery) ||
+      (task.type === "issue" &&
+        task.gitlabIid?.toString().includes(searchQuery))
+  );
+
+  return filteredTasks;
 };

@@ -1,11 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import {
-  addNotificationSpy,
-  loadCustomProjectsAsyncSpy,
-  loadGitLabProjectsAsyncSpy,
-  setCommandInputValueSpy,
-} from "../../../base.test";
 import { setDropdownValues } from "../../stores/commandStore";
+import { useSpies } from "../../../base.test";
+import { loadGitLabProjectsAsync } from "../../services/gitlabService";
+import { loadCustomProjectsAsync } from "../../services/customProjectService";
+import { addNotification } from "../../services/notificationService";
 
 describe("loadProjects execute", () => {
   test("should load projects and set dropdown values", async () => {
@@ -15,6 +13,12 @@ describe("loadProjects execute", () => {
     const customProjects = [
       { _id: "customProjectId", custom: true, name: "customProject" },
     ];
+
+    const {
+      loadCustomProjectsAsyncSpy,
+      loadGitLabProjectsAsyncSpy,
+      setCommandInputValueSpy,
+    } = useSpies();
 
     loadGitLabProjectsAsyncSpy.mockImplementationOnce(async () => {
       return gitlabProjects;
@@ -27,8 +31,8 @@ describe("loadProjects execute", () => {
     const { execute } = require("../loadProjects");
     await execute();
 
-    expect(loadGitLabProjectsAsyncSpy).toHaveBeenCalled();
-    expect(loadCustomProjectsAsyncSpy).toHaveBeenCalled();
+    expect(loadGitLabProjectsAsync).toHaveBeenCalled();
+    expect(loadCustomProjectsAsync).toHaveBeenCalled();
 
     expect(setDropdownValues).toHaveBeenCalledWith([
       {
@@ -47,6 +51,8 @@ describe("loadProjects execute", () => {
   });
 
   test("should show error notification if failed to load projects", async () => {
+    const { loadGitLabProjectsAsyncSpy } = useSpies();
+
     loadGitLabProjectsAsyncSpy.mockImplementationOnce(async () => {
       throw new Error("Failed to load projects");
     });
@@ -54,7 +60,7 @@ describe("loadProjects execute", () => {
     const { execute } = require("../loadProjects");
     await execute();
 
-    expect(addNotificationSpy).toHaveBeenCalledWith({
+    expect(addNotification).toHaveBeenCalledWith({
       title: "Error",
       description: "Failed to load projects",
       type: "error",

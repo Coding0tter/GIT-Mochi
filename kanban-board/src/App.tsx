@@ -8,13 +8,13 @@ import {
   updateTaskAsync,
 } from "./services/taskService";
 import { STATES } from "./constants";
-import { handleKeyDown } from "./services/navigationHandler";
+import { handleKeyDown } from "./services/keyboardShortcutHandler";
 import TaskDetailsModal from "./components/modals/TaskDetailsModal";
 import HelpModal from "./components/modals/HelpModal";
 import NotificationManager from "./components/NotificationManager";
 import { addNotification } from "./services/notificationService";
 import EditOrCreateTaskModal from "./components/modals/EditOrCreateTaskModal";
-import { fetchTasksAsync, taskStore } from "./stores/taskStore";
+import { fetchTasksAsync, filteredTasks } from "./stores/taskStore";
 import {
   handleCloseModal,
   modalStore,
@@ -22,7 +22,6 @@ import {
   setActiveModal,
   setSelectedTaskForModal,
 } from "./stores/modalStore";
-import { InputMode, uiStore } from "./stores/uiStore";
 
 const App = () => {
   const handleCreateOrUpdateTask = async () => {
@@ -118,22 +117,7 @@ const App = () => {
         {STATES.map((status, columnIndex) => (
           <TaskColumn
             status={status}
-            tasks={taskStore.tasks
-              .filter((task) => task.status === status.id)
-              .filter((task) => {
-                // Only filter if inputMode is Search
-                if (uiStore.inputMode === InputMode.Search) {
-                  const searchQuery = uiStore.commandInputValue.toLowerCase();
-                  return (
-                    task.title.toLowerCase().includes(searchQuery) ||
-                    task.labels.some((label) =>
-                      label.toLowerCase().includes(searchQuery)
-                    ) ||
-                    task.branch?.toString().includes(searchQuery)
-                  );
-                }
-                return true; // Don't filter if not in Search mode
-              })}
+            tasks={filteredTasks().filter((task) => task.status === status.id)}
             columnIndex={columnIndex}
           />
         ))}
