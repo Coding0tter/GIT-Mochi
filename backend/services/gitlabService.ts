@@ -1,15 +1,126 @@
 import axios, { AxiosError } from "axios";
+import { Setting } from "../models/setting";
 import { Task } from "../models/task";
 import { User, type IUser } from "../models/user";
-import { Setting } from "../models/setting";
-import { logError, logInfo } from "../utils/logger";
+import { MochiError } from "../utils/error";
+import { TaskRepo } from "../repositories/taskRepo";
 
-const GIT_API_URL = process.env.GIT_URL + "/api/v4";
+export class GitlabService {
+  private taskRepo: TaskRepo;
 
-export const syncGitLabData = async (): Promise<void> => {
-  await syncMergeRequests();
-  await syncIssues();
-};
+  constructor() {
+    this.taskRepo = new TaskRepo();
+  }
+
+  syncGitLabData = async () => {
+    await this.syncMergeRequests();
+    await this.syncIssues();
+  };
+
+  createGitlabMergeRequest = async (issueId: string) => {
+    try {
+      // TODO
+    } catch (error) {
+      throw new MochiError(
+        "Failed to create merge request",
+        500,
+        error as Error
+      );
+    }
+  };
+
+  private async syncMergeRequests() {
+    try {
+      const mergeRequestResponse = await axios.get(
+        `${process.env.GIT_API_URL}/merge_requests?scope=assigned_to_me`,
+        {
+          headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
+        }
+      );
+
+      const gitlabMergeRequests = mergeRequestResponse.data;
+
+      for (const mr of gitlabMergeRequests) {
+        const existingTask = await this.taskRepo.findOneAsync({
+          gitlabId: mr.id,
+        });
+        const comments = await getMergeRequestComments(mr.iid, mr.project_id);
+
+        const taskData = {
+          labels: mr.labels,
+          branch: mr.source_branch,
+          comments,
+        };
+
+        if (existingTask) {
+          await this.taskRepo.updateAsync(existingTask._id as string, taskData);
+        } else {
+          await this.taskRepo.createAsync({
+            ...taskData,
+            projectId: mr.project_id,
+            gitlabId: mr.id,
+            web_url: mr.web_url,
+            type: "merge_request",
+            gitlabIid: mr.iid,
+            title: mr.title,
+            description: mr.description,
+            status: mr.state,
+            custom: false,
+          });
+        }
+      }
+    } catch (error) {
+      throw new MochiError(
+        "Failed to sync merge requests",
+        500,
+        error as Error
+      );
+    }
+  }
+
+  private async syncIssues() {
+    try {
+      const issuesResponse = await axios.get(
+        `${process.env.GIT_API_URL}/issues?scope=assigned_to_me`,
+        {
+          headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
+        }
+      );
+      const issues = await issuesResponse.data;
+
+      for (const issue of issues) {
+        const existingTask = await this.taskRepo.findOneAsync({
+          gitlabId: issue.id,
+        });
+
+        const taskData = {
+          labels: issue.labels,
+          milestoneId: issue.milestone?.id,
+          milestoneName: issue.milestone?.title,
+        };
+
+        if (existingTask) {
+          await this.taskRepo.updateAsync(existingTask._id as string, taskData);
+        } else {
+          await this.taskRepo.createAsync({
+            gitlabId: issue.id,
+            gitlabIid: issue.iid,
+            projectId: issue.project_id,
+            web_url: issue.web_url,
+            ...taskData,
+            type: "issue",
+            status: "opened",
+            custom: false,
+            title: issue.title,
+            description: issue.description,
+          });
+        }
+      }
+    } catch (error) {
+      throw new MochiError("Failed to sync issues", 500, error as Error);
+    }
+  }
+}
 
 export const createGitLabMergeRequest = async (
   issueId: string
@@ -22,7 +133,7 @@ export const createGitLabMergeRequest = async (
   if (!issue) throw new Error("Issue not found");
 
   const createBranchResponse = await fetch(
-    `${GIT_API_URL}/projects/${currentProjectId.value}/repository/branches`,
+    `${process.env.GIT_API_URL}/projects/${currentProjectId.value}/repository/branches`,
     {
       method: "POST",
       headers: {
@@ -46,7 +157,7 @@ export const createGitLabMergeRequest = async (
   if (!user) throw new Error("No current user found");
 
   const createMergeRequestResponse = await fetch(
-    `${GIT_API_URL}/projects/${currentProjectId.value}/merge_requests`,
+    `${process.env.GIT_API_URL}/projects/${currentProjectId.value}/merge_requests`,
     {
       method: "POST",
       headers: {
@@ -75,7 +186,7 @@ export const createGitLabMergeRequest = async (
 };
 
 export const getUserByPersonalAccessTokenAsync = async (): Promise<IUser> => {
-  const response = await axios.get(`${GIT_API_URL}/user`, {
+  const response = await axios.get(`${process.env.GIT_API_URL}/user`, {
     headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
   });
 
@@ -98,92 +209,14 @@ export const getUserByPersonalAccessTokenAsync = async (): Promise<IUser> => {
 };
 
 export const getGitlabProjectsAsync = async () => {
-  const projectsResponse = await axios.get(`${GIT_API_URL}/projects`, {
-    headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
-  });
+  const projectsResponse = await axios.get(
+    `${process.env.GIT_API_URL}/projects`,
+    {
+      headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
+    }
+  );
 
   return projectsResponse.data;
-};
-
-export const getGitlabProjectAsync = async (projectId: string) => {
-  const projectResponse = await axios.get(
-    `${GIT_API_URL}/projects/${projectId}`,
-    {
-      headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
-    }
-  );
-
-  return projectResponse.data;
-};
-
-const syncMergeRequests = async () => {
-  const mergeRequestResponse = await axios.get(
-    `${GIT_API_URL}/merge_requests?scope=assigned_to_me`,
-    {
-      headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
-    }
-  );
-
-  const gitlabMergeRequests = mergeRequestResponse.data;
-
-  for (const mr of gitlabMergeRequests) {
-    const existingTask = await Task.findOne({ gitlabId: mr.id });
-    const comments = await getMergeRequestComments(mr.iid, mr.project_id);
-
-    const taskData = { labels: mr.labels, branch: mr.source_branch, comments };
-
-    if (existingTask) {
-      await Task.findByIdAndUpdate(existingTask._id, taskData);
-    } else {
-      await Task.create({
-        ...taskData,
-        projectId: mr.project_id,
-        gitlabId: mr.id,
-        web_url: mr.web_url,
-        type: "merge_request",
-        gitlabIid: mr.iid,
-        title: mr.title,
-        description: mr.description,
-        status: mr.state,
-        custom: false,
-      });
-    }
-  }
-};
-
-const syncIssues = async () => {
-  const issuesResponse = await fetch(
-    `${GIT_API_URL}/issues?scope=assigned_to_me`,
-    {
-      headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
-    }
-  );
-  const issues = await issuesResponse.json();
-
-  for (const issue of issues) {
-    const existingTask = await Task.findOne({ gitlabId: issue.id });
-    const taskData = {
-      labels: issue.labels,
-      milestoneId: issue.milestone?.id,
-      milestoneName: issue.milestone?.title,
-    };
-    if (existingTask) {
-      await Task.findByIdAndUpdate(existingTask._id, taskData);
-    } else {
-      await Task.create({
-        gitlabId: issue.id,
-        gitlabIid: issue.iid,
-        projectId: issue.project_id,
-        web_url: issue.web_url,
-        ...taskData,
-        type: "issue",
-        status: "opened",
-        custom: false,
-        title: issue.title,
-        description: issue.description,
-      });
-    }
-  }
 };
 
 export const getMergeRequestComments = async (
@@ -192,7 +225,7 @@ export const getMergeRequestComments = async (
 ) => {
   try {
     const commentsResponse = await axios.get(
-      `${GIT_API_URL}/projects/${projectId}/merge_requests/${mergeRequestIid}/notes`,
+      `${process.env.GIT_API_URL}/projects/${projectId}/merge_requests/${mergeRequestIid}/notes`,
       {
         headers: {
           "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN,
@@ -229,12 +262,7 @@ export const getMergeRequestComments = async (
     return [];
   } catch (error) {
     if (error instanceof AxiosError) {
-      logError(
-        `Failed to fetch comments: ${error?.message} ${error?.config?.url}`
-      );
       return [];
     }
-
-    logError(`Failed to fetch comments: ${error}`);
   }
 };

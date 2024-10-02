@@ -98,7 +98,7 @@ describe("TaskService", () => {
   test("should restore selected task", async () => {
     const {
       getColumnTasksSpy,
-      putSpy,
+      patchSpy,
       addNotificationSpy,
       fetchTasksAsyncSpy,
     } = useSpies();
@@ -114,7 +114,7 @@ describe("TaskService", () => {
 
     await restoreSelectedTaskAsync();
 
-    expect(putSpy).toHaveBeenCalledWith("/tasks/1/restore");
+    expect(patchSpy).toHaveBeenCalledWith("/tasks/1");
 
     expect(fetchTasksAsyncSpy).toHaveBeenCalled();
 
@@ -128,7 +128,7 @@ describe("TaskService", () => {
   test("should handle error when restoring task", async () => {
     const {
       getColumnTasksSpy,
-      putSpy,
+      patchSpy,
       addNotificationSpy,
       fetchTasksAsyncSpy,
     } = useSpies();
@@ -142,11 +142,11 @@ describe("TaskService", () => {
       },
     ] as Task[]);
 
-    putSpy.mockRejectedValueOnce(new Error("Failed to restore task"));
+    patchSpy.mockRejectedValueOnce(new Error("Failed to restore task"));
 
     await restoreSelectedTaskAsync();
 
-    expect(putSpy).toHaveBeenCalledWith("/tasks/1/restore");
+    expect(patchSpy).toHaveBeenCalledWith("/tasks/1");
 
     expect(fetchTasksAsyncSpy).not.toHaveBeenCalled();
 

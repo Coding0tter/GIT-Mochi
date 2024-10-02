@@ -1,26 +1,47 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import {
-  syncGitLabData,
   createGitLabMergeRequest,
   getUserByPersonalAccessTokenAsync,
   getGitlabProjectsAsync,
+  GitlabService,
 } from "../services/gitlabService";
-import { logError } from "../utils/logger";
+import { handleControllerError } from "../utils/error";
 
-export const syncGitLab = async (
-  _req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    await syncGitLabData();
-    res
-      .status(200)
-      .json({ message: "GitLab data and issues synced successfully" });
-  } catch (error) {
-    logError("Error syncing GitLab data: " + error);
-    res.status(500).json({ error: "Failed to sync data" });
+export class GitlabController {
+  private gitlabService: GitlabService;
+
+  constructor() {
+    this.gitlabService = new GitlabService();
   }
-};
+
+  syncGitLabAsync = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      await this.gitlabService.syncGitLabData();
+      res
+        .status(200)
+        .json({ message: "GitLab data and issues synced successfully" });
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
+  createMergeRequestAsync = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const { issueId } = req.body;
+      const result = await createGitLabMergeRequest(issueId);
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create merge request" });
+    }
+  };
+}
 
 export const createMergeRequest = async (
   req: Request,
@@ -31,7 +52,6 @@ export const createMergeRequest = async (
     const result = await createGitLabMergeRequest(issueId);
     res.status(200).json(result);
   } catch (error) {
-    logError("Error creating merge request: " + error);
     res.status(500).json({ error: "Failed to create merge request" });
   }
 };
@@ -41,7 +61,6 @@ export const getUser = async (_req: Request, res: Response): Promise<void> => {
     const user = await getUserByPersonalAccessTokenAsync();
     res.status(200).json(user);
   } catch (error) {
-    logError("Error getting user: " + error);
     res.status(500).json({ error: "Failed to get user" });
   }
 };
@@ -54,7 +73,6 @@ export const getProjects = async (
     const projects = await getGitlabProjectsAsync();
     res.status(200).json(projects);
   } catch (error) {
-    logError("Error getting projects: " + error);
     res.status(500).json({ error: "Failed to get projects" });
   }
 };

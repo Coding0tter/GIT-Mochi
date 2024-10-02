@@ -1,5 +1,5 @@
 import axios from "axios";
-import {  STATES } from "../constants";
+import { STATES } from "../constants";
 import {
   keyboardNavigationStore,
   setSelectedColumnIndex,
@@ -20,7 +20,7 @@ export const restoreSelectedTaskAsync = async () => {
     const taskId =
       getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]._id;
 
-    await axios.put(`/tasks/${taskId}/restore`);
+    await axios.patch(`/tasks/${taskId}`);
 
     await fetchTasksAsync();
 

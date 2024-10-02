@@ -1,3 +1,5 @@
+import type { MochiError } from "./error";
+
 export enum MessageType {
   INFO = "INFO",
   ERROR = "ERROR",
@@ -11,6 +13,6 @@ export const logInfo = (message: string): void => {
   addLog(message, MessageType.INFO);
 };
 
-export const logError = (message: string): void => {
-  addLog(message, MessageType.ERROR);
+export const logError = (error: MochiError): void => {
+  addLog(`${error.message} ${error?.stack ?? ""}`, MessageType.ERROR);
 };

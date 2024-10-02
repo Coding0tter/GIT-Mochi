@@ -1,4 +1,3 @@
-import { Setting } from "../models/setting";
 import { Task } from "../models/task";
 import { getMergeRequestComments } from "../services/gitlabService";
 import { logError, logInfo } from "./logger";
