@@ -6,13 +6,11 @@ import { logError, logInfo } from "../utils/logger";
 
 const GIT_API_URL = process.env.GIT_URL + "/api/v4";
 
-// Sync GitLab merge requests data
 export const syncGitLabData = async (): Promise<void> => {
   await syncMergeRequests();
   await syncIssues();
 };
 
-// Create a merge request from an issue
 export const createGitLabMergeRequest = async (
   issueId: string
 ): Promise<any> => {

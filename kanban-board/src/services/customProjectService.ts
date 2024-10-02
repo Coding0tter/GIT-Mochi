@@ -48,7 +48,6 @@ export const setProjectAsync = async (projectId: string) => {
     const response = await axios.patch("/projects", { projectId });
     return response;
   } catch (error) {
-    console.error("Error setting project:", error);
     return;
   }
 };
@@ -61,7 +60,6 @@ export const getProjectAsync = async () => {
       name: response.data?.name_with_namespace || response.data?.name,
     };
   } catch (error) {
-    console.error("Error getting project:", error);
     return null;
   }
 };

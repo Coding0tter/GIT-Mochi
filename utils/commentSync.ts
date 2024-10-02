@@ -21,6 +21,18 @@ const periodicallySyncComments = async () => {
         );
 
         if (comments) {
+          if (
+            mr.comments.filter(
+              (item) => !item.resolved && item.body.includes("@maxi")
+            ).length <
+              comments.filter(
+                (item) => !item.resolved && item.body.includes("@maxi")
+              ).length &&
+            (mr.status === "done" || mr.status === "review")
+          ) {
+            mr.status = "inprogress";
+          }
+
           mr.comments = comments;
 
           await mr.save();

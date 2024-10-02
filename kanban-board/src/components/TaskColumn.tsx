@@ -54,7 +54,9 @@ const TaskColumn = (props: TaskColumnProps) => {
               taskIndex={taskIndex()}
               setTaskRef={(el) => (taskRefs[taskIndex()] = el)}
               commentsCount={
-                task.comments.filter((item) => !item.resolved).length || 0
+                task.comments.filter(
+                  (item) => !item.resolved && item.body.includes("@maxi")
+                ).length || 0
               }
             />
           )}

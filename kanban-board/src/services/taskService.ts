@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BACKEND_URL, STATES } from "../constants";
+import {  STATES } from "../constants";
 import {
   keyboardNavigationStore,
   setSelectedColumnIndex,
@@ -20,9 +20,7 @@ export const restoreSelectedTaskAsync = async () => {
     const taskId =
       getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]._id;
 
-    await fetch(`${BACKEND_URL}/tasks/${taskId}/restore`, {
-      method: "PUT",
-    });
+    await axios.put(`/tasks/${taskId}/restore`);
 
     await fetchTasksAsync();
 
@@ -41,54 +39,42 @@ export const restoreSelectedTaskAsync = async () => {
 };
 
 export const createTaskAsync = async (task: Partial<Task>) => {
-  const res = await fetch(`${BACKEND_URL}/tasks`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title: task.title,
-      status: task.status,
-      description: task.description,
-      custom: true,
-    }),
+  const res = await axios.post(`/tasks`, {
+    title: task.title,
+    status: task.status,
+    description: task.description,
+    custom: true,
   });
-  return await res.json();
+  return res.data;
 };
 
 export const updateTaskAsync = async (taskId: string, task: Partial<Task>) => {
   try {
-    const res = await axios.put(`${BACKEND_URL}/tasks/${taskId}`, task);
+    const res = await axios.put(`/tasks/${taskId}`, task);
     return res;
-  } catch (error) {
-    console.error("Failed to update task:", error);
-  }
+  } catch (error) {}
 };
 
 export const deleteTaskAsync = async (taskId: string) => {
-  await fetch(`${BACKEND_URL}/tasks/${taskId}`, { method: "DELETE" });
+  await axios.delete(`/tasks/${taskId}`);
 };
 
 export const moveSelectedTasksAsync = async (direction: Direction) => {
-  const columnTasks = getColumnTasks();
-
+  const { selectedColumnIndex, selectedTaskIndexes } = keyboardNavigationStore;
   const newStatusIndex =
     direction === Direction.Right
-      ? Math.min(
-          keyboardNavigationStore.selectedColumnIndex + 1,
-          STATES.length - 1
-        )
-      : Math.max(keyboardNavigationStore.selectedColumnIndex - 1, 0);
+      ? Math.min(selectedColumnIndex + 1, STATES.length - 1)
+      : Math.max(selectedColumnIndex - 1, 0);
 
-  const tasksToMove = columnTasks.filter((_task, index) =>
-    keyboardNavigationStore.selectedTaskIndexes.includes(index)
+  const tasksToMove = getColumnTasks().filter((_task, index) =>
+    selectedTaskIndexes.includes(index)
   );
 
-  const requests = tasksToMove.map((task) => {
-    return updateTaskAsync(task._id, {
-      status: STATES[newStatusIndex].id,
-    });
-  });
-
-  const results = await Promise.all(requests);
+  const results = await Promise.all(
+    tasksToMove.map((task) =>
+      updateTaskAsync(task._id, { status: STATES[newStatusIndex].id })
+    )
+  );
 
   if (results.every((res) => res?.status === 200)) {
     await fetchTasksAsync();
@@ -97,12 +83,12 @@ export const moveSelectedTasksAsync = async (direction: Direction) => {
       (task) => task.status === STATES[newStatusIndex].id
     );
 
-    const movedTaskIndexes = newColumnTasks
-      .filter((task) => tasksToMove.some((t) => t._id === task._id))
-      .map((task) => newColumnTasks.indexOf(task));
+    const movedTaskIndexes = tasksToMove.map((task) =>
+      newColumnTasks.findIndex((t) => t._id === task._id)
+    );
 
     setSelectedColumnIndex(newStatusIndex);
-    setSelectedTaskIndex(movedTaskIndexes.at(0)!);
+    setSelectedTaskIndex(movedTaskIndexes[0]);
     setSelectedTaskIndexes(movedTaskIndexes);
   }
 };

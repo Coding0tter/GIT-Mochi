@@ -7,7 +7,6 @@ import {
 } from "../services/gitlabService";
 import { logError } from "../utils/logger";
 
-// Sync GitLab and RSS data
 export const syncGitLab = async (
   _req: Request,
   res: Response
@@ -23,7 +22,6 @@ export const syncGitLab = async (
   }
 };
 
-// Create a merge request for an issue
 export const createMergeRequest = async (
   req: Request,
   res: Response

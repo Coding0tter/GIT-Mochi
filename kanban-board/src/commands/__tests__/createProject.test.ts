@@ -17,7 +17,7 @@ const setupTest = (
   });
 };
 
-describe("createProject execute", () => {
+describe("CreateProject Command", () => {
   test("should create project and set buffer", async () => {
     const projectName = "test-project";
     setupTest(projectName, { _id: "projectId" });

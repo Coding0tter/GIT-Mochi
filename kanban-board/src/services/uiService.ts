@@ -21,5 +21,5 @@ export const closeModalAndUnfocus = () => {
     if (activeElement) {
       activeElement.blur();
     }
-  });
+  }, 0);
 };

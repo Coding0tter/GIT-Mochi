@@ -90,7 +90,6 @@ export const loadGitLabProjectsAsync = async () => {
       name: project.name_with_namespace,
     }));
   } catch (error) {
-    console.error("Error getting projects:", error);
     return [];
   }
 };

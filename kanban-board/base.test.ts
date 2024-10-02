@@ -1,4 +1,4 @@
-import { afterEach, jest, spyOn } from "bun:test";
+import { afterEach, beforeEach, jest, spyOn } from "bun:test";
 import * as customProjectService from "./src/services/customProjectService";
 import * as gitlabService from "./src/services/gitlabService";
 import * as notificationService from "./src/services/notificationService";
@@ -8,13 +8,23 @@ import * as commandStore from "./src/stores/commandStore";
 import * as uiStore from "./src/stores/uiStore";
 import * as taskStore from "./src/stores/taskStore";
 import * as taskService from "./src/services/taskService";
+import * as taskNavigationService from "./src/services/taskNavigationService";
 import * as uiService from "./src/services/uiService";
 import { resetCommandRegistry } from "./src/commands/commandRegistry";
 import * as modalStore from "./src/stores/modalStore";
 import { ModalType, setActiveModal } from "./src/stores/modalStore";
+import axios from "axios";
+import { setSelectedTaskIndex } from "./src/stores/keyboardNavigationStore";
 
 export const useSpies = () => {
   return {
+    // axios Spies
+    postSpy: spyOn(axios, "post").mockResolvedValue({ status: 200 }),
+    getSpy: spyOn(axios, "get").mockResolvedValue({ status: 200 }),
+    putSpy: spyOn(axios, "put").mockResolvedValue({ status: 200 }),
+    deleteSpy: spyOn(axios, "delete").mockResolvedValue({ status: 200 }),
+    patchSpy: spyOn(axios, "patch").mockResolvedValue({ status: 200 }),
+
     // Gitlab Service Spies
     loadGitLabProjectsAsyncSpy: spyOn(
       gitlabService,
@@ -24,6 +34,15 @@ export const useSpies = () => {
       gitlabService,
       "createMergeRequestAndBranchAsync"
     ),
+    syncGitlabAsyncSpy: spyOn(gitlabService, "syncGitlabAsync").mockClear(),
+    openSelectedTaskLinkSpy: spyOn(
+      gitlabService,
+      "openSelectedTaskLink"
+    ).mockClear(),
+    createMergeRequestAndBranchForSelectedTaskAsyncSpy: spyOn(
+      gitlabService,
+      "createMergeRequestAndBranchForSelectedTaskAsync"
+    ).mockClear(),
 
     // Notification Service Spies
     addNotificationSpy: spyOn(
@@ -40,6 +59,7 @@ export const useSpies = () => {
       modalStore,
       "setSelectedTaskForModal"
     ).mockClear(),
+    handleCloseModalSpy: spyOn(modalStore, "handleCloseModal").mockClear(),
 
     // Custom Project Service Spies
     createProjectAsyncSpy: spyOn(
@@ -60,9 +80,10 @@ export const useSpies = () => {
     ).mockClear(),
 
     // UI Service Spies
-    closeModalAndUnfocusSpy: spyOn(uiService, "closeModalAndUnfocus")
-      .mockImplementation(() => {})
-      .mockClear(),
+    closeModalAndUnfocusSpy: spyOn(
+      uiService,
+      "closeModalAndUnfocus"
+    ).mockClear(),
     focusInputSpy: spyOn(uiService, "focusInput").mockClear(),
 
     // Task Service Spies
@@ -70,6 +91,11 @@ export const useSpies = () => {
       taskService,
       "moveSelectedTasksAsync"
     ).mockClear(),
+    restoreSelectedTaskAsyncSpy: spyOn(
+      taskService,
+      "restoreSelectedTaskAsync"
+    ).mockClear(),
+    updateTaskAsyncSpy: spyOn(taskService, "updateTaskAsync").mockClear(),
 
     // Task Store Spies
     fetchTasksAsyncSpy: spyOn(taskStore, "fetchTasksAsync")
@@ -80,6 +106,18 @@ export const useSpies = () => {
       "handleGitlabSyncAsync"
     ).mockClear(),
     getColumnTasksSpy: spyOn(taskStore, "getColumnTasks").mockClear(),
+    toggleShowDeletedTasksAsyncSpy: spyOn(
+      taskStore,
+      "toggleShowDeletedTasksAsync"
+    ).mockClear(),
+    filteredTasksSpy: spyOn(taskStore, "filteredTasks").mockClear(),
+
+    // Task Navigation Service Spies
+    addToSelectionSpy: spyOn(
+      taskNavigationService,
+      "addToSelection"
+    ).mockClear(),
+    moveSelectionSpy: spyOn(taskNavigationService, "moveSelection").mockClear(),
 
     // UI Store Spies
     setCommandInputValueSpy: spyOn(uiStore, "setCommandInputValue").mockClear(),
@@ -89,6 +127,7 @@ export const useSpies = () => {
     ).mockClear(),
     setCurrentProjectSpy: spyOn(uiStore, "setCurrentProject").mockClear(),
     setLoadingSpy: spyOn(uiStore, "setLoading").mockClear(),
+    setInputModeSpy: spyOn(uiStore, "setInputMode").mockClear(),
 
     // Command Store Spies
     setBufferSpy: spyOn(commandStore, "setBuffer").mockClear(),
@@ -106,10 +145,12 @@ export const useSpies = () => {
   };
 };
 
-// Reset the command registry before each test
-afterEach(() => {
+beforeEach(() => {
+  setSelectedTaskIndex(0);
   jest.restoreAllMocks();
+});
 
+afterEach(() => {
   global.document = Object.create({});
   global.window = Object.create({});
 

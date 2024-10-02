@@ -5,7 +5,6 @@ import {
   setDropdownValues,
 } from "../../stores/commandStore";
 import { AxiosResponse } from "axios";
-import { setCommandPlaceholder } from "../../stores/uiStore";
 import { useSpies } from "../../../base.test";
 
 enum Choice {
@@ -27,7 +26,7 @@ const setup = (choice: Choice) => {
   setActiveDropdownIndex(choice);
 };
 
-describe("setNewProjectAsCurrent execute", () => {
+describe("SetNewProjectAsCurrent Command", () => {
   test("should set new project as current", async () => {
     setBuffer("newProject");
     setup(Choice.Yes);

@@ -1,6 +1,5 @@
 import { Schema, model, Document } from "mongoose";
 
-// Task interface extends Document for mongoose
 export interface IUser extends Document {
   gitlabId: { type: Number; required: true; unique: true };
   username: { type: String; required: true };

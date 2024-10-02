@@ -1,6 +1,5 @@
 import { Schema, model, Document } from "mongoose";
 
-// Task interface extends Document for mongoose
 export interface IProject extends Document {
   name: string;
   deleted: boolean;

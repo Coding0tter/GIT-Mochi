@@ -18,17 +18,16 @@ beforeEach(() => {
 
 describe("GitLabService", () => {
   test("syncGitlabAsync should sync gitlab", async () => {
-    const axiosPostSpy = spyOn(axios, "post").mockResolvedValue({
+    const { postSpy, fetchTasksAsyncSpy, setLoadingSpy, addNotificationSpy } =
+      useSpies();
+    postSpy.mockResolvedValue({
       status: 200,
     });
-
-    const { fetchTasksAsyncSpy, setLoadingSpy, addNotificationSpy } =
-      useSpies();
 
     await syncGitlabAsync();
 
     expect(setLoadingSpy).toHaveBeenCalledWith(true);
-    expect(axiosPostSpy).toHaveBeenCalledWith(`/git/sync`);
+    expect(postSpy).toHaveBeenCalledWith(`/git/sync`);
 
     expect(fetchTasksAsyncSpy).toHaveBeenCalled();
 
@@ -41,16 +40,15 @@ describe("GitLabService", () => {
   });
 
   test("syncGitlabAsync should show error notification if failed to sync", async () => {
-    const axiosPostSpy = spyOn(axios, "post").mockResolvedValue({
+    const { postSpy, addNotificationSpy, setLoadingSpy } = useSpies();
+    postSpy.mockResolvedValue({
       status: 500,
     });
-
-    const { addNotificationSpy, setLoadingSpy } = useSpies();
 
     await syncGitlabAsync();
 
     expect(setLoadingSpy).toHaveBeenCalledWith(true);
-    expect(axiosPostSpy).toHaveBeenCalledWith(`/git/sync`);
+    expect(postSpy).toHaveBeenCalledWith(`/git/sync`);
 
     expect(addNotificationSpy).toHaveBeenCalledWith({
       title: "Error",
@@ -64,7 +62,9 @@ describe("GitLabService", () => {
     const mockOpen = mock();
     const { getColumnTasksSpy } = useSpies();
 
-    getColumnTasksSpy.mockReturnValue([{ web_url: "test" } as Task]);
+    getColumnTasksSpy.mockImplementation(() => {
+      return [{ web_url: "test" } as Task];
+    });
 
     global.window = Object.create({
       open: () => {
@@ -180,13 +180,14 @@ describe("GitLabService", () => {
   });
 
   test("loadGitLabProjectsAsync should load gitlab projects", async () => {
-    const axiosGetSpy = spyOn(axios, "get").mockResolvedValue({
+    const { getSpy } = useSpies();
+    getSpy.mockResolvedValue({
       data: [{ id: "projectId", name_with_namespace: "project" }],
     });
 
     const projects = await loadGitLabProjectsAsync();
 
-    expect(axiosGetSpy).toHaveBeenCalledWith("/git/projects");
+    expect(getSpy).toHaveBeenCalledWith("/git/projects");
 
     expect(projects).toEqual([
       { id: "projectId", name: "project", name_with_namespace: "project" },
@@ -194,19 +195,20 @@ describe("GitLabService", () => {
   });
 
   test("loadGitLabProjectsAsync should do nothing if failed to load projects", async () => {
-    const axiosGetSpy = spyOn(axios, "get").mockRejectedValue(
-      new Error("Failed to load projects")
-    );
+    const { getSpy } = useSpies();
+
+    getSpy.mockRejectedValue(new Error("Failed to load projects"));
 
     const projects = await loadGitLabProjectsAsync();
 
-    expect(axiosGetSpy).toHaveBeenCalledWith("/git/projects");
+    expect(getSpy).toHaveBeenCalledWith("/git/projects");
 
     expect(projects).toEqual([]);
   });
 
   test("createMergeRequestAndBranchAsync should make call to backend", async () => {
-    const axiosPostSpy = spyOn(axios, "post").mockResolvedValue({
+    const { postSpy } = useSpies();
+    postSpy.mockResolvedValue({
       status: 200,
       data: { branch: { name: "1" }, mergeRequest: { title: "1" } },
     });
@@ -215,7 +217,7 @@ describe("GitLabService", () => {
       "1"
     );
 
-    expect(axiosPostSpy).toHaveBeenCalledWith("/git/create-merge-request", {
+    expect(postSpy).toHaveBeenCalledWith("/git/create-merge-request", {
       issueId: "1",
     });
 
@@ -224,7 +226,8 @@ describe("GitLabService", () => {
   });
 
   test("createMergeRequestAndBranchAsync should throw error if failed to create merge request", async () => {
-    const axiosPostSpy = spyOn(axios, "post").mockResolvedValue({
+    const { postSpy } = useSpies();
+    postSpy.mockResolvedValue({
       status: 500,
     });
 
@@ -232,7 +235,7 @@ describe("GitLabService", () => {
       "Failed to create merge request"
     );
 
-    expect(axiosPostSpy).toHaveBeenCalledWith("/git/create-merge-request", {
+    expect(postSpy).toHaveBeenCalledWith("/git/create-merge-request", {
       issueId: "1",
     });
   });

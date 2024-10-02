@@ -2,14 +2,9 @@ import { createStore } from "solid-js/store";
 import { BACKEND_URL, STATES } from "../constants";
 import { addNotification } from "../services/notificationService";
 import { InputMode, setLoading, uiStore } from "./uiStore";
-import {
-  keyboardNavigationStore,
-  setSelectedColumnIndex,
-  setSelectedTaskIndex,
-  setSelectedTaskIndexes,
-} from "./keyboardNavigationStore";
+import { keyboardNavigationStore } from "./keyboardNavigationStore";
 import { syncGitlabAsync } from "../services/gitlabService";
-import { groupBy } from "lodash";
+import axios from "axios";
 
 export interface Task {
   _id: string;
@@ -52,8 +47,8 @@ export const getColumnTasks = () => {
 export const fetchTasksAsync = async (
   showDeleted: boolean = false
 ): Promise<Task[]> => {
-  const res = await fetch(`${BACKEND_URL}/tasks?showDeleted=${showDeleted}`);
-  const response = await res.json();
+  const res = await axios.get(`/tasks?showDeleted=${showDeleted}`);
+  const response = res.data;
 
   if (response.error) {
     addNotification({

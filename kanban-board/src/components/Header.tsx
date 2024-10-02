@@ -1,5 +1,5 @@
 import { createEffect, createSignal, JSX, onMount } from "solid-js";
-import { getUser } from "../services/utils";
+import { getUserAsync } from "../services/userService";
 import logo from "../assets/logo.svg";
 import { useCommandProcessor } from "../services/commandProcessor";
 import {
@@ -47,7 +47,7 @@ const Header = (props: HeaderProps): JSX.Element => {
   const { handleCommandAsync, resetPendingCommand } = useCommandProcessor();
 
   onMount(async () => {
-    setUser(await getUser());
+    setUser(await getUserAsync());
     setCurrentProject(await getProjectAsync());
   });
 
@@ -95,7 +95,6 @@ const Header = (props: HeaderProps): JSX.Element => {
       }
 
       setActiveDropdownIndex(newSelectedCommand);
-      // Scroll the newly selected item into view
       document
         .getElementById(`command-item-${newSelectedCommand}`)
         ?.scrollIntoView({ block: "nearest" });
@@ -164,7 +163,7 @@ const Header = (props: HeaderProps): JSX.Element => {
               <ul class="command-dropdown">
                 {filteredDropdownValues().map((item, index) => (
                   <li
-                    id={`command-item-${index}`} // Add unique ID for each item
+                    id={`command-item-${index}`}
                     class="command-item"
                     onClick={handleCommandAsync}
                     style={{

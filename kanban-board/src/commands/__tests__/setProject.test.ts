@@ -9,7 +9,7 @@ import { Project } from "../../stores/uiStore";
 import { closeModalAndUnfocus } from "../../services/uiService";
 import { useSpies } from "../../../base.test";
 
-describe("setProject execute", () => {
+describe("SetProject Command", () => {
   test("should set custom project", async () => {
     const {
       setProjectAsyncSpy,

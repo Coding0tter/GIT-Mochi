@@ -15,7 +15,7 @@ export enum Direction {
   Right,
 }
 
-export const moveSelection = async (direction: Direction) => {
+export const moveSelection = (direction: Direction) => {
   const columnTasks = getColumnTasks();
   switch (direction) {
     case Direction.Up:

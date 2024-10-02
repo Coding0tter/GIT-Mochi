@@ -5,7 +5,7 @@ import { loadGitLabProjectsAsync } from "../../services/gitlabService";
 import { loadCustomProjectsAsync } from "../../services/customProjectService";
 import { addNotification } from "../../services/notificationService";
 
-describe("loadProjects execute", () => {
+describe("LoadProjects Command", () => {
   test("should load projects and set dropdown values", async () => {
     const gitlabProjects = [
       { id: "gitlabProjectId", custom: false, name: "gitlabProject" },
