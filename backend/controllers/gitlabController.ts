@@ -1,10 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import {
-  createGitLabMergeRequest,
-  getUserByPersonalAccessTokenAsync,
-  getGitlabProjectsAsync,
-  GitlabService,
-} from "../services/gitlabService";
+import { GitlabService } from "../services/gitlabService";
 import { handleControllerError } from "../utils/error";
 
 export class GitlabController {
@@ -31,48 +26,39 @@ export class GitlabController {
 
   createMergeRequestAsync = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const { issueId } = req.body;
-      const result = await createGitLabMergeRequest(issueId);
+      const result = await this.gitlabService.createGitlabMergeRequestAsync(
+        issueId
+      );
       res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({ error: "Failed to create merge request" });
+      handleControllerError(error, next);
+    }
+  };
+
+  getUserAsync = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = await this.gitlabService.getUserByAccessTokenAsync();
+      res.status(200).json(user);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
+  getProjectsAsync = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const projects = await this.gitlabService.getProjectsAsync();
+      res.status(200).json(projects);
+    } catch (error) {
+      handleControllerError(error, next);
     }
   };
 }
-
-export const createMergeRequest = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    const { issueId } = req.body;
-    const result = await createGitLabMergeRequest(issueId);
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to create merge request" });
-  }
-};
-
-export const getUser = async (_req: Request, res: Response): Promise<void> => {
-  try {
-    const user = await getUserByPersonalAccessTokenAsync();
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to get user" });
-  }
-};
-
-export const getProjects = async (
-  _req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    const projects = await getGitlabProjectsAsync();
-    res.status(200).json(projects);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to get projects" });
-  }
-};

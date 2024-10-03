@@ -1,17 +1,12 @@
 import express from "express";
-import {
-  createMergeRequest,
-  getUser,
-  getProjects,
-  GitlabController,
-} from "../controllers/gitlabController";
+import { GitlabController } from "../controllers/gitlabController";
 
 const router = express.Router();
 const gitlabController = new GitlabController();
 
 router.post("/sync", gitlabController.syncGitLabAsync);
-router.post("/create-merge-request", createMergeRequest);
-router.get("/user", getUser);
-router.get("/projects", getProjects);
+router.post("/create-merge-request", gitlabController.createMergeRequestAsync);
+router.get("/user", gitlabController.getUserAsync);
+router.get("/projects", gitlabController.getProjectsAsync);
 
 export default router;

@@ -1,11 +1,14 @@
 import { Task } from "../models/task";
-import { getMergeRequestComments } from "../services/gitlabService";
+import { GitlabService } from "../services/gitlabService";
+import { MochiError } from "./error";
 import { logError, logInfo } from "./logger";
 
 const periodicallySyncComments = async () => {
   setInterval(async () => {
     try {
       logInfo("Syncing comments...");
+
+      const gitlabService = new GitlabService();
       const merge_requests = await Task.find({ type: "merge_request" });
 
       if (merge_requests.length === 0) {
@@ -14,9 +17,8 @@ const periodicallySyncComments = async () => {
       }
 
       for (const mr of merge_requests) {
-        const comments = await getMergeRequestComments(
-          mr.gitlabIid?.toString()!,
-          mr.projectId!
+        const comments = await gitlabService.getMergeRequestCommentsAsync(
+          mr._id as string
         );
 
         if (comments) {
@@ -42,7 +44,7 @@ const periodicallySyncComments = async () => {
 
       logInfo("Comments synced!");
     } catch (error) {
-      logError(`Failed to sync comments: ${error}`);
+      throw new MochiError("Failed to sync comments", 500, error as Error);
     }
   }, 60000);
 };
