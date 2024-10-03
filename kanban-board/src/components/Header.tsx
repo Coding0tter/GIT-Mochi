@@ -27,6 +27,7 @@ import {
   setSelectedTaskIndex,
   setSelectedTaskIndexes,
 } from "../stores/keyboardNavigationStore";
+import WebSocketHandler from "../sockets/WebSocketHandler";
 
 interface HeaderProps {
   onToggleCreateTask: () => void;
@@ -201,6 +202,10 @@ const Header = (props: HeaderProps): JSX.Element => {
       </div>
 
       <div class="legend-row">
+        <span>
+          backend:{" "}
+          <strong> {uiStore.isConnected ? "active" : "inactive"}</strong>
+        </span>
         <span>
           active project:{" "}
           <strong>{uiStore.currentProject?.name || "none"}</strong>

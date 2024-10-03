@@ -24,6 +24,7 @@
     "@types/lodash": "^4.17.9",
     "axios": "^1.7.7",
     "lodash": "^4.17.21",
+    "socket.io-client": "^4.8.0",
     "solid-js": "^1.8.11"
   }
 }

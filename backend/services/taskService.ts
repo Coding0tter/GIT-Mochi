@@ -21,6 +21,7 @@ export class TaskService {
       }
 
       task.projectId = currentProject.id;
+      task.custom = true;
 
       return this.taskRepo.createAsync(task as ITask);
     } catch (error: any) {
@@ -39,6 +40,7 @@ export class TaskService {
       const tasks = await this.taskRepo.getAllAsync({
         projectId: currentProject.id,
       });
+
       return showDeleted ? tasks : tasks.filter((task) => !task.deleted);
     } catch (error: any) {
       throw new MochiError("Failed to get tasks", 500, error as Error);

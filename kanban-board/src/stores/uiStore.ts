@@ -1,4 +1,4 @@
-import { createStore } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
 
 export enum InputMode {
   None,
@@ -22,8 +22,13 @@ export const [uiStore, setUiStore] = createStore({
   commandPlaceholder: "",
   commandReadonly: false,
   loading: false,
+  isConnected: false,
   inputMode: InputMode.None,
 });
+
+export const setConnected = (connected: boolean) => {
+  setUiStore("isConnected", connected);
+};
 
 export const setCommandInputRef = (ref: HTMLInputElement | null) => {
   setUiStore("commandInputRef", ref);
@@ -50,5 +55,5 @@ export const setCommandInputValue = (value: string) => {
 };
 
 export const setCurrentProject = (project: Project | null) => {
-  setUiStore("currentProject", project);
+  setUiStore("currentProject", reconcile(project));
 };

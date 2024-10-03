@@ -15,7 +15,7 @@ export class GitlabController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      await this.gitlabService.syncGitLabData();
+      await this.gitlabService.syncGitLabDataAsync();
       res
         .status(200)
         .json({ message: "GitLab data and issues synced successfully" });

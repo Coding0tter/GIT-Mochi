@@ -1,12 +1,22 @@
 import axios from "axios";
 import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
 import { fetchTasksAsync, getColumnTasks } from "../stores/taskStore";
-import { Project, setLoading } from "../stores/uiStore";
+import { Project, setLoading, uiStore } from "../stores/uiStore";
 import { addNotification } from "./notificationService";
+import { has } from "lodash";
 
 export const syncGitlabAsync = async () => {
   try {
     setLoading(true);
+
+    if (has(uiStore.currentProject, "_id")) {
+      addNotification({
+        title: "Warning",
+        description: "Cannot sync custom projects",
+        type: "warning",
+      });
+      return;
+    }
 
     const res = await axios.post(`/git/sync`);
     if (res.status !== 200) {

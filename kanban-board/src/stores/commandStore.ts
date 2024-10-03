@@ -1,4 +1,4 @@
-import { createStore } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
 import {
   InputMode,
   setCommandInputValue,
@@ -51,8 +51,7 @@ export const setBuffer = (value: any) => {
 };
 
 export const setPendingCommand = (command: Command | undefined) => {
-  setCommandStore("pendingCommand", undefined);
-  setCommandStore("pendingCommand", command);
+  setCommandStore("pendingCommand", reconcile(command));
 };
 
 export const filteredDropdownValues = () => {

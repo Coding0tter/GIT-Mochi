@@ -1,10 +1,21 @@
 import { createStore } from "solid-js/store";
-import { BACKEND_URL, STATES } from "../constants";
+import { STATES } from "../constants";
 import { addNotification } from "../services/notificationService";
 import { InputMode, setLoading, uiStore } from "./uiStore";
 import { keyboardNavigationStore } from "./keyboardNavigationStore";
 import { syncGitlabAsync } from "../services/gitlabService";
 import axios from "axios";
+
+export interface Comment {
+  body: string;
+  images?: string[];
+  resolved: boolean;
+  author: {
+    name: string;
+    username: string;
+  };
+  system: boolean;
+}
 
 export interface Task {
   _id: string;
@@ -15,16 +26,7 @@ export interface Task {
   web_url: string;
   status: string;
   type?: string;
-  comments: Array<{
-    body: string;
-    images?: string[];
-    resolved: boolean;
-    author: {
-      name: string;
-      username: string;
-    };
-    system: boolean;
-  }>;
+  comments: Comment[];
   custom?: boolean;
   branch: string;
   deleted: boolean;
@@ -42,6 +44,32 @@ export const getColumnTasks = () => {
     (task) =>
       task.status === STATES[keyboardNavigationStore.selectedColumnIndex].id
   );
+};
+
+export const updateComments = (
+  values: { taskId: string; comments: Comment[] }[]
+) => {
+  setTaskStore("tasks", (tasks) =>
+    tasks.map((task) => {
+      const updatedValue = values.find((value) => value.taskId === task._id);
+      return updatedValue ? { ...task, comments: updatedValue.comments } : task;
+    })
+  );
+};
+
+export const updateTasks = (values: Task[]) => {
+  setTaskStore("tasks", (tasks) => {
+    const updatedTasks = tasks.map((task) => {
+      const updatedValue = values.find((value) => value._id === task._id);
+      return updatedValue ? updatedValue : task;
+    });
+
+    const newTasks = values.filter(
+      (value) => !tasks.some((task) => task._id === value._id)
+    );
+
+    return [...updatedTasks, ...newTasks];
+  });
 };
 
 export const fetchTasksAsync = async (

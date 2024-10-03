@@ -4,6 +4,7 @@ import { MochiError } from "../utils/error";
 import { TaskRepo } from "../repositories/taskRepo";
 import { SettingRepo } from "../repositories/settingRepo";
 import { UserRepo } from "../repositories/userRepo";
+import { addNotification } from "../../kanban-board/src/services/notificationService";
 
 export class GitlabService {
   private taskRepo: TaskRepo;
@@ -16,9 +17,27 @@ export class GitlabService {
     this.userRepo = new UserRepo();
   }
 
-  syncGitLabData = async () => {
-    await this.syncMergeRequests();
-    await this.syncIssues();
+  syncGitLabDataAsync = async () => {
+    const user = await this.userRepo.findOneAsync({});
+    const project = await this.settingRepo.getByKeyAsync("currentProject");
+
+    if (!user) throw new MochiError("No user found", 404);
+    if (!project) throw new MochiError("No project selected", 404);
+
+    if (project.value.includes("custom_project")) {
+      return [];
+    }
+
+    const updatedMergeRequest = await this.syncMergeRequests(
+      project.value,
+      user.gitlabId.toString()
+    );
+    const updatedIssues = await this.syncIssues(
+      project.value,
+      user.gitlabId.toString()
+    );
+
+    return [...updatedMergeRequest, ...updatedIssues];
   };
 
   createGitlabMergeRequestAsync = async (issueId: string) => {
@@ -163,10 +182,15 @@ export class GitlabService {
     }
   };
 
-  private async syncMergeRequests() {
+  private async syncMergeRequests(projectId: string, userId: string) {
+    const updatedTasks = [] as ITask[];
+
     try {
+      console.log(
+        `${process.env.GIT_API_URL}/projects/${projectId}/merge_requests?assignee_id=${userId}`
+      );
       const mergeRequestResponse = await axios.get(
-        `${process.env.GIT_API_URL}/merge_requests?scope=assigned_to_me`,
+        `${process.env.GIT_API_URL}/projects/${projectId}/merge_requests?assignee_id=${userId}`,
         {
           headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
         }
@@ -187,10 +211,16 @@ export class GitlabService {
         let newTask = {} as ITask;
 
         if (existingTask) {
-          newTask = await this.taskRepo.updateAsync(
-            existingTask._id as string,
-            taskData
-          );
+          const hasChanges = this.detectChanges(existingTask, taskData);
+
+          if (hasChanges) {
+            newTask = await this.taskRepo.updateAsync(
+              existingTask._id as string,
+              taskData
+            );
+
+            updatedTasks.push(newTask);
+          }
         } else {
           newTask = await this.taskRepo.createAsync({
             ...taskData,
@@ -204,6 +234,8 @@ export class GitlabService {
             status: mr.state,
             custom: false,
           });
+
+          updatedTasks.push(newTask);
         }
 
         newTask.comments = await this.getMergeRequestCommentsAsync(
@@ -219,12 +251,15 @@ export class GitlabService {
         error as Error
       );
     }
+
+    return updatedTasks;
   }
 
-  private async syncIssues() {
+  private async syncIssues(projectId: string, userId: string) {
+    const updatedTasks = [] as ITask[];
     try {
       const issuesResponse = await axios.get(
-        `${process.env.GIT_API_URL}/issues?scope=assigned_to_me`,
+        `${process.env.GIT_API_URL}/projects/${projectId}/issues?assignee_id=${userId}`,
         {
           headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
         }
@@ -243,9 +278,17 @@ export class GitlabService {
         };
 
         if (existingTask) {
-          await this.taskRepo.updateAsync(existingTask._id as string, taskData);
+          const hasChanges = this.detectChanges(existingTask, taskData);
+
+          if (hasChanges) {
+            const updatedTask = await this.taskRepo.updateAsync(
+              existingTask._id as string,
+              taskData
+            );
+            updatedTasks.push(updatedTask);
+          }
         } else {
-          await this.taskRepo.createAsync({
+          const newTask = await this.taskRepo.createAsync({
             gitlabId: issue.id,
             gitlabIid: issue.iid,
             projectId: issue.project_id,
@@ -257,11 +300,28 @@ export class GitlabService {
             title: issue.title,
             description: issue.description,
           });
+
+          updatedTasks.push(newTask);
         }
       }
     } catch (error) {
       throw new MochiError("Failed to sync issues", 500, error as Error);
     }
+
+    return updatedTasks;
+  }
+
+  private detectChanges(
+    existingTask: ITask,
+    taskData: Partial<ITask>
+  ): boolean {
+    // Compare each key in taskData with existingTask
+    for (const key of Object.keys(taskData)) {
+      if (taskData[key as keyof ITask] !== existingTask[key as keyof ITask]) {
+        return true; // Changes detected
+      }
+    }
+    return false; // No changes
   }
 
   private fetchMergeRequestCommentsAsync = async (
@@ -308,6 +368,7 @@ export class GitlabService {
 
             comment.body = cleanedText;
             comment.images = images;
+            comment.originalId = comment.id;
 
             return comment;
           });

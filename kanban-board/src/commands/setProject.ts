@@ -14,7 +14,7 @@ import {
   setSelectedTaskIndexes,
 } from "../stores/keyboardNavigationStore";
 import { fetchTasksAsync, handleGitlabSyncAsync } from "../stores/taskStore";
-import { Project, setCurrentProject } from "../stores/uiStore";
+import { Project, setCurrentProject, uiStore } from "../stores/uiStore";
 import { registerCommand } from "./commandRegistry";
 
 export const execute = async () => {
@@ -28,12 +28,11 @@ export const execute = async () => {
     }
 
     await setProjectAsync(projectId);
+    setCurrentProject(await getProjectAsync());
 
     if (!project.custom) await handleGitlabSyncAsync();
 
     await fetchTasksAsync();
-
-    setCurrentProject(await getProjectAsync());
 
     setSelectedTaskIndex(0);
     setSelectedColumnIndex(0);
