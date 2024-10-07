@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   kanban-board:
     build: ./kanban-board

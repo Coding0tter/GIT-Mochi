@@ -21,14 +21,14 @@ export class SettingRepo extends BaseRepo<ISetting> {
 
   async setByKeyAsync(key: string, value: string): Promise<ISetting> {
     try {
-      const setting = this.model.findOneAndUpdate(
+      const setting = await this.model.findOneAndUpdate(
         { key },
         { value },
         { new: true }
       );
 
       if (!setting) {
-        return this.model.create({ key, value });
+        return super.createAsync({ key, value });
       }
 
       return setting;

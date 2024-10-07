@@ -10,6 +10,7 @@ import { globalErrorHandler } from "./backend/middlewares/globalErrorHandler";
 import { SocketHandler } from "./backend/sockets";
 import { syncCommentJob } from "./backend/background-jobs/commentSync";
 import { syncGitlabJob } from "./backend/background-jobs/gitlabSync";
+import { GitlabService } from "./backend/services/gitlabService";
 
 const app = express();
 const server = http.createServer(app);
@@ -22,6 +23,10 @@ app.use(globalErrorHandler);
 connect("mongodb://mongo:27017/kanban", {})
   .then(() => logInfo("MongoDB connected"))
   .catch((err) => logError(err));
+
+// Fetch user initially for now to avoid errors
+const gitlabService = new GitlabService();
+await gitlabService.getUserByAccessTokenAsync();
 
 app.use("/api/tasks", taskRoutes);
 app.use("/api/git", gitlabRoutes);
