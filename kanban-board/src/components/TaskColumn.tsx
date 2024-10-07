@@ -33,7 +33,9 @@ const TaskColumn = (props: TaskColumnProps) => {
 
   return (
     <div class="column" data-status={props.status.id}>
-      <h2>{props.status.display_name}</h2>
+      <h2>
+        {props.status.display_name} ({props.tasks.length})
+      </h2>
       <section>
         <For each={props.tasks}>
           {(task, taskIndex) => (
