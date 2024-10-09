@@ -7,6 +7,11 @@ export class WebSocketHandler {
   private socket: Socket | null = null;
   private taskSockets: TaskSockets = new TaskSockets();
   private static instance: WebSocketHandler | null = null;
+  private reconnectAttempts: number = 0;
+  private maxReconnectAttempts: number = 5;
+  private reconnectInterval: number = 3000; // 3 seconds
+  private heartbeatInterval: number = 25000; // 25 seconds
+  private heartbeatTimer: NodeJS.Timeout | null = null;
 
   private constructor() {}
 
@@ -26,21 +31,80 @@ export class WebSocketHandler {
     }
 
     console.log("Initializing WebSocket connection...");
-    this.socket = io(url);
+    this.socket = io(url, {
+      reconnection: false, // Disable default reconnection to use custom logic
+      transports: ["websocket"], // Ensures it uses WebSocket only, not polling
+    });
 
     this.socket.on("connect", () => {
-      if (this.socket) {
-        setConnected(true);
-      }
+      console.log("WebSocket connected.");
+      setConnected(true);
+      this.reconnectAttempts = 0; // Reset attempts on successful connection
+      this.startHeartbeat();
     });
 
     this.socket.on("disconnect", () => {
-      if (this.socket) {
-        setConnected(false);
-      }
+      console.log("WebSocket disconnected.");
+      setConnected(false);
+      this.stopHeartbeat();
+      this.reconnect();
+    });
+
+    this.socket.on("connect_error", (error) => {
+      console.error("Connection error:", error);
+      this.stopHeartbeat();
+      this.reconnect();
+    });
+
+    this.socket.on("reconnect_failed", () => {
+      console.error("Reconnection failed.");
+      setConnected(false);
+      this.stopHeartbeat();
+    });
+
+    this.socket.on("pong", () => {
+      console.log("Pong received from server.");
     });
 
     this.taskSockets.addListeners(this.socket);
+  }
+
+  // Custom reconnection logic
+  private reconnect() {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error("Max reconnection attempts reached. Giving up.");
+      return;
+    }
+
+    this.reconnectAttempts++;
+    console.log(
+      `Reconnecting attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`
+    );
+
+    setTimeout(() => {
+      if (this.socket) {
+        this.socket.connect();
+      }
+    }, this.reconnectInterval);
+  }
+
+  // Start heartbeat mechanism
+  private startHeartbeat() {
+    this.stopHeartbeat(); // Clear any existing interval
+    this.heartbeatTimer = setInterval(() => {
+      if (this.socket && this.socket.connected) {
+        console.log("Sending ping...");
+        this.socket.emit("ping");
+      }
+    }, this.heartbeatInterval) as NodeJS.Timeout;
+  }
+
+  // Stop heartbeat mechanism
+  private stopHeartbeat() {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
   }
 }
 

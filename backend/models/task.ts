@@ -29,7 +29,7 @@ export interface ITask extends Document {
 }
 
 const TaskSchema = new Schema<ITask>({
-  gitlabIid: { type: Number, unique: false, sparse: true },
+  gitlabIid: { type: Number, unique: false },
   gitlabId: { type: Number, unique: true, sparse: true },
   web_url: String,
   title: { type: String, required: true },

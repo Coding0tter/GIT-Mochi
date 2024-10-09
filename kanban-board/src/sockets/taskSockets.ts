@@ -28,9 +28,7 @@ export class TaskSockets {
   };
 
   private handleUpdateTasks = (data: Task[]) => {
-    data.forEach((task) => {
-      this.activeCalls["tasks"].push(task);
-    });
+    this.activeCalls["tasks"].push(...data);
 
     this.debouncedUpdate();
   };

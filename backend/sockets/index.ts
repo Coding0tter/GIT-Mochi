@@ -1,4 +1,4 @@
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { logInfo } from "../utils/logger";
 
 export class SocketHandler {
@@ -28,12 +28,19 @@ export class SocketHandler {
       },
     });
 
-    this.io.on("connection", (socket) => {
+    this.io.on("connection", (socket: Socket) => {
+      console.log("New connection: " + socket.id);
       logInfo("New connection: " + socket.id);
-    });
 
-    this.io.on("disconnect", (socket) => {
-      logInfo("Disconnected: " + socket.id);
+      // Listen for ping events and respond with pong
+      socket.on("ping", () => {
+        console.log("Ping received from client. Sending pong...");
+        socket.emit("pong");
+      });
+
+      socket.on("disconnect", () => {
+        logInfo("Disconnected: " + socket.id);
+      });
     });
   }
 
