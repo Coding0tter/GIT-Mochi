@@ -44,11 +44,13 @@ const TaskCard = (props: TaskCardProps) => {
           Branch: {props.task.branch}
         </span>
       )}
-      {!props.task.custom && props.task.type === "issue" && props.task.milestoneName && (
-        <span title={props.task.milestoneName} class="priority-flag">
-          {props.task.milestoneName}
-        </span>
-      )}
+      {!props.task.custom &&
+        props.task.type === "issue" &&
+        props.task.milestoneName && (
+          <span title={props.task.milestoneName} class="priority-flag">
+            {props.task.milestoneName}
+          </span>
+        )}
       {!props.task.custom && props.task.type === "issue" && (
         <span title={props.task.gitlabIid} class="priority-flag">
           Issue: {props.task.gitlabIid}

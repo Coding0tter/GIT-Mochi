@@ -79,7 +79,7 @@ export class GitlabService {
         gitlabIid: mergeRequestData.iid,
         title: mergeRequestData.title,
         description: mergeRequestData.description,
-        status: mergeRequestData.state,
+        status: "inprogress",
         custom: false,
       });
 
@@ -96,7 +96,10 @@ export class GitlabService {
 
       SocketHandler.getInstance()
         .getIO()
-        .emit("updateTasks", [newMergeRequestTask, issue]);
+        .emit("updateTasks", [
+          newMergeRequestTask,
+          { ...issue, status: "closed" },
+        ]);
 
       return {
         branch: createBranchData,
