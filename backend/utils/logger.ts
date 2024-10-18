@@ -1,4 +1,4 @@
-import type { MochiError } from "./error";
+import type { MochiError } from "../errors/mochiError";
 
 export enum MessageType {
   INFO = "INFO",

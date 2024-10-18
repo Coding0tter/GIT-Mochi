@@ -1,4 +1,4 @@
-.priority-flag,
+.flag,
 .custom-flag {
   max-width: 100px;
   white-space: nowrap;
@@ -14,21 +14,20 @@
   margin-right: 5px;
 }
 
-.priority-flag.medium {
+.flag.medium {
   background-color: #f38ba8;
 }
 
-.priority-flag.high {
+.flag.high {
   color: white;
   background-color: #e74c3c;
 }
 
-.priority-flag.low {
+.flag.low {
   background-color: #74c7ec;
 }
 
-.priority-flag.issue {
+.flag.issue {
   background-color: #f5e0dc;
   color: #1e1e2e;
 }
-

@@ -34,7 +34,6 @@ export class SocketHandler {
 
       // Listen for ping events and respond with pong
       socket.on("ping", () => {
-        console.log("Ping received from client. Sending pong...");
         socket.emit("pong");
       });
 

@@ -1,6 +1,6 @@
 import BaseRepo from "./baseRepo";
 import { Setting, type ISetting } from "../models/setting.js";
-import { MochiError } from "../utils/error.js";
+import { MochiError } from "../errors/mochiError.js";
 
 export class SettingRepo extends BaseRepo<ISetting> {
   constructor() {

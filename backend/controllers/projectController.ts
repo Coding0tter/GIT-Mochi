@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { ProjectService } from "../services/projectService";
-import { handleControllerError } from "../utils/error";
+import { handleControllerError } from "../errors/mochiError";
 
 export class ProjectController {
   private projectService: ProjectService;

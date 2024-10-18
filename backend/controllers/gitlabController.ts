@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { GitlabService } from "../services/gitlabService";
-import { handleControllerError } from "../utils/error";
+import { handleControllerError } from "../errors/mochiError";
 
 export class GitlabController {
   private gitlabService: GitlabService;

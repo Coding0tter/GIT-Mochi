@@ -14,6 +14,7 @@ export interface ITask extends Document {
   type?: string;
   custom?: boolean;
   deleted?: boolean;
+  order?: number;
   comments: Array<{
     originalId?: number;
     body: string;
@@ -43,6 +44,7 @@ const TaskSchema = new Schema<ITask>({
   projectId: String,
   custom: { type: Boolean, default: false },
   deleted: { type: Boolean, default: false },
+  order: Number,
   comments: [
     {
       originalId: Number,

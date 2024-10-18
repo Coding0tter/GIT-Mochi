@@ -11,7 +11,9 @@ import { SocketHandler } from "./backend/sockets";
 import { syncCommentJob } from "./backend/background-jobs/commentSync";
 import { syncGitlabJob } from "./backend/background-jobs/gitlabSync";
 import { GitlabService } from "./backend/services/gitlabService";
-import { MochiError } from "./backend/utils/error";
+import { MochiError } from "./backend/errors/mochiError";
+import { closeMergeMergeRequestsJob } from "./backend/background-jobs/closeMergedMergeRequests";
+import { contextMiddleware } from "./backend/middlewares/contextMiddleware";
 
 const app = express();
 const server = http.createServer(app);
@@ -20,6 +22,7 @@ SocketHandler.getInstance().init(server);
 app.use(cors());
 app.use(express.json());
 app.use(globalErrorHandler);
+app.use(contextMiddleware);
 
 connect("mongodb://mongo:27017/kanban", {})
   .then(() => logInfo("MongoDB connected"))
@@ -55,6 +58,9 @@ app.use("/api/projects", projectRoutes);
 // Sync comments every minute
 syncCommentJob();
 syncGitlabJob();
+
+// Close merged merge requests every minute
+closeMergeMergeRequestsJob();
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () =>

@@ -62,9 +62,7 @@ export class WebSocketHandler {
       this.stopHeartbeat();
     });
 
-    this.socket.on("pong", () => {
-      console.log("Pong received from server.");
-    });
+    this.socket.on("pong", () => {});
 
     this.taskSockets.addListeners(this.socket);
   }
@@ -93,7 +91,6 @@ export class WebSocketHandler {
     this.stopHeartbeat(); // Clear any existing interval
     this.heartbeatTimer = setInterval(() => {
       if (this.socket && this.socket.connected) {
-        console.log("Sending ping...");
         this.socket.emit("ping");
       }
     }, this.heartbeatInterval) as NodeJS.Timeout;

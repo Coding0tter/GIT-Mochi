@@ -50,36 +50,12 @@ export const openSelectedTaskLink = () => {
 export const createMergeRequestAndBranchForSelectedTaskAsync = async () => {
   const columnTasks = getColumnTasks();
   if (columnTasks[keyboardNavigationStore.selectedTaskIndex].type === "issue") {
-    const { branch, mergeRequest } = await createMergeRequestAndBranchAsync(
+    const { mergeRequest } = await createMergeRequestAndBranchAsync(
       columnTasks[keyboardNavigationStore.selectedTaskIndex].gitlabIid!
     );
 
-    if (branch.error) {
-      addNotification({
-        title: "Error",
-        description: branch.error,
-        type: "error",
-      });
-      return;
-    }
-
-    if (mergeRequest.error) {
-      addNotification({
-        title: "Error",
-        description: mergeRequest.error,
-        type: "error",
-      });
-      return;
-    }
-
     addNotification({
-      title: "Branch created",
-      description: `Created branch ${branch.name}`,
-      type: "success",
-    });
-
-    addNotification({
-      title: "Merge request created",
+      title: "Branch and Merge request created",
       description: `Created merge request ${mergeRequest.title}`,
       type: "success",
     });

@@ -5,6 +5,7 @@ import { InputMode, setLoading, uiStore } from "./uiStore";
 import { keyboardNavigationStore } from "./keyboardNavigationStore";
 import { syncGitlabAsync } from "../services/gitlabService";
 import axios from "axios";
+import { orderBy } from "lodash";
 
 export interface Comment {
   body: string;
@@ -27,6 +28,7 @@ export interface Task {
   status: string;
   type?: string;
   comments: Comment[];
+  order: number;
   custom?: boolean;
   branch: string;
   deleted: boolean;
@@ -111,8 +113,8 @@ export const handleGitlabSyncAsync = async () => {
 export const filteredTasks = () => {
   const searchQuery = uiStore.commandInputValue.toLowerCase();
 
-  if (uiStore.inputMode !== InputMode.Search) {
-    return taskStore.tasks;
+  if (uiStore.inputMode !== InputMode.Search || !searchQuery) {
+    return orderBy(taskStore.tasks, "order");
   }
 
   const filteredTasks = taskStore.tasks.filter(
@@ -124,5 +126,5 @@ export const filteredTasks = () => {
         task.gitlabIid?.toString().includes(searchQuery))
   );
 
-  return filteredTasks;
+  return orderBy(filteredTasks, "order");
 };

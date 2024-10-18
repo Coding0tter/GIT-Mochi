@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For } from "solid-js";
+import { createEffect, Index } from "solid-js";
 import TaskCard from "./TaskCard";
 import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
 import { Task } from "../stores/taskStore";
@@ -27,7 +27,7 @@ const TaskColumn = (props: TaskColumnProps) => {
           behavior: "smooth",
           block: "center",
         });
-      }, 0);
+      });
     }
   });
 
@@ -37,32 +37,32 @@ const TaskColumn = (props: TaskColumnProps) => {
         {props.status.display_name} ({props.tasks.length})
       </h2>
       <section>
-        <For each={props.tasks}>
+        <Index each={props.tasks}>
           {(task, taskIndex) => (
             <TaskCard
-              task={task}
+              task={task()}
               isSelected={
                 keyboardNavigationStore.selectedColumnIndex ===
                   props.columnIndex &&
-                (keyboardNavigationStore.selectedTaskIndex === taskIndex() ||
+                (keyboardNavigationStore.selectedTaskIndex === taskIndex ||
                   keyboardNavigationStore.selectedTaskIndexes.includes(
-                    taskIndex()
+                    taskIndex
                   ))
               }
               onClick={() => {
-                setSelectedTaskForModal(task);
+                setSelectedTaskForModal(task());
                 setActiveModal(ModalType.TaskDetails);
               }}
-              taskIndex={taskIndex()}
-              setTaskRef={(el) => (taskRefs[taskIndex()] = el)}
+              taskIndex={taskIndex}
+              setTaskRef={(el) => (taskRefs[taskIndex] = el)}
               commentsCount={
-                task.comments.filter(
+                task().comments.filter(
                   (item) => !item.resolved && item.body.includes("@maxi")
                 ).length || 0
               }
             />
           )}
-        </For>
+        </Index>
       </section>
     </div>
   );

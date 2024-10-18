@@ -27,8 +27,8 @@ class BaseRepo<TModel> {
     return await this.model.findByIdAndUpdate(id, data, { new: true });
   }
 
-  public async deleteAsync(id: string): Promise<void> {
-    await this.model.findByIdAndDelete(id);
+  public async deleteAsync(id: string): Promise<TModel> {
+    return await this.model.findByIdAndDelete(id, { new: true });
   }
 }
 

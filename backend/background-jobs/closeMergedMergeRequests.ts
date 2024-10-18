@@ -3,21 +3,21 @@ import { SocketHandler } from "../sockets";
 import { MochiError } from "../errors/mochiError";
 import { logInfo } from "../utils/logger";
 
-const syncGitlabJob = async () => {
+const closeMergeMergeRequestsJob = async () => {
   setInterval(async () => {
     try {
-      logInfo("Syncing Gitlab Issues and MergeRequests...");
+      logInfo("Close merged MergeRequests...");
 
       const gitlabService = new GitlabService();
 
-      const changes = await gitlabService.syncGitLabDataAsync();
+      const changes = await gitlabService.closeMergedMergeRequestsAsync();
 
       SocketHandler.getInstance().getIO().emit("updateTasks", changes);
 
-      logInfo("Gitlab Issues and MergeRequests synced!");
+      logInfo("Closed merged MergeRequests synced!");
     } catch (error) {
       throw new MochiError(
-        "Failed to sync Gitlab Issues and MergeRequests",
+        "Failed to close merge requests",
         500,
         error as Error
       );
@@ -25,4 +25,4 @@ const syncGitlabJob = async () => {
   }, 60000);
 };
 
-export { syncGitlabJob };
+export { closeMergeMergeRequestsJob };

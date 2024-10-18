@@ -1,4 +1,4 @@
-import { MochiError } from "../utils/error.js";
+import { MochiError } from "../errors/mochiError.js";
 import { logError } from "../utils/logger.js";
 import type { Request, Response, NextFunction } from "express";
 

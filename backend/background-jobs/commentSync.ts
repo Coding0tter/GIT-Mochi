@@ -1,7 +1,7 @@
 import { Task } from "../models/task";
 import { GitlabService } from "../services/gitlabService";
 import { SocketHandler } from "../sockets";
-import { MochiError } from "../utils/error";
+import { MochiError } from "../errors/mochiError";
 import { logInfo } from "../utils/logger";
 
 export interface Comment {
@@ -44,7 +44,7 @@ const syncCommentJob = async () => {
                 (item) => !item.resolved && item.body.includes("@maxi")
               ).length <
                 newComments.filter(
-                  (item) => !item.resolved && item.body.includes("@maxi")
+                  (item: any) => !item.resolved && item.body.includes("@maxi")
                 ).length &&
               (mr.status === "done" || mr.status === "review")
             ) {

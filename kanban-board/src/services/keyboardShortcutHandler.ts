@@ -56,6 +56,18 @@ export const handleKeyDown = async (event: KeyboardEvent) => {
         event.stopPropagation();
         focusInput(InputMode.Search);
         break;
+      case "w":
+      case "ArrowUp":
+        event.preventDefault();
+        event.stopPropagation();
+        await moveSelectedTasksAsync(Direction.Up);
+        break;
+      case "s":
+      case "ArrowDown":
+        event.preventDefault();
+        event.stopPropagation();
+        await moveSelectedTasksAsync(Direction.Down);
+        break;
       default:
         break;
     }

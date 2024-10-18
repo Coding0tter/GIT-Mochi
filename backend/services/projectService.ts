@@ -1,13 +1,15 @@
-import { Project } from "../models/project";
-import { SettingRepo } from "../repositories/settingRepo";
-import { MochiError } from "../utils/error";
+import { Project, type IProject } from "../models/project";
+import { MochiError } from "../errors/mochiError";
 import axios from "axios";
+import { BaseService } from "./baseService";
+import { ProjectRepo } from "../repositories/projectRepo";
+import { SettingRepo } from "../repositories/settingRepo";
 
-export class ProjectService {
-  private settingRepo: SettingRepo;
+export class ProjectService extends BaseService<IProject> {
+  private settingRepo = new SettingRepo();
 
   constructor() {
-    this.settingRepo = new SettingRepo();
+    super(new ProjectRepo(), "Project");
   }
 
   async getCurrentProjectAsync() {
@@ -58,71 +60,44 @@ export class ProjectService {
   };
 
   async createProjectAsync(name: string) {
-    try {
-      const alreadyExists = await Project.findOne({ name });
-      if (alreadyExists) {
-        throw new MochiError("Project already exists", 400);
-      }
-
-      const project = await Project.create({ name });
-
-      return project;
-    } catch (error) {
-      throw new MochiError("Failed to create project", 500, error as Error);
+    const alreadyExists = await Project.findOne({ name });
+    if (alreadyExists) {
+      throw new MochiError("Project already exists", 400);
     }
+
+    const project = await super.createAsync({ name });
+
+    return project;
   }
 
   async updateProjectAsync(id: string, name: string) {
-    try {
-      const updatedProject = await Project.findByIdAndUpdate(
-        id,
-        { name },
-        { new: true }
-      );
+    const updatedProject = await super.updateAsync(id, { name });
 
-      if (!updatedProject) {
-        throw new MochiError("Project not found", 404);
-      }
-
-      return updatedProject;
-    } catch (error) {
-      throw new MochiError("Failed to update project", 500, error as Error);
+    if (!updatedProject) {
+      throw new MochiError("Project not found", 404);
     }
+
+    return updatedProject;
   }
 
   async deleteProjectAsync(id: string) {
-    try {
-      const deletedProject = await Project.findByIdAndDelete(id);
+    const deletedProject = await super.deleteAsync(id);
 
-      if (!deletedProject) {
-        throw new MochiError("Project not found", 404);
-      }
-
-      return deletedProject;
-    } catch (error) {
-      throw new MochiError("Failed to delete project", 500, error as Error);
-    }
+    return deletedProject;
   }
 
   async getProjectsAsync() {
-    try {
-      const projects = await Project.find({ deleted: false });
-      return projects;
-    } catch (error) {
-      throw new MochiError("Failed to get projects", 500, error as Error);
-    }
+    return await super.getAllAsync({ deleted: false });
   }
 
   async getProjectByIdAsync(id: string) {
-    try {
-      const project = await Project.findById(id);
-      if (!project) {
-        throw new MochiError("Project not found", 404);
-      }
-      return project;
-    } catch (error) {
-      throw new MochiError("Failed to get project", 500, error as Error);
+    const project = await super.getByIdAsync(id);
+
+    if (!project) {
+      throw new MochiError("Project not found", 404);
     }
+
+    return project;
   }
 
   async setCurrentProjectAsync(id: string) {
