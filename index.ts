@@ -5,6 +5,7 @@ import { connect } from "mongoose";
 import taskRoutes from "./backend/routes/taskRoutes";
 import gitlabRoutes from "./backend/routes/gitlabRoutes";
 import projectRoutes from "./backend/routes/projectRouter";
+import ruleRoutes from "./backend/routes/ruleRoutes";
 import { logError, logInfo } from "./backend/utils/logger";
 import { globalErrorHandler } from "./backend/middlewares/globalErrorHandler";
 import { SocketHandler } from "./backend/sockets";
@@ -14,6 +15,7 @@ import { GitlabService } from "./backend/services/gitlabService";
 import { MochiError } from "./backend/errors/mochiError";
 import { closeMergeMergeRequestsJob } from "./backend/background-jobs/closeMergedMergeRequests";
 import { contextMiddleware } from "./backend/middlewares/contextMiddleware";
+import { RuleEngine } from "./backend/ruleLogic/ruleEngine";
 
 const app = express();
 const server = http.createServer(app);
@@ -51,9 +53,13 @@ do {
   }
 } while (retries > 0);
 
+const ruleEngine = RuleEngine.getInstance();
+ruleEngine.initialize();
+
 app.use("/api/tasks", taskRoutes);
 app.use("/api/git", gitlabRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/rules", ruleRoutes);
 
 // Sync comments every minute
 syncCommentJob();

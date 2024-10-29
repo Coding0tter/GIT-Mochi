@@ -2,12 +2,15 @@ import type { ITask } from "../models/task";
 import { TaskRepo } from "../repositories/taskRepo";
 import { MochiError } from "../errors/mochiError";
 import { BaseService } from "./baseService";
+import { EventNamespaces, EventTypes } from "../events/eventTypes";
+import { ruleEvent } from "../decorators/ruleEventDecorator";
 
 export class TaskService extends BaseService<ITask> {
   constructor() {
     super(new TaskRepo(), "Task");
   }
 
+  @ruleEvent(EventNamespaces.Task, EventTypes.Created)
   async createTaskAsync(projectId: string, task: Partial<ITask>) {
     if (!projectId) {
       throw new MochiError("No project selected", 404);
@@ -30,6 +33,7 @@ export class TaskService extends BaseService<ITask> {
     return showDeleted ? tasks : tasks.filter((task) => !task.deleted);
   }
 
+  @ruleEvent(EventNamespaces.Task, EventTypes.Updated)
   async updateTaskAsync(id: string, task: Partial<ITask>) {
     const updatedTask = await super.updateAsync(id, task);
     if (!updatedTask) {

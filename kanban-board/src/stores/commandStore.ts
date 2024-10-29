@@ -6,6 +6,7 @@ import {
   setInputMode,
   uiStore,
 } from "./uiStore";
+import { CommandProcessor } from "../commandPipeline/commandProcessor";
 
 export type Command = {
   text: string;
@@ -27,6 +28,7 @@ export type DropdownValue = {
 };
 
 export const [commandStore, setCommandStore] = createStore({
+  activeCommandProcessor: undefined as CommandProcessor | undefined,
   dropdownValues: [] as DropdownValue[],
   waitingForInput: false,
   activeDropdownIndex: 0,
@@ -34,8 +36,12 @@ export const [commandStore, setCommandStore] = createStore({
   pendingCommand: undefined as Command | undefined,
 });
 
+export const setCommandProcessor = (processor: CommandProcessor) => {
+  setCommandStore("activeCommandProcessor", processor);
+};
+
 export const setDropdownValues = (values: DropdownValue[]) => {
-  setCommandStore("dropdownValues", values);
+  setCommandStore("dropdownValues", reconcile(values));
 };
 
 export const setActiveDropdownIndex = (index: number) => {
@@ -47,7 +53,7 @@ export const setWaitingForInput = (value: boolean) => {
 };
 
 export const setBuffer = (value: any) => {
-  setCommandStore("buffer", value);
+  setCommandStore("buffer", reconcile(value));
 };
 
 export const setPendingCommand = (command: Command | undefined) => {
@@ -76,4 +82,6 @@ export const resetCommandline = () => {
 
   setInputMode(InputMode.None);
   setCommandInputValue("");
+
+  setCommandProcessor(undefined as any);
 };

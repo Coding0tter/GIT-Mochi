@@ -12,12 +12,13 @@ export const contextMiddleware = (
   next: NextFunction
 ) => {
   asyncLocalStorage.run(new Map(), async () => {
-    const projectService = new ProjectService();
-    const currentProject = await projectService.getCurrentProjectAsync();
+    try {
+      const projectService = new ProjectService();
+      const currentProject = await projectService.getCurrentProjectAsync();
 
-    console.log("currentProject", currentProject);
-    setContext(ContextKeys.Project, currentProject);
-
-    next();
+      setContext(ContextKeys.Project, currentProject);
+    } finally {
+      next();
+    }
   });
 };

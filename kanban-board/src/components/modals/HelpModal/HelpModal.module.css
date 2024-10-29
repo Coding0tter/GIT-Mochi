@@ -1,0 +1,38 @@
+.helpWrapper {
+  background-color: var(--color-surface0);
+  padding: var(--spacing-sm);
+  border-radius: var(--spacing-xs);
+}
+
+.keybindings-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--spacing-md) 0;
+  color: var(--color-subtext1);
+}
+
+.keybindings-list li {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+
+.keybindings-list li strong {
+  color: var(--color-blue);
+  font-weight: var(--font-weight-medium);
+  margin-right: var(--spacing-xs);
+}
+
+.keybindings-list li kbd {
+  display: inline-block;
+  background-color: var(--color-surface1);
+  color: var(--color-text);
+  padding: var(--spacing-xxs) var(--spacing-xs);
+  border-radius: var(--spacing-xxs);
+  margin-right: var(--spacing-xxs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

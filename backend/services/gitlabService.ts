@@ -13,6 +13,9 @@ import { UserService } from "./userService";
 import { GitlabError } from "../errors/gitlabError";
 import type { ITask } from "../models/task";
 import { ContextKeys, getContext } from "../utils/asyncContext";
+import { ruleEvent } from "../decorators/ruleEventDecorator";
+import { EventNamespaces, EventTypes } from "../events/eventTypes";
+import type { ObjectId } from "mongoose";
 
 export class GitlabService {
   private gitlabApiClient: GitlabApiClient;
@@ -138,7 +141,7 @@ export class GitlabService {
     return this.gitlabApiClient.request("/projects");
   }
 
-  async getMergeRequestCommentsAsync(taskId: string) {
+  async getMergeRequestCommentsAsync(taskId: ObjectId) {
     const mergeRequest = await this.taskService.findOneAsync({ _id: taskId });
     if (!mergeRequest) throw new GitlabError("Merge request not found", 404);
 
@@ -236,7 +239,9 @@ export class GitlabService {
     }
 
     if (task && entityType === "merge_request") {
-      const comments = await this.getMergeRequestCommentsAsync(task.id);
+      const comments = await this.getMergeRequestCommentsAsync(
+        task._id as ObjectId
+      );
       task.comments = comments;
       await this.taskService.updateTaskAsync(task._id as string, {
         comments: task.comments,
@@ -246,6 +251,7 @@ export class GitlabService {
     return task;
   }
 
+  @ruleEvent(EventNamespaces.GitLab, EventTypes.CreateBranch)
   private async createBranch(projectId: string, issue: ITask) {
     await this.gitlabApiClient.request(
       `/projects/${projectId}/repository/branches`,

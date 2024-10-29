@@ -1,7 +1,6 @@
-import { createSignal, onCleanup, onMount } from "solid-js";
-import Header from "./components/Header";
-import TaskColumn from "./components/TaskColumn";
-import DeleteModal from "./components/modals/DeleteModal";
+import { onCleanup, onMount } from "solid-js";
+import Header from "./components/Header/Header";
+import TaskColumn from "./components/TaskColumn/TaskColumn";
 import {
   createTaskAsync,
   deleteTaskAsync,
@@ -9,11 +8,14 @@ import {
 } from "./services/taskService";
 import { STATES } from "./constants";
 import { handleKeyDown } from "./services/keyboardShortcutHandler";
-import TaskDetailsModal from "./components/modals/TaskDetailsModal";
-import HelpModal from "./components/modals/HelpModal";
+import TaskDetailsModal from "./components/modals/TaskDetailsModal/TaskDetailsModal";
+import {
+  HelpModal,
+  DeleteModal,
+  EditOrCreateTaskModal,
+} from "./components/modals";
 import NotificationManager from "./components/NotificationManager";
 import { addNotification } from "./services/notificationService";
-import EditOrCreateTaskModal from "./components/modals/EditOrCreateTaskModal";
 import { fetchTasksAsync, filteredTasks } from "./stores/taskStore";
 import {
   handleCloseModal,
@@ -22,6 +24,7 @@ import {
   setActiveModal,
   setSelectedTaskForModal,
 } from "./stores/modalStore";
+import styles from "./App.module.css";
 
 const App = () => {
   const handleCreateOrUpdateTask = async () => {
@@ -113,7 +116,7 @@ const App = () => {
       {modalStore.activeModal === ModalType.Help && (
         <HelpModal onClose={handleCloseModal} />
       )}
-      <div class="kanban">
+      <div class={styles.kanban}>
         {STATES.map((status, columnIndex) => (
           <TaskColumn
             status={status}

@@ -1,0 +1,51 @@
+.badge {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-crust);
+  padding: var(--spacing-xxs) var(--spacing-xs);
+  border-radius: var(--spacing-xxs);
+  font-size: var(--font-size-xs);
+  display: inline-block;
+  margin-top: var(--spacing-xxs);
+  margin-right: var(--spacing-xxs);
+}
+
+.badge.none {
+  background-color: var(--color-crust);
+  color: var(--color-text);
+}
+
+.badge.medium {
+  background-color: var(--color-yellow);
+}
+
+.badge.low {
+  background-color: var(--color-green);
+}
+
+.badge.high {
+  background-color: var(--color-red);
+  color: var(--color-base);
+}
+
+.badge.deleted {
+  background-color: var(--color-red);
+  color: var(--color-base);
+}
+
+.badge.issue {
+  background-color: var(--color-green);
+  color: var(--color-base);
+}
+
+.badge.custom {
+  background-color: var(--color-peach);
+  color: var(--color-crust);
+}
+
+.badge.mergeRequest {
+  background-color: var(--color-blue);
+  color: var(--color-crust);
+}

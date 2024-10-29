@@ -1,9 +1,12 @@
 export enum EventTypes {
-  MergeRequestCreated = "merge_request.created",
-  MergeRequestUpdated = "merge_request.updated",
-  MergeRequestMerged = "merge_request.merged",
+  Created = "created",
+  Updated = "updated",
+  Deleted = "deleted",
+  Moved = "moved",
+  CreateBranch = "createBranch",
+}
 
-  IssueCreated = "issue.created",
-  IssueUpdated = "issue.updated",
-  IssueClosed = "issue.closed",
+export enum EventNamespaces {
+  GitLab = "gitlab",
+  Task = "task",
 }

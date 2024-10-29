@@ -1,0 +1,91 @@
+.task {
+  background: rgba(200, 200, 255, 0.1);
+  min-height: 100px;
+  color: var(--color-text);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  border-radius: var(--spacing-xs);
+  position: relative;
+  transition: transform 0.2s ease, background-color 0.3s ease,
+    box-shadow 0.3s ease;
+  border-left: 5px solid var(--color-blue);
+
+  p {
+    margin: 0;
+  }
+
+  &.issue {
+    border-left: 5px solid var(--color-green);
+  }
+
+  &.customTask {
+    border-left: 5px solid var(--color-peach);
+  }
+
+  &.deletedTask {
+    border-left: 5px solid var(--color-red);
+  }
+
+  .description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--font-size-sm);
+    max-height: calc(1.5em * 3);
+  }
+}
+
+.task:hover {
+  background-color: rgba(200, 200, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.selectedTask {
+  border: 3px solid var(--color-peach) !important;
+  background-color: rgba(255, 255, 255, 0.1);
+  animation: selectTask 0.2s ease forwards;
+
+  &.issue {
+    border: 3px solid var(--color-green) !important;
+  }
+
+  &.merge_request {
+    border: 3px solid var(--color-blue) !important;
+  }
+
+  &.deleted-task {
+    border: 3px solid var(--color-red) !important;
+  }
+}
+
+.commentCount {
+  background-color: var(--color-red);
+  position: absolute;
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  color: var(--color-crust);
+  top: -8px;
+  right: -8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Improved Animation */
+@keyframes selectTask {
+  from {
+    transform: scale(0.95);
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  to {
+    transform: scale(1);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}

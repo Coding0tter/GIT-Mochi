@@ -1,14 +1,10 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 
-import "./index.css";
+import "./styles/variables.css";
 import "./styles/base.css";
 import "./styles/scrollbar.css";
-import "./styles/header.css";
-import "./styles/kanban.css";
 import "./styles/notification.css";
-import "./styles/modal.css";
-import "./styles/task-flags.css";
 
 import App from "./App";
 import axios from "axios";

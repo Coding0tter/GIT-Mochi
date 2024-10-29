@@ -15,7 +15,8 @@ export class TaskController {
 
   createTaskAsync = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { title, status, description } = req.body as Partial<TaskDto>;
+      const { title, status, description, custom } =
+        req.body as Partial<TaskDto>;
 
       const currentProject = await this.projectService.getCurrentProjectAsync();
 
@@ -29,6 +30,7 @@ export class TaskController {
           title,
           status,
           description,
+          custom,
         }
       );
 

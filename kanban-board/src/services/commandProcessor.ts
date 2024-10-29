@@ -38,22 +38,24 @@ export const useCommandProcessor = () => {
   };
 
   const executeCommandFlow = async (command: Command) => {
-    if (command.beforeAction && !commandStore.pendingCommand) {
-      const beforeCommand = getCommandByAction(command.beforeAction);
+    const currentCommand = { ...command };
+
+    if (currentCommand.beforeAction && !commandStore.pendingCommand) {
+      const beforeCommand = getCommandByAction(currentCommand.beforeAction);
       if (!beforeCommand) throw new Error("No before command found");
 
-      setPendingCommand(command);
+      setPendingCommand(currentCommand);
       await beforeCommand.execute();
       setCommandInputValue("");
       setWaitingForInput(true);
       return;
     }
 
-    await command.execute();
+    await currentCommand.execute();
     setCommandInputValue("");
 
-    if (command.nextAction) {
-      const nextCommand = getCommandByAction(command.nextAction);
+    if (currentCommand.nextAction) {
+      const nextCommand = getCommandByAction(currentCommand.nextAction);
       if (!nextCommand) throw new Error("No next command found");
 
       setPendingCommand(nextCommand);

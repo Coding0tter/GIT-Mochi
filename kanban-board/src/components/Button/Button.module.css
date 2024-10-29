@@ -1,0 +1,30 @@
+.mochiButton {
+  background-color: var(--color-blue);
+  color: var(--color-crust);
+  border: none;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--spacing-xs);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background-color 0.3s ease, transform 0.2s;
+
+  &.primary {
+    background-color: var(--color-blue);
+  }
+
+  &.secondary {
+    background-color: var(--color-surface1);
+
+    &:hover {
+      background-color: var(--color-surface0);
+    }
+  }
+}
+
+.mochiButton:hover {
+  background-color: var(--color-sapphire);
+}
+
+.mochiButton:active {
+  transform: translateY(0);
+}

@@ -1,41 +1,45 @@
-import { model, Schema } from "mongoose";
+import { model, Schema, Document } from "mongoose";
 
+// Define Condition interface and schema
 export interface ICondition {
-  field: string;
-  operation: string;
+  fieldPath: string;
+  operator: "==" | "!=" | ">" | "<";
   value: any;
 }
 
+const ConditionSchema = new Schema({
+  fieldPath: { type: String, required: true },
+  operator: { type: String, enum: ["==", "!=", ">", "<"], required: true },
+  value: { type: Schema.Types.Mixed, required: true },
+});
+
+// Define Action interface and schema
 export interface IAction {
-  actionType: string;
-  params: Record<string, any>;
+  targetPath: string;
+  value: any;
 }
 
+const ActionSchema = new Schema({
+  targetPath: { type: String, required: true },
+  value: { type: Schema.Types.Mixed, required: true },
+});
+
+// Define Rule interface and schema
 export interface IRule extends Document {
   name: string;
-  triggerEvent: string;
-  conditions: ICondition[];
+  eventType: string;
+  conditions?: ICondition[];
   actions: IAction[];
   enabled: boolean;
 }
 
-const ConditionSchema = new Schema({
-  field: String,
-  operation: String,
-  value: Schema.Types.Mixed,
-});
-
-const ActionSchema = new Schema({
-  actionType: String,
-  params: Schema.Types.Mixed,
-});
-
-const RuleSchema = new Schema({
+const RuleSchema = new Schema<IRule>({
   name: { type: String, required: true },
-  triggerEvent: { type: String, required: true },
+  eventType: { type: String, required: true },
   conditions: [ConditionSchema],
   actions: [ActionSchema],
   enabled: { type: Boolean, default: true },
 });
 
+// Export Rule model
 export const Rule = model<IRule>("Rule", RuleSchema);
