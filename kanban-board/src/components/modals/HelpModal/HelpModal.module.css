@@ -1,4 +1,11 @@
 .helpWrapper {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+}
+
+.helpSection {
   background-color: var(--color-surface0);
   padding: var(--spacing-sm);
   border-radius: var(--spacing-xs);

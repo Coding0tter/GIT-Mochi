@@ -25,6 +25,7 @@ import {
   setSelectedTaskForModal,
 } from "./stores/modalStore";
 import styles from "./App.module.css";
+import StatusBar from "./components/StatusBar/StatusBar";
 
 const App = () => {
   const handleCreateOrUpdateTask = async () => {
@@ -125,6 +126,7 @@ const App = () => {
           />
         ))}
       </div>
+      <StatusBar />
     </div>
   );
 };

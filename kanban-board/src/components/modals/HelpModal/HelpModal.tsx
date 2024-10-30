@@ -1,6 +1,7 @@
 import { JSX } from "solid-js";
 import BaseModal, { BaseModalProps } from "../BaseModal/BaseModal";
 import styles from "./HelpModal.module.css";
+import Badge from "../../Badge/Badge";
 
 const KEYBINDINGS = [
   { key: "W / ↑", description: "Move up through tasks" },
@@ -50,25 +51,36 @@ interface HelpModalProps extends BaseModalProps {}
 const HelpModal = (props: HelpModalProps): JSX.Element => {
   return (
     <BaseModal {...props} closeText="Close">
-      <h2>Help - Keybindings</h2>
       <div class={styles.helpWrapper}>
-        <p>
-          This tool allows you to manage tasks efficiently. Here are the
-          keyboard shortcuts:
-        </p>
-        <ul class={styles["keybindings-list"]}>
-          {KEYBINDINGS.map((binding) => (
-            <li>
-              <strong>
-                {binding.key.split(" / ").map((key) => (
-                  <kbd>{key}</kbd>
-                ))}
-                :
-              </strong>{" "}
-              {binding.description}
-            </li>
-          ))}
-        </ul>
+        <div class={styles.helpSection}>
+          <h2>Keybindings</h2>
+
+          <p>
+            This tool allows you to manage tasks efficiently. Here are the
+            keyboard shortcuts:
+          </p>
+          <ul class={styles["keybindings-list"]}>
+            {KEYBINDINGS.map((binding) => (
+              <li>
+                <strong>
+                  {binding.key.split(" / ").map((key) => (
+                    <kbd>{key}</kbd>
+                  ))}
+                  :
+                </strong>{" "}
+                {binding.description}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div class={styles.helpSection}>
+          <h2>Legend</h2>
+
+          <Badge type="deleted">Deleted</Badge>
+          <Badge type="custom">Custom Task</Badge>
+          <Badge type="mergeRequest">Merge Request</Badge>
+          <Badge type="issue">Issue</Badge>
+        </div>
       </div>
     </BaseModal>
   );

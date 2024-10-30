@@ -70,26 +70,6 @@ const Header = (props: HeaderProps): JSX.Element => {
           )}
         </div>
       </div>
-
-      <div class={styles.legendRow}>
-        <Badge type="none">
-          backend:{" "}
-          <strong>
-            {uiStore.isConnected ? (
-              <i class="fa-solid fa-link"></i>
-            ) : (
-              <i class="fa-solid fa-link-slash"></i>
-            )}
-          </strong>
-        </Badge>
-        <Badge type="none">
-          <strong>{uiStore.currentProject?.name || "none"}</strong>
-        </Badge>
-        <Badge type="deleted">Deleted</Badge>
-        <Badge type="custom">Custom Task</Badge>
-        <Badge type="mergeRequest">Merge Request</Badge>
-        <Badge type="issue">Issue</Badge>
-      </div>
     </div>
   );
 };
