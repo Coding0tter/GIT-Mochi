@@ -24,6 +24,22 @@ export class CommandProcessor {
     await this.executeCurrentStep();
   }
 
+  next = () => {
+    this.currentStepIndex++;
+    this.executeCurrentStep();
+  };
+
+  repeat = () => {
+    this.executeCurrentStep();
+  };
+
+  goto = (key: string) => {
+    this.currentStepIndex = this.pipeline.steps.findIndex(
+      (step) => step.key === key
+    );
+    this.executeCurrentStep();
+  };
+
   private async executeCurrentStep() {
     setCommandInputValue("");
     setActiveDropdownIndex(0);
@@ -38,27 +54,28 @@ export class CommandProcessor {
     const step = this.pipeline.steps[this.currentStepIndex];
 
     setCommandPlaceholder(step.prompt);
-    if (step.dropdownValues) setDropdownValues(step.dropdownValues);
+    if (step.dropdownValues)
+      setDropdownValues(
+        typeof step.dropdownValues === "function"
+          ? step.dropdownValues()
+          : step.dropdownValues
+      );
     else if (step.cleanDropdown) setDropdownValues([]);
-
-    const next = () => {
-      this.currentStepIndex++;
-      this.executeCurrentStep();
-    };
-
-    const retry = () => {
-      this.executeCurrentStep();
-    };
 
     try {
       if (step.awaitInput) {
-        await step.executeAsync(await this.waitForUserInput(), next, retry);
+        await step.executeAsync(
+          await this.waitForUserInput(),
+          this.next,
+          this.repeat,
+          this.goto
+        );
       } else {
-        await step.executeAsync(undefined, next, retry);
+        await step.executeAsync(undefined, this.next, this.repeat, this.goto);
       }
     } catch (error: any) {
       if (step.onError) {
-        step.onError(error, retry);
+        step.onError(error, this.repeat);
       } else {
         console.error("Error:", error.message);
       }

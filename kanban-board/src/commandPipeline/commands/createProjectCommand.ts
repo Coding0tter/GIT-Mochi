@@ -21,9 +21,9 @@ const createProjectCommand: CommandPipeline = {
     {
       awaitInput: true,
       cleanDropdown: true,
-      executeAsync: async (input, next, retry) => {
+      executeAsync: async (input, next, repeat) => {
         if (input === "") {
-          retry();
+          repeat();
           return;
         }
 
@@ -35,7 +35,7 @@ const createProjectCommand: CommandPipeline = {
             type: "error",
           });
 
-          retry();
+          repeat();
           return;
         }
         setBuffer(project._id);

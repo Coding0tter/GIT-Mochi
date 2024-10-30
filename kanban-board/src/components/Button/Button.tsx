@@ -6,11 +6,23 @@ type ButtonProps = {
   disabled?: boolean;
   type?: "primary" | "secondary" | "default";
   onClick: () => void;
+  style?: any;
 };
 
-const Button = ({ children, onClick, disabled, type = "default" }: ButtonProps) => {
+const Button = ({
+  children,
+  onClick,
+  disabled,
+  type = "default",
+  style,
+}: ButtonProps) => {
   return (
-    <button disabled={disabled} class={`${styles.mochiButton} ${styles[type]}`} onClick={onClick}>
+    <button
+      style={style}
+      disabled={disabled}
+      class={`${styles.mochiButton} ${styles[type]}`}
+      onClick={onClick}
+    >
       {children}
     </button>
   );

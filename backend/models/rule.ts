@@ -21,7 +21,7 @@ export interface IAction {
 
 const ActionSchema = new Schema({
   targetPath: { type: String, required: true },
-  value: { type: Schema.Types.Mixed, required: true },
+  value: { type: Schema.Types.Mixed, required: false },
 });
 
 // Define Rule interface and schema

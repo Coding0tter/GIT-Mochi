@@ -15,13 +15,20 @@ export type Project = {
   description: string;
 };
 
+export enum LoadingTarget {
+  Commandline,
+  SyncGitlab,
+  LoadTasks,
+  None,
+}
+
 export const [uiStore, setUiStore] = createStore({
   commandInputRef: null as HTMLInputElement | null,
   currentProject: null as Project | null,
   commandInputValue: "",
   commandPlaceholder: "",
   commandReadonly: false,
-  loading: false,
+  loadingTarget: LoadingTarget.None,
   isConnected: false,
   inputMode: InputMode.None,
 });
@@ -42,8 +49,8 @@ export const setCommandReadonly = (readonly: boolean) => {
   setUiStore("commandReadonly", readonly);
 };
 
-export const setLoading = (loading: boolean) => {
-  setUiStore("loading", loading);
+export const setLoading = (loadingTarget: LoadingTarget) => {
+  setUiStore("loadingTarget", loadingTarget);
 };
 
 export const setInputMode = (mode: InputMode) => {

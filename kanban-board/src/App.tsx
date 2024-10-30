@@ -29,30 +29,50 @@ import StatusBar from "./components/StatusBar/StatusBar";
 
 const App = () => {
   const handleCreateOrUpdateTask = async () => {
-    try {
-      if (!modalStore.selectedTask) return;
+    if (!modalStore.selectedTask) return;
 
-      if (modalStore.selectedTask!._id) {
+    if (modalStore.selectedTask!._id) {
+      try {
         await updateTaskAsync(
           modalStore.selectedTask!._id,
           modalStore.selectedTask!
         );
-      } else {
-        await createTaskAsync(modalStore.selectedTask!);
+        addNotification({
+          title: "Success",
+          description: "Task updated successfully",
+          type: "success",
+        });
+      } catch (error) {
+        addNotification({
+          title: "Error",
+          description: "Failed to update task",
+          type: "error",
+        });
       }
+    } else {
+      try {
+        await createTaskAsync(modalStore.selectedTask!);
+        addNotification({
+          title: "Success",
+          description: "Task created successfully",
+          type: "success",
+        });
+      } catch (error) {
+        addNotification({
+          title: "Error",
+          description: "Failed to create task",
+          type: "error",
+        });
+      }
+    }
+    try {
       await fetchTasksAsync();
       setSelectedTaskForModal(null);
       setActiveModal(ModalType.None);
-
-      addNotification({
-        title: "Success",
-        description: "Task created successfully",
-        type: "success",
-      });
     } catch (error) {
       addNotification({
         title: "Error",
-        description: "Failed to create task",
+        description: "Failed to fetch tasks",
         type: "error",
       });
     }

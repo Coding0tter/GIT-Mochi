@@ -1,4 +1,8 @@
-import { setCommandInputValue, setLoading } from "../stores/uiStore";
+import {
+  LoadingTarget,
+  setCommandInputValue,
+  setLoading,
+} from "../stores/uiStore";
 import {
   Command,
   commandStore,
@@ -13,7 +17,7 @@ import { closeModalAndUnfocus } from "./uiService";
 
 export const useCommandProcessor = () => {
   const handleCommandAsync = async () => {
-    setLoading(true);
+    setLoading(LoadingTarget.Commandline);
 
     try {
       if (commandStore.waitingForInput) {

@@ -37,7 +37,7 @@ const TaskCard = (props: TaskCardProps) => {
       <p>{props.task.title}</p>
       {props.task.description && <div class="divider" />}
       <p class={styles.description}>{props.task.description}</p>
-      {props.task.custom && <span class="custom-flag">Custom</span>}
+      {props.task.custom && <Badge>Custom</Badge>}
       {getPriorityLabel(props.task) && (
         <Badge type={getPriorityLabel(props.task)}>
           {getPriorityLabel(props.task)}

@@ -7,7 +7,7 @@ export interface BaseModalProps {
   onClose?: () => void;
   closeText?: string;
   onSubmit?: () => void;
-  submitText?: string;
+  submitText?: string | (() => string);
 }
 
 const BaseModal: ParentComponent<BaseModalProps> = (props): JSX.Element => {
@@ -22,7 +22,9 @@ const BaseModal: ParentComponent<BaseModalProps> = (props): JSX.Element => {
         <div class={styles.modalButtons}>
           {props.submitText !== undefined && (
             <Button type="primary" onClick={props.onSubmit!}>
-              {props.submitText}
+              {props.submitText instanceof Function
+                ? props.submitText()
+                : props.submitText}
             </Button>
           )}
           {props.closeText !== undefined && (

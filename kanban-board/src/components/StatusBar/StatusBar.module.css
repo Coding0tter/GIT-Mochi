@@ -7,7 +7,7 @@
   color: var(--color-text);
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   font-size: var(--font-size-sm);
   z-index: 1000;
 }

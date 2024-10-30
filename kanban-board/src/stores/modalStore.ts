@@ -1,4 +1,4 @@
-import { createStore } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
 import { Task } from "./taskStore";
 
 export enum ModalType {
@@ -20,7 +20,7 @@ export const setActiveModal = (type: ModalType) => {
 };
 
 export const setSelectedTaskForModal = (task: Partial<Task> | null) => {
-  setModalStore("selectedTask", task as Task);
+  setModalStore("selectedTask", reconcile(task as Task));
 };
 
 export const setSelectedTaskValue = (key: string, value: string) => {

@@ -1,7 +1,7 @@
 import { createStore } from "solid-js/store";
 import { STATES } from "../constants";
 import { addNotification } from "../services/notificationService";
-import { InputMode, setLoading, uiStore } from "./uiStore";
+import { InputMode, LoadingTarget, setLoading, uiStore } from "./uiStore";
 import { keyboardNavigationStore } from "./keyboardNavigationStore";
 import { syncGitlabAsync } from "../services/gitlabService";
 import axios from "axios";
@@ -97,17 +97,17 @@ export const fetchTasksAsync = async (
 };
 
 export const toggleShowDeletedTasksAsync = async () => {
-  setLoading(true);
+  setLoading(LoadingTarget.LoadTasks);
   await fetchTasksAsync(!taskStore.showDeleted);
   setTaskStore("showDeleted", !taskStore.showDeleted);
-  setLoading(false);
+  setLoading(LoadingTarget.None);
 };
 
 export const handleGitlabSyncAsync = async () => {
-  setLoading(true);
+  setLoading(LoadingTarget.SyncGitlab);
   await syncGitlabAsync();
   await fetchTasksAsync();
-  setLoading(false);
+  setLoading(LoadingTarget.None);
 };
 
 export const filteredTasks = () => {

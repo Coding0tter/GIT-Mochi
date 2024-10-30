@@ -8,4 +8,8 @@ export class RuleService extends BaseService<IRule> {
   constructor() {
     super(new RuleRepo(), "Rule");
   }
+
+  async createRuleAsync(rule: IRule) {
+    return super.createAsync(rule);
+  }
 }

@@ -9,6 +9,7 @@ import {
 import axios from "axios";
 import { useSpies } from "../../../base.test";
 import { Task } from "../../stores/taskStore";
+import { LoadingTarget } from "../../stores/uiStore";
 
 beforeEach(() => {
   global.window = Object.create({
@@ -26,7 +27,7 @@ describe("GitLabService", () => {
 
     await syncGitlabAsync();
 
-    expect(setLoadingSpy).toHaveBeenCalledWith(true);
+    expect(setLoadingSpy).toHaveBeenCalledWith(LoadingTarget.SyncGitlab);
     expect(postSpy).toHaveBeenCalledWith(`/git/sync`);
 
     expect(fetchTasksAsyncSpy).toHaveBeenCalled();
@@ -36,7 +37,7 @@ describe("GitLabService", () => {
       description: "Tasks have been synced with GitLab",
       type: "success",
     });
-    expect(setLoadingSpy).toHaveBeenCalledWith(false);
+    expect(setLoadingSpy).toHaveBeenCalledWith(LoadingTarget.None);
   });
 
   test("syncGitlabAsync should show error notification if failed to sync", async () => {
@@ -47,7 +48,7 @@ describe("GitLabService", () => {
 
     await syncGitlabAsync();
 
-    expect(setLoadingSpy).toHaveBeenCalledWith(true);
+    expect(setLoadingSpy).toHaveBeenCalledWith(LoadingTarget.SyncGitlab);
     expect(postSpy).toHaveBeenCalledWith(`/git/sync`);
 
     expect(addNotificationSpy).toHaveBeenCalledWith({
@@ -55,7 +56,7 @@ describe("GitLabService", () => {
       description: "Failed to sync with GitLab",
       type: "error",
     });
-    expect(setLoadingSpy).toHaveBeenCalledWith(false);
+    expect(setLoadingSpy).toHaveBeenCalledWith(LoadingTarget.None);
   });
 
   test("openSelectedTaskLink should openLink", () => {

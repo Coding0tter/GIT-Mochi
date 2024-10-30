@@ -1,10 +1,12 @@
 import { logInfo } from "../utils/logger";
+import { EventEmitterService } from "./eventEmitterService";
 
 type EventMetadata = {
   eventType: string;
   eventNamespace: string;
   className: string;
   methodName: string;
+  hasParams?: boolean;
 };
 
 export class EventRegistry {
@@ -38,12 +40,19 @@ export class EventRegistry {
     eventType: string,
     eventNamespace: string,
     className: string,
-    methodName: string
+    methodName: string,
+    hasParams: boolean
   ) {
     logInfo(
       `Registering listener for ${eventType} in ${className}.${methodName}`
     );
-    this.listeners.push({ eventType, className, methodName, eventNamespace });
+    this.listeners.push({
+      eventType,
+      className,
+      methodName,
+      eventNamespace,
+      hasParams,
+    });
   }
 
   getEmitters() {
@@ -52,5 +61,14 @@ export class EventRegistry {
 
   getListeners() {
     return this.listeners;
+  }
+
+  getListenerByEvent(event: string) {
+    const [eventNamespace, eventType] = event.split(".");
+    return this.listeners.find(
+      (listener) =>
+        listener.eventNamespace == eventNamespace &&
+        listener.eventType === eventType
+    );
   }
 }

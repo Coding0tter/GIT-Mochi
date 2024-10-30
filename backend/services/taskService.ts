@@ -2,10 +2,11 @@ import type { ITask } from "../models/task";
 import { TaskRepo } from "../repositories/taskRepo";
 import { MochiError } from "../errors/mochiError";
 import { BaseService } from "./baseService";
-import { EventNamespaces, EventTypes } from "../events/eventTypes";
+import { ActionTypes, EventNamespaces, EventTypes } from "../events/eventTypes";
 import { ruleEvent } from "../decorators/ruleEventDecorator";
+import { ruleAction } from "../decorators/ruleListenerDecorator";
 
-export class TaskService extends BaseService<ITask> {
+class TaskService extends BaseService<ITask> {
   constructor() {
     super(new TaskRepo(), "Task");
   }
@@ -42,6 +43,15 @@ export class TaskService extends BaseService<ITask> {
     return updatedTask;
   }
 
+  @ruleAction(EventNamespaces.Task, ActionTypes.Move, true)
+  async moveTaskAsync(id: string, status: string) {
+    const updatedTask = await super.updateAsync(id, { status });
+    if (!updatedTask) {
+      throw new MochiError("Task not found", 404);
+    }
+    return updatedTask;
+  }
+
   async updateTaskOrderAsync(tasks: string[]) {
     const updatePromises = tasks.map((taskId, index) => {
       return super.updateAsync(taskId, { order: index });
@@ -60,6 +70,7 @@ export class TaskService extends BaseService<ITask> {
     return restoredTask;
   }
 
+  @ruleAction(EventNamespaces.Task, ActionTypes.Delete)
   async deleteTaskAsync(id: string) {
     const deletedTask = await super.updateAsync(id, {
       deleted: true,
@@ -69,3 +80,6 @@ export class TaskService extends BaseService<ITask> {
     }
   }
 }
+
+export { TaskService };
+export default TaskService;

@@ -1,7 +1,7 @@
 import { JSX, onMount } from "solid-js";
-import BaseModal, { BaseModalProps } from "../BaseModal/BaseModal";
-import { modalStore, setSelectedTaskValue } from "../../../stores/modalStore";
 import { STATES } from "../../../constants";
+import { modalStore, setSelectedTaskValue } from "../../../stores/modalStore";
+import BaseModal, { BaseModalProps } from "../BaseModal/BaseModal";
 import styles from "./EditOrCreateTaskModal.module.css";
 
 interface EditTaskModalProps extends BaseModalProps {}
@@ -16,12 +16,7 @@ const EditOrCreateTaskModal = (props: EditTaskModalProps): JSX.Element => {
   });
 
   return (
-    <BaseModal
-      {...props}
-      submitText={
-        modalStore.selectedTask?._id !== undefined ? "Edit Task" : "Add Task"
-      }
-    >
+    <BaseModal {...props} submitText={"Submit"}>
       <h2>
         {modalStore.selectedTask?._id !== undefined ? "Edit" : "Create"} Custom
         Task

@@ -1,13 +1,13 @@
 import axios from "axios";
 import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
 import { fetchTasksAsync, getColumnTasks } from "../stores/taskStore";
-import { Project, setLoading, uiStore } from "../stores/uiStore";
+import { LoadingTarget, Project, setLoading, uiStore } from "../stores/uiStore";
 import { addNotification } from "./notificationService";
 import { has } from "lodash";
 
 export const syncGitlabAsync = async () => {
   try {
-    setLoading(true);
+    setLoading(LoadingTarget.SyncGitlab);
 
     if (has(uiStore.currentProject, "_id")) {
       addNotification({
@@ -36,7 +36,7 @@ export const syncGitlabAsync = async () => {
       type: "error",
     });
   } finally {
-    setLoading(false);
+    setLoading(LoadingTarget.None);
   }
 };
 

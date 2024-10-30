@@ -25,6 +25,7 @@
 
 .modalButtons {
   display: flex;
+  justify-content: flex-end;
   gap: var(--spacing-sm);
 }
 
@@ -57,12 +58,6 @@
   font-weight: var(--font-weight-regular);
   color: var(--color-subtext1);
   margin-bottom: var(--spacing-md);
-}
-
-.modal footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-sm);
 }
 
 /* Keyframe Animations */

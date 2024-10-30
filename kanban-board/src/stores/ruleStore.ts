@@ -12,6 +12,7 @@ export interface Listener {
   eventNamespace: string;
   eventType: string;
   methodName: string;
+  hasParams: boolean;
 }
 
 export interface Rule {

@@ -45,7 +45,7 @@ const Header = (props: HeaderProps): JSX.Element => {
           </div>
         </div>
         <CommandLine />
-        <div class={styles.headerActions}>
+        {/* <div class={styles.headerActions}>
           <Button
             onClick={async () => await handleGitlabSyncAsync()}
             disabled={uiStore.loading}
@@ -61,7 +61,7 @@ const Header = (props: HeaderProps): JSX.Element => {
           <Button onClick={props.onToggleCreateTask}>
             {props.showCreateTask ? "Close Create New" : "(C)reate New"}
           </Button>
-        </div>
+        </div> */}
         <div class={styles.userInfo}>
           {user() && (
             <div title={user()!.username} class={styles.user}>

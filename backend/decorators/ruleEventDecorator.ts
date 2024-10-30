@@ -25,13 +25,7 @@ export function ruleEvent(eventNamespace: string, eventName: string) {
       try {
         const result = await originalMethod.apply(this, args);
 
-        const eventNamespace = Reflect.getMetadata(
-          "eventNamespace",
-          target.constructor
-        );
-        const eventType = eventNamespace
-          ? `${eventNamespace}.${eventName}`
-          : eventName;
+        const eventType = `${eventNamespace}.${eventName}`;
 
         const resultData =
           result instanceof MochiResult

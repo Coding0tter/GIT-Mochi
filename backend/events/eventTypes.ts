@@ -6,6 +6,12 @@ export enum EventTypes {
   CreateBranch = "createBranch",
 }
 
+export enum ActionTypes {
+  Move = "move",
+  Restore = "restore",
+  Delete = "delete",
+}
+
 export enum EventNamespaces {
   GitLab = "gitlab",
   Task = "task",

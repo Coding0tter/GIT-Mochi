@@ -16,6 +16,7 @@ import {
 import { filteredTasks } from "../../stores/taskStore";
 import {
   InputMode,
+  LoadingTarget,
   setCommandInputRef,
   setCommandInputValue,
   setCommandPlaceholder,
@@ -139,7 +140,11 @@ const CommandLine = () => {
           ref={(el) => setCommandInputRef(el)}
           type="text"
           readOnly={uiStore.commandReadonly}
-          value={!uiStore.loading ? uiStore.commandInputValue : "Loading..."}
+          value={
+            uiStore.loadingTarget === LoadingTarget.Commandline
+              ? "Loading..."
+              : uiStore.commandInputValue
+          }
           placeholder={uiStore.commandPlaceholder}
           onKeyDown={handleKeydown}
           onInput={handleInput}

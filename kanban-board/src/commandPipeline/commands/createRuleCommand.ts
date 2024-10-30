@@ -1,5 +1,9 @@
 import { cloneDeep } from "lodash";
-import { fetchEmitters } from "../../services/ruleService";
+import {
+  createRuleAsync,
+  fetchEmitters,
+  fetchListeners,
+} from "../../services/ruleService";
 import {
   commandStore,
   getActiveDropdownValue,
@@ -9,6 +13,7 @@ import {
 import { Rule } from "../../stores/ruleStore";
 import { registerCommand } from "../commandRegistry";
 import { CommandPipeline } from "../types";
+import { addNotification } from "../../services/notificationService";
 
 const BaseRule: Rule = {
   name: "",
@@ -48,10 +53,26 @@ const createRuleCommand: CommandPipeline = {
       },
     },
     {
-      prompt: "Add a condition. Leave empty to move on",
+      prompt: "Enter condition",
+      dropdownValues: () => {
+        return [
+          {
+            text: "Add condition (eg. field == value). Leave empty to move on",
+            showAlways: true,
+          },
+          ...commandStore.buffer?.conditions.map((condition: any) => ({
+            text:
+              condition.fieldPath +
+              " " +
+              condition.operator +
+              " " +
+              condition.value,
+            showAlways: true,
+          })),
+        ];
+      },
       awaitInput: true,
-      cleanDropdown: true,
-      executeAsync: async (input, next, retry) => {
+      executeAsync: async (input, next, repeat) => {
         if (input.trim() === "") {
           next();
           return;
@@ -62,7 +83,7 @@ const createRuleCommand: CommandPipeline = {
 
         if (!match) {
           console.error("Invalid condition format. Use: field operator value");
-          retry();
+          repeat();
           return;
         }
 
@@ -75,18 +96,107 @@ const createRuleCommand: CommandPipeline = {
         const rule = cloneDeep(commandStore.buffer) as Rule;
         rule.conditions.push(condition);
 
-        console.log("Updated rule with new condition:", rule);
         setBuffer(rule);
 
-        retry();
+        repeat();
       },
     },
     {
-      prompt: "Add an action. Leave empty to move on",
+      key: "loadActions",
+      prompt: "Loading actions...",
+      executeAsync: async (_, next) => {
+        const actions = await fetchListeners();
+        setDropdownValues([
+          ...actions.map((action) => ({
+            text:
+              action.eventNamespace +
+              "." +
+              action.eventType +
+              (action.hasParams ? " (with params)" : ""),
+            value: action,
+          })),
+          { text: "Finish", value: "finish" },
+        ]);
+        next();
+      },
+    },
+    {
+      prompt: "Add an action. Or choose 'Finish' to complete the rule",
+      awaitInput: true,
+      executeAsync: async (input, next, repeat, goto) => {
+        const action = getActiveDropdownValue().value;
+
+        if (action === "finish") {
+          goto("enterName");
+          return;
+        }
+
+        const rule = cloneDeep(commandStore.buffer) as Rule;
+        rule.actions.push({
+          targetPath: action.eventNamespace + "." + action.eventType,
+          value: null,
+        });
+        setBuffer(rule);
+
+        console.log(action);
+        if (action.hasParams) {
+          next();
+        } else {
+          repeat();
+        }
+      },
+    },
+    {
+      prompt: "Enter a parameter",
+      dropdownValues: [
+        {
+          text: "Enter parameter for action.",
+          showAlways: true,
+        },
+      ],
+      awaitInput: true,
+      executeAsync: async (input, _, repeat, goto) => {
+        if (input.trim() === "") {
+          repeat();
+          return;
+        }
+
+        const rule = cloneDeep(commandStore.buffer) as Rule;
+        rule.actions[rule.actions.length - 1].value = input;
+
+        setBuffer(rule);
+
+        goto("loadActions");
+      },
+    },
+    {
+      key: "enterName",
+      prompt: "Enter a name for the rule",
       awaitInput: true,
       cleanDropdown: true,
-      executeAsync: async (input, next, retry) => {
-        console.log("Adding action", input);
+      executeAsync: async (input, next) => {
+        const rule = cloneDeep(commandStore.buffer) as Rule;
+        rule.name = input;
+
+        setBuffer(rule);
+
+        next();
+      },
+    },
+    {
+      prompt: "Saving...",
+      cleanDropdown: true,
+      executeAsync: async (_, next) => {
+        const rule = cloneDeep(commandStore.buffer) as Rule;
+        await createRuleAsync(rule);
+        next();
+      },
+      onError: (error) => {
+        addNotification({
+          type: "error",
+          title: "Failed to create rule",
+          description: error.message,
+        });
       },
     },
   ],

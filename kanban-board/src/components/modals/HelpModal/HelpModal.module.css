@@ -11,6 +11,13 @@
   border-radius: var(--spacing-xs);
 }
 
+.keybindingsWrapper {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
 .keybindings-list {
   list-style: none;
   padding: 0;

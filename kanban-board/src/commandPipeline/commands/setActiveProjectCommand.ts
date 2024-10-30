@@ -42,8 +42,8 @@ const setActiveProjectCommand: CommandPipeline = {
             value: project,
           }))
         );
-        setCommandInputValue(""); // Clear input
-        next(); // Proceed to next step
+        setCommandInputValue("");
+        next();
       },
       prompt: "Loading projects...",
       onError: (error) => {
@@ -57,7 +57,6 @@ const setActiveProjectCommand: CommandPipeline = {
     {
       awaitInput: true,
       executeAsync: async (input, next) => {
-        // Set the selected project as active
         const selectedProject = getActiveDropdownValue().value as Project;
         let projectId = selectedProject.id;
 
@@ -82,16 +81,16 @@ const setActiveProjectCommand: CommandPipeline = {
           type: "success",
         });
 
-        next(); // Proceed to next step or finish
+        next();
       },
       prompt: "Select a project to set as active",
-      onError: (error, retry) => {
+      onError: (error, repeat) => {
         addNotification({
           title: "Error",
           description: "Failed to set project",
           type: "error",
         });
-        retry(); // Retry the current
+        repeat();
       },
     },
   ],

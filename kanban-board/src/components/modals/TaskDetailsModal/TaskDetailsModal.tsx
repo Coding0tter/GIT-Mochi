@@ -4,7 +4,6 @@ import { modalStore } from "../../../stores/modalStore";
 import DOMPurify from "dompurify";
 import styles from "./TaskDetailsModal.module.css";
 import Badge from "../../Badge/Badge";
-import Button from "../../Button/Button";
 
 interface TaskDetailsModalProps extends BaseModalProps {}
 
@@ -83,10 +82,13 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
               ?.filter((comment) => showResolved() || !comment.resolved)
               .map((comment) => (
                 <div class={styles.comment}>
-                  <div>
-                    <strong class={styles.name}>{comment.author.name}:</strong>
-                    <div innerHTML={formatCommentBody(comment.body)} />
+                  <div class={styles.authorInfo}>
+                    <span class={styles.authorName}>{comment.author.name}</span>
                   </div>
+                  <div
+                    class={styles.commentText}
+                    innerHTML={formatCommentBody(comment.body)}
+                  />
                   {comment.images?.map((src) =>
                     src.includes(".webm") ? (
                       <video src={src} class={styles.commentImage} controls />

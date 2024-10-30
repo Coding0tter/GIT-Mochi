@@ -2,15 +2,17 @@ import { DropdownValue } from "../stores/commandStore";
 
 export interface CommandStep {
   prompt: string;
-  dropdownValues?: DropdownValue[];
+  key?: string;
+  dropdownValues?: DropdownValue[] | (() => DropdownValue[]);
   awaitInput?: boolean;
   cleanDropdown?: boolean;
   executeAsync: (
     input: any,
     next: () => void,
-    retry: () => void
+    repeat: () => void,
+    goto: (key: string) => void
   ) => Promise<void>;
-  onError?: (error: Error, retry: () => void) => void;
+  onError?: (error: Error, repeat: () => void) => void;
 }
 
 export interface CommandPipeline {
