@@ -11,11 +11,12 @@ const TimeMarker: Component<TimeMarkerProps> = (props) => {
 
   const updateCurrentTimePosition = () => {
     const now = new Date();
-    const hour = 18;
-    const minutes = now.getMinutes();
-    const totalMinutes = (hour - props.startHour) * 60 + minutes;
-    const totalHeight = (props.endHour - props.startHour + 1) * 60;
-    const position = (totalMinutes / totalHeight) * 100;
+    const totalMinutes = (props.endHour - props.startHour + 1) * 60;
+    const currentMinutes =
+      (now.getHours() - props.startHour) * 60 + now.getMinutes();
+
+    const position = (currentMinutes / totalMinutes) * 100;
+
     setCurrentTimePosition(position);
   };
 

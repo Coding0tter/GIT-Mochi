@@ -3,4 +3,5 @@
   display: flex;
   flex-direction: column;
   height: 100%; /* Ensure it takes the full height of .weekCalendar */
+  position: relative;
 }

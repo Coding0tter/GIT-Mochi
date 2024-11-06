@@ -1,35 +1,18 @@
-import { Navigator, redirect, useNavigate } from "@solidjs/router";
+import { Location, Navigator } from "@solidjs/router";
+import ShortcutRegistry from "../shortcutMaps/shortcutRegistry";
 import { resetCommandline } from "../stores/commandStore";
 import { modalStore, ModalType } from "../stores/modalStore";
-import { toggleShowDeletedTasksAsync } from "../stores/taskStore";
 import { InputMode, uiStore } from "../stores/uiStore";
-import {
-  createMergeRequestAndBranchForSelectedTaskAsync,
-  openSelectedTaskLink,
-  syncGitlabAsync,
-} from "./gitlabService";
-import {
-  openCreateModal,
-  openDeleteModal,
-  openDetailsModal,
-  openEditModal,
-  openHelpModal,
-} from "./modalService";
-import {
-  addToSelection,
-  Direction,
-  moveSelection,
-} from "./taskNavigationService";
-import {
-  moveSelectedTasksAsync,
-  restoreSelectedTaskAsync,
-} from "./taskService";
+import { openHelpModal } from "./modalService";
 import { closeModalAndUnfocus, focusInput } from "./uiService";
 
 export const handleKeyDown = async (
   event: KeyboardEvent,
-  navigator: Navigator
+  navigator: Navigator,
+  location: Location
 ) => {
+  const key = location.pathname.split("/")[1];
+
   if (event.key === "Escape") {
     closeModalAndUnfocus();
 
@@ -52,6 +35,8 @@ export const handleKeyDown = async (
     return;
   }
 
+  ShortcutRegistry.getInstance().executeShortcut(key, event);
+
   if (event.ctrlKey) {
     switch (event.key) {
       case "p":
@@ -64,20 +49,6 @@ export const handleKeyDown = async (
         event.stopPropagation();
         focusInput(InputMode.Search);
         break;
-      case "w":
-      case "ArrowUp":
-        event.preventDefault();
-        event.stopPropagation();
-        await moveSelectedTasksAsync(Direction.Up);
-        break;
-      case "s":
-      case "ArrowDown":
-        event.preventDefault();
-        event.stopPropagation();
-        await moveSelectedTasksAsync(Direction.Down);
-        break;
-      default:
-        break;
     }
 
     return;
@@ -85,45 +56,14 @@ export const handleKeyDown = async (
 
   if (event.shiftKey) {
     switch (event.key) {
-      case "A":
-      case "ArrowLeft":
-        await moveSelectedTasksAsync(Direction.Left);
-        break;
-
-      case "D":
-      case "ArrowRight":
-        await moveSelectedTasksAsync(Direction.Right);
-        break;
-
-      case "ArrowUp":
-        await addToSelection(Direction.Up);
-        break;
-
-      case "ArrowDown":
-        await addToSelection(Direction.Down);
-        break;
-
-      case "S":
-        await syncGitlabAsync();
-        break;
-
-      case "O":
-        openSelectedTaskLink();
-        break;
-
-      case "M":
-        await createMergeRequestAndBranchForSelectedTaskAsync();
-        break;
-
-      case "R":
-        restoreSelectedTaskAsync();
-        break;
-
       case "!":
         navigator("/kanban");
         break;
       case '"':
         navigator("/timetrack");
+        break;
+      case "=":
+        navigator("/");
         break;
 
       default:
@@ -134,57 +74,10 @@ export const handleKeyDown = async (
   }
 
   switch (event.key) {
-    case "w":
-    case "ArrowUp":
-      moveSelection(Direction.Up);
-      break;
-
-    case "s":
-    case "ArrowDown":
-      moveSelection(Direction.Down);
-      break;
-
-    case "a":
-    case "ArrowLeft":
-      moveSelection(Direction.Left);
-      break;
-
-    case "d":
-    case "ArrowRight":
-      moveSelection(Direction.Right);
-      break;
-
-    case "n":
-      await moveSelectedTasksAsync(Direction.Right);
-      break;
-
-    case "p":
-      await moveSelectedTasksAsync(Direction.Left);
-      break;
-
     case "h":
       openHelpModal();
       break;
 
-    case "x":
-      openDeleteModal();
-      break;
-
-    case "c":
-      openCreateModal();
-      break;
-
-    case "e":
-      openEditModal();
-      break;
-
-    case "o":
-      openDetailsModal();
-      break;
-
-    case "v":
-      await toggleShowDeletedTasksAsync();
-      break;
     default:
       break;
   }

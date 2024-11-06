@@ -1,0 +1,87 @@
+.homeWrapper {
+  padding-inline: var(--spacing-sm);
+  height: calc(100% - 30px - var(--spacing-sm));
+}
+
+.home {
+  color: var(--color-text);
+  background: var(--color-base);
+  height: 100%;
+  border-radius: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--spacing-xl);
+  align-items: center;
+  text-align: center;
+}
+
+.logo {
+  width: 150px;
+  height: 150px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.homeHeader h1 {
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-md);
+}
+
+.homeHeader p {
+  font-size: var(--font-size-md);
+  color: var(--color-subtext1);
+  margin-bottom: var(--spacing-xl);
+}
+
+.features {
+  display: flex;
+  gap: var(--spacing-lg);
+  justify-content: center;
+}
+
+.featureCard {
+  cursor: pointer;
+  background: var(--color-surface0);
+  border-radius: var(--spacing-md);
+  padding: var(--spacing-lg);
+  min-width: 300px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.featureCard h2 {
+  font-size: var(--font-size-lg);
+  color: var(--color-lavender);
+  margin-bottom: var(--spacing-sm);
+}
+
+.featureCard p {
+  font-size: var(--font-size-sm);
+  color: var(--color-subtext0);
+  margin-bottom: var(--spacing-md);
+}
+
+.featureCard ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: var(--font-size-xs);
+}
+
+.featureCard ul li {
+  padding: var(--spacing-xxs) 0;
+  color: var(--color-text);
+}
+
+.kanban h2 {
+  color: var(--color-blue);
+}
+
+.time-tracking h2 {
+  color: var(--color-peach);
+}

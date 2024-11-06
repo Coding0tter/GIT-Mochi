@@ -1,10 +1,7 @@
-import { onMount } from "solid-js";
-import styles from "./TimeTrack.module.css";
 import WeekCalendar from "../../components/TimeTrack/WeekCalendar/WeekCalendar";
+import styles from "./TimeTrack.module.css";
 
 const TimeTrack = () => {
-  onMount(() => {});
-
   return (
     <>
       <div class={styles.timetrack}>

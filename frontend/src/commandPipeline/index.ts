@@ -1,4 +1,3 @@
-// Dynamically import all command files in the "commands" directory
 const commandModules = import.meta.glob("./commands/*Command.ts");
 
 for (const path in commandModules) {

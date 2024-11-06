@@ -1,4 +1,3 @@
-import { groupBy } from "lodash";
 import { STATES } from "../constants";
 import {
   keyboardNavigationStore,
@@ -48,7 +47,7 @@ export const moveSelection = (direction: Direction) => {
   }
 };
 
-export const addToSelection = async (direction: Direction) => {
+export const addToSelection = (direction: Direction) => {
   const columnTasks = getColumnTasks();
   switch (direction) {
     case Direction.Up:

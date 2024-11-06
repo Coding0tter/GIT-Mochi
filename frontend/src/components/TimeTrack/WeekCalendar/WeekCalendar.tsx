@@ -2,6 +2,11 @@ import { createSignal, onMount } from "solid-js";
 import WeekCalendarBody from "../WeekCalendarBody/WeekCalendarBody";
 import WeekCalendarHeader from "../WeekCalendarHeader/WeekCalendarHeader";
 import styles from "./WeekCalendar.module.css";
+import {
+  setSelectedDayIndex,
+  setSelectedHourIndex,
+  setSelectedQuarterHourIndex,
+} from "../../../stores/keyboardNavigationStore";
 
 interface WeekCalendarProps {
   startHour?: number;
@@ -30,6 +35,9 @@ function WeekCalendar(props: WeekCalendarProps) {
       return date;
     });
 
+    setSelectedDayIndex(dayOfWeek);
+    setSelectedHourIndex(today.getHours());
+    setSelectedQuarterHourIndex(Math.floor(today.getMinutes() / 15));
     setWeekDates(dates);
   });
 

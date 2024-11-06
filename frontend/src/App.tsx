@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+import { useLocation, useNavigate } from "@solidjs/router";
 import { onCleanup, onMount } from "solid-js";
 import { HelpModal } from "./components/modals";
 import NotificationManager from "./components/shared/NotificationManager";
@@ -10,8 +10,9 @@ import styles from "./App.module.css";
 
 const App = (props: any) => {
   const navigator = useNavigate();
+  const location = useLocation();
   const keydownHandler = (event: KeyboardEvent) =>
-    handleKeyDown(event, navigator);
+    handleKeyDown(event, navigator, location);
 
   onMount(async () => {
     window.addEventListener("keydown", keydownHandler);

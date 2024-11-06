@@ -11,6 +11,8 @@ import WebSocketHandler from "./sockets/WebSocketHandler";
 import { Route, Router } from "@solidjs/router";
 import KanbanBoard from "./modules/KanbanBoard/KanbanBoard";
 import TimeTrack from "./modules/TimeTrack/TimeTrack";
+import Home from "./Home";
+import ShortcutRegistry from "./shortcutMaps/shortcutRegistry";
 
 const root = document.getElementById("root");
 
@@ -23,10 +25,12 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
+await ShortcutRegistry.getInstance().initializeAsync();
+
 render(
   () => (
     <Router root={App}>
-      <Route path="/" component={KanbanBoard} />
+      <Route path="/" component={Home} />
       <Route path="/kanban" component={KanbanBoard} />
       <Route path="/timetrack" component={TimeTrack} />
     </Router>

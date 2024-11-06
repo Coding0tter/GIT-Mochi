@@ -54,3 +54,11 @@
 .weekCalendarHourRow:last-child {
   border-bottom: none;
 }
+
+.selectedCell {
+  border: 1px solid var(--color-green);
+}
+
+.currentDay {
+  background-color: var(--color-crust);
+}
