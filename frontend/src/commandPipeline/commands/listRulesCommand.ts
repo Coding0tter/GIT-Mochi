@@ -30,8 +30,6 @@ const listRulesCommand: CommandPipeline = {
           ]);
         }
 
-        console.log(rules);
-
         setDropdownValues(
           rules.map((rule: Rule) => {
             let description = rule.eventType + " => ";
@@ -46,7 +44,6 @@ const listRulesCommand: CommandPipeline = {
             description += rule.actions
               .map((action) => `${action.targetPath}(${action.value ?? ""})`)
               .join(", ");
-            console.log(rule.enabled);
             return {
               text: `[${rule.enabled ? "on" : "off"}] ${rule.name}`,
               description,

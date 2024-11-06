@@ -132,8 +132,6 @@ export class EventEmitterHandler {
           const instance = new module.default();
           const method = instance[methodName].bind(instance);
 
-          console.log("Performing action", action, method);
-
           if (hasParams) {
             method(data, action.value);
           } else {

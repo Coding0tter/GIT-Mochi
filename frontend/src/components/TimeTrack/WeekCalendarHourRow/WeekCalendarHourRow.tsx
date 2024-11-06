@@ -1,6 +1,7 @@
 import { Component } from "solid-js";
 import styles from "./WeekCalendarHourRow.module.css";
 import { keyboardNavigationStore } from "../../../stores/keyboardNavigationStore";
+import Appointment from "../Appointment/Appointment";
 
 interface WeekCalendarHourRowProps {
   hour: number;
@@ -16,6 +17,7 @@ const WeekCalendarHourRow: Component<WeekCalendarHourRowProps> = (props) => {
         <div class={styles.weekCalendarDayColumn}>
           {Array.from({ length: 4 }, (_, index) => (
             <div
+              id={`day-${dayOfWeek}-hour-${props.hour}-quarter-${index}`}
               class={`${styles.weekCalendarQuarterHourCell} ${
                 date.toDateString() === props.currentDay.toDateString()
                   ? styles.currentDay
@@ -24,11 +26,20 @@ const WeekCalendarHourRow: Component<WeekCalendarHourRowProps> = (props) => {
                 keyboardNavigationStore.selectedDayIndex === dayOfWeek &&
                 keyboardNavigationStore.selectedHourIndex === props.hour &&
                 keyboardNavigationStore.selectedQuarterHourIndex === index
+                  ? styles.activeCell
+                  : ""
+              } ${
+                keyboardNavigationStore.selectedQuarterHourIndexes.length > 1 &&
+                keyboardNavigationStore.selectedQuarterHourIndexes.includes(
+                  props.hour * 4 + index
+                ) &&
+                keyboardNavigationStore.selectedDayIndex === dayOfWeek
                   ? styles.selectedCell
                   : ""
               }`}
-            ></div>
+            />
           ))}
+          {dayOfWeek === 0 && props.hour === 9 && <Appointment />}
         </div>
       ))}
     </div>

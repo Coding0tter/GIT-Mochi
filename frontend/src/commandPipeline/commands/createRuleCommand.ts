@@ -140,7 +140,6 @@ const createRuleCommand: CommandPipeline = {
         });
         setBuffer(rule);
 
-        console.log(action);
         if (action.hasParams) {
           next();
         } else {

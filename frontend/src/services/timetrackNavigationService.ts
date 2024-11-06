@@ -1,8 +1,10 @@
+import { uniq } from "lodash";
 import {
   keyboardNavigationStore,
   setSelectedDayIndex,
   setSelectedHourIndex,
   setSelectedQuarterHourIndex,
+  setSelectedQuarterHourIndexes,
 } from "../stores/keyboardNavigationStore";
 import { Direction } from "./taskNavigationService";
 
@@ -54,6 +56,77 @@ export const moveSelection = (direction: Direction, moveHourly = false) => {
 
     case Direction.Right:
       adjustDayIndex(selectedDayIndex === 6 ? 0 : selectedDayIndex + 1);
+      break;
+  }
+
+  setSelectedQuarterHourIndexes([
+    keyboardNavigationStore.selectedHourIndex * 4 +
+      keyboardNavigationStore.selectedQuarterHourIndex,
+  ]);
+};
+
+export const addToSelection = (direction: Direction, moveHourly = false) => {
+  const { selectedHourIndex, selectedQuarterHourIndex } =
+    keyboardNavigationStore;
+
+  const baseIndex = selectedHourIndex * 4 + selectedQuarterHourIndex;
+  const startQuarters = 8 * 4;
+  const endQuarters = 21 * 4;
+  let selectedQuarter = 0;
+
+  switch (direction) {
+    case Direction.Up:
+      setSelectedHourIndex(() => {
+        const newIndex = baseIndex - (moveHourly ? 4 : 1);
+        return Math.max(Math.floor(newIndex / 4), 8);
+      });
+      setSelectedQuarterHourIndex(() => {
+        const newIndex = baseIndex - (moveHourly ? 4 : 1);
+        return newIndex >= startQuarters
+          ? newIndex % 4
+          : selectedQuarterHourIndex;
+      });
+
+      selectedQuarter =
+        keyboardNavigationStore.selectedHourIndex * 4 +
+        keyboardNavigationStore.selectedQuarterHourIndex;
+
+      setSelectedQuarterHourIndexes((prev) => [
+        ...prev.filter((index) => index <= prev[0]! || index < selectedQuarter),
+        ...(prev.at(0)! > selectedQuarter
+          ? moveHourly
+            ? Array.from({ length: 4 }, (_, i) =>
+                Math.max(baseIndex - 4 + i, 0)
+              )
+            : [Math.max(baseIndex - 1, 0)]
+          : [selectedQuarter]),
+      ]);
+      break;
+
+    case Direction.Down:
+      setSelectedHourIndex(() => {
+        const newIndex = baseIndex + (moveHourly ? 4 : 1);
+        return Math.min(Math.floor(newIndex / 4), 20);
+      });
+      setSelectedQuarterHourIndex(() => {
+        const newIndex = baseIndex + (moveHourly ? 4 : 1);
+        return newIndex < endQuarters ? newIndex % 4 : selectedQuarterHourIndex;
+      });
+
+      selectedQuarter =
+        keyboardNavigationStore.selectedHourIndex * 4 +
+        keyboardNavigationStore.selectedQuarterHourIndex;
+
+      setSelectedQuarterHourIndexes((prev) => [
+        ...prev.filter((index) => index >= prev[0]! || index > selectedQuarter),
+        ...(prev.at(0)! < selectedQuarter
+          ? moveHourly
+            ? Array.from({ length: 4 }, (_, i) =>
+                Math.min(baseIndex + 1 + i, endQuarters - 1)
+              )
+            : [Math.min(baseIndex + 1, endQuarters - 1)]
+          : [selectedQuarter]),
+      ]);
       break;
   }
 };

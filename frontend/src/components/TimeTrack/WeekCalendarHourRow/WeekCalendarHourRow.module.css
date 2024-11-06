@@ -7,7 +7,7 @@
 .weekCalendarHourLabel {
   width: 80px;
   min-width: 80px;
-  padding: var(--spacing-sm) var(--spacing-xs);
+  padding: var(--spacing-xxs) var(--spacing-xs);
   background-color: var(--color-surface2);
   border-right: 1px solid var(--color-overlay0);
   text-align: right;
@@ -17,13 +17,13 @@
   font-size: var(--font-size-sm);
   box-sizing: border-box;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .weekCalendarDayColumn {
   flex: 1;
   display: flex;
+  position: relative;
   flex-direction: column;
   border-right: 1px solid var(--color-overlay0);
 }
@@ -33,6 +33,10 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   box-sizing: border-box;
   transition: background-color 0.2s;
+}
+
+.weekCalendarQuarterHourCell:last-child {
+  border-bottom: none;
 }
 
 .weekCalendarQuarterHourCell:hover {
@@ -56,7 +60,16 @@
 }
 
 .selectedCell {
-  border: 1px solid var(--color-green);
+  background-color: var(--color-blue) !important;
+  opacity: 0.5;
+  z-index: 19;
+}
+
+.activeCell {
+  border: 2px solid var(--color-red) !important;
+  backdrop-filter: brightness(80%) !important;
+  z-index: 20;
+  margin: -1px;
 }
 
 .currentDay {

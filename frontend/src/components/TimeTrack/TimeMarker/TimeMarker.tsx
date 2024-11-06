@@ -8,14 +8,19 @@ interface TimeMarkerProps {
 
 const TimeMarker: Component<TimeMarkerProps> = (props) => {
   const [currentTimePosition, setCurrentTimePosition] = createSignal(0);
+  const [currentTime, setCurrentTime] = createSignal(new Date());
 
   const updateCurrentTimePosition = () => {
     const now = new Date();
+    setCurrentTime(now);
     const totalMinutes = (props.endHour - props.startHour + 1) * 60;
     const currentMinutes =
       (now.getHours() - props.startHour) * 60 + now.getMinutes();
 
-    const position = (currentMinutes / totalMinutes) * 100;
+    const position = Math.max(
+      Math.min((currentMinutes / totalMinutes) * 100, 99),
+      0
+    );
 
     setCurrentTimePosition(position);
   };
@@ -32,7 +37,16 @@ const TimeMarker: Component<TimeMarkerProps> = (props) => {
       style={{
         top: `${currentTimePosition()}%`,
       }}
-    />
+    >
+      <div class={styles.time}>
+        {" "}
+        {currentTime().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })}
+      </div>
+    </div>
   );
 };
 

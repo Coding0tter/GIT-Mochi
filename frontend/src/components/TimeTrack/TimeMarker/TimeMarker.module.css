@@ -7,3 +7,15 @@
   z-index: 10;
   pointer-events: none;
 }
+
+.time {
+  position: absolute;
+  top: -25px;
+  right: 0;
+  display: inline-block;
+  padding: var(--spacing-xxs);
+  background-color: var(--color-sapphire);
+  border-radius: var(--spacing-xs);
+  color: var(--color-base);
+  border-bottom-right-radius: 0;
+}

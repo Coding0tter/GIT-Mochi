@@ -6,6 +6,7 @@ import {
   setSelectedDayIndex,
   setSelectedHourIndex,
   setSelectedQuarterHourIndex,
+  setSelectedQuarterHourIndexes,
 } from "../../../stores/keyboardNavigationStore";
 
 interface WeekCalendarProps {
@@ -38,6 +39,9 @@ function WeekCalendar(props: WeekCalendarProps) {
     setSelectedDayIndex(dayOfWeek);
     setSelectedHourIndex(today.getHours());
     setSelectedQuarterHourIndex(Math.floor(today.getMinutes() / 15));
+    setSelectedQuarterHourIndexes([
+      today.getHours() * 4 + Math.floor(today.getMinutes() / 15),
+    ]);
     setWeekDates(dates);
   });
 

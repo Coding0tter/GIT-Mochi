@@ -48,7 +48,6 @@ class TaskActionHandler {
     eventName: ActionTypes.Restore,
   })
   async restoreTaskAsync(data: MochiResult) {
-    console.log(data);
     try {
       await this._service.restoreTaskAsync(data.data._id as string);
     } catch (error: any) {

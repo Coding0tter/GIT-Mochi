@@ -1,6 +1,9 @@
 import { KeyboardShortcutMap } from ".";
 import { Direction } from "../services/taskNavigationService";
-import { moveSelection } from "../services/timetrackNavigationService";
+import {
+  addToSelection,
+  moveSelection,
+} from "../services/timetrackNavigationService";
 import { setSelectedQuarterHourIndex } from "../stores/keyboardNavigationStore";
 import ShortcutRegistry from "./shortcutRegistry";
 
@@ -25,6 +28,17 @@ const shortcuts: KeyboardShortcutMap = {
     },
 
     {
+      shiftKey: true,
+      key: ["ArrowUp"],
+      action: () => addToSelection(Direction.Up),
+    },
+    {
+      shiftKey: true,
+      key: ["ArrowDown"],
+      action: () => addToSelection(Direction.Down),
+    },
+
+    {
       ctrlKey: true,
       key: ["ArrowUp"],
       action: () => moveSelection(Direction.Up, true),
@@ -33,6 +47,19 @@ const shortcuts: KeyboardShortcutMap = {
       ctrlKey: true,
       key: ["ArrowDown"],
       action: () => moveSelection(Direction.Down, true),
+    },
+
+    {
+      ctrlKey: true,
+      shiftKey: true,
+      key: ["ArrowUp"],
+      action: () => addToSelection(Direction.Up, true),
+    },
+    {
+      ctrlKey: true,
+      shiftKey: true,
+      key: ["ArrowDown"],
+      action: () => addToSelection(Direction.Down, true),
     },
   ],
 };

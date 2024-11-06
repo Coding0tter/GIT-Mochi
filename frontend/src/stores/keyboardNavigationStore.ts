@@ -8,7 +8,7 @@ export const [keyboardNavigationStore, setKeyboardNavigationStore] =
     selectedDayIndex: 0,
     selectedHourIndex: 0,
     selectedQuarterHourIndex: 0,
-    selectedHourIndexes: [0] as number[],
+    selectedQuarterHourIndexes: [0] as number[],
   });
 
 const updateStoreIndex = <T>(
@@ -50,6 +50,6 @@ export const setSelectedQuarterHourIndex = (
   updater: number | ((prev: number) => number)
 ) => updateStoreIndex("selectedQuarterHourIndex", updater);
 
-export const setSelectedHourIndexes = (
+export const setSelectedQuarterHourIndexes = (
   updater: number[] | ((prev: number[]) => number[])
-) => updateStoreIndex("selectedHourIndexes", updater);
+) => updateStoreIndex("selectedQuarterHourIndexes", updater);

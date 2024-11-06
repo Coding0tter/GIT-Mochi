@@ -17,11 +17,13 @@ const WeekCalendarBody: Component<WeekCalendarBodyProps> = (props) => {
         { length: props.endHour - props.startHour + 1 },
         (_, idx) => props.startHour + idx
       ).map((hour) => (
-        <WeekCalendarHourRow
-          hour={hour}
-          weekDates={props.weekDates}
-          currentDay={props.currentDay}
-        />
+        <>
+          <WeekCalendarHourRow
+            hour={hour}
+            weekDates={props.weekDates}
+            currentDay={props.currentDay}
+          />
+        </>
       ))}
       <TimeMarker startHour={props.startHour} endHour={props.endHour} />
     </div>
