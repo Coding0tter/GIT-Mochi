@@ -7,9 +7,13 @@ export enum EventTypes {
 }
 
 export enum ActionTypes {
+  // Task actions
   Move = "move",
   Restore = "restore",
   Delete = "delete",
+
+  // GitLab actions
+  UpdateAssignee = "updateAssignee",
 }
 
 export enum EventNamespaces {

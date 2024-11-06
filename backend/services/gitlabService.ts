@@ -16,16 +16,20 @@ import { ContextKeys, getContext } from "../utils/asyncContext";
 import { ruleEvent } from "../decorators/ruleEventDecorator";
 import { EventNamespaces, EventTypes } from "../events/eventTypes";
 import type { ObjectId } from "mongoose";
+import TaskEventEmitter from "./emitters/taskEventEmitter";
+import type { MochiResult } from "../utils/mochiResult";
 
 export class GitlabService {
   private gitlabApiClient: GitlabApiClient;
   private taskService: TaskService;
+  private taskEmitter: TaskEventEmitter;
   private userService: UserService;
   private settingRepo: SettingRepo;
 
   constructor() {
     this.gitlabApiClient = new GitlabApiClient();
     this.taskService = new TaskService();
+    this.taskEmitter = new TaskEventEmitter();
     this.userService = new UserService();
     this.settingRepo = new SettingRepo();
   }
@@ -79,7 +83,7 @@ export class GitlabService {
       user.gitlabId.toString()
     );
 
-    const newMergeRequestTask = await this.taskService.createTaskAsync(
+    const newMergeRequestTaskResult = await this.taskEmitter.createTaskAsync(
       mergeRequestData.project_id,
       {
         labels: mergeRequestData.labels,
@@ -95,16 +99,22 @@ export class GitlabService {
       }
     );
 
+    if (newMergeRequestTaskResult.error) {
+      throw newMergeRequestTaskResult.error;
+    }
+
+    const newMergeRequestTask = newMergeRequestTaskResult.data;
+
     const comments = await this.getMergeRequestCommentsAsync(
       newMergeRequestTask.id
     );
     newMergeRequestTask.comments = comments;
 
-    await this.taskService.updateTaskAsync(newMergeRequestTask.id, {
+    await this.taskEmitter.updateTaskAsync(newMergeRequestTask.id, {
       comments: newMergeRequestTask.comments,
     });
 
-    await this.taskService.updateTaskAsync(issue._id as string, {
+    await this.taskEmitter.updateTaskAsync(issue._id as string, {
       status: "closed",
     });
 
@@ -141,6 +151,10 @@ export class GitlabService {
     return this.gitlabApiClient.request("/projects");
   }
 
+  async getUsersAsync() {
+    return this.gitlabApiClient.request("/users?per_page=100");
+  }
+
   async getMergeRequestCommentsAsync(taskId: ObjectId) {
     const mergeRequest = await this.taskService.findOneAsync({ _id: taskId });
     if (!mergeRequest) throw new GitlabError("Merge request not found", 404);
@@ -167,7 +181,7 @@ export class GitlabService {
       );
 
       if (mergeRequest.state === "merged") {
-        await this.taskService.updateTaskAsync(mr._id as string, {
+        await this.taskEmitter.updateTaskAsync(mr._id as string, {
           status: "closed",
         });
         changes.push({ ...mr, status: "closed" });
@@ -221,12 +235,12 @@ export class GitlabService {
 
     const taskData = createTaskData(entity, entityType);
 
-    let task: ITask | null = null;
+    let taskResult: MochiResult | null = null;
 
     if (existingTask) {
       const hasChanges = detectChanges(existingTask, taskData);
       if (hasChanges) {
-        task = await this.taskService.updateTaskAsync(
+        taskResult = await this.taskEmitter.updateTaskAsync(
           existingTask._id as string,
           {
             labels: taskData.labels,
@@ -235,15 +249,22 @@ export class GitlabService {
         );
       }
     } else {
-      task = await this.taskService.createTaskAsync(projectId, taskData);
+      taskResult = await this.taskEmitter.createTaskAsync(projectId, taskData);
     }
 
+    if (taskResult?.error) {
+      throw taskResult.error;
+    }
+
+    const task = taskResult?.data as ITask;
+
+    // TODO: refactor to only update task once
     if (task && entityType === "merge_request") {
       const comments = await this.getMergeRequestCommentsAsync(
         task._id as ObjectId
       );
       task.comments = comments;
-      await this.taskService.updateTaskAsync(task._id as string, {
+      await this.taskEmitter.updateTaskAsync(task._id as string, {
         comments: task.comments,
       });
     }

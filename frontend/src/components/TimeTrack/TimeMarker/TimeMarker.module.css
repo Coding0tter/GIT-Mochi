@@ -1,0 +1,9 @@
+.currentTimeMarker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-peach);
+  z-index: 10;
+  pointer-events: none;
+}

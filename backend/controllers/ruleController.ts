@@ -42,4 +42,35 @@ export class RuleController {
       handleControllerError(error, next);
     }
   };
+
+  getAllRulesAsync = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const rules = await this.ruleService.getAllAsync();
+      res.json(rules);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
+  deleteRuleAsync = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await this.ruleService.deleteRuleAsync(req.params.id);
+      res.sendStatus(204);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
+  toggleRuleAsync = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const rule = await this.ruleService.toggleRuleAsync(req.params.id);
+      res.json(rule);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
 }

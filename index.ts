@@ -1,21 +1,32 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 import http from "http";
 import { connect } from "mongoose";
-import taskRoutes from "./backend/routes/taskRoutes";
+import { closeMergeMergeRequestsJob } from "./backend/background-jobs/closeMergedMergeRequests";
+import { syncCommentJob } from "./backend/background-jobs/commentSync";
+import { syncGitlabJob } from "./backend/background-jobs/gitlabSync";
+import { MochiError } from "./backend/errors/mochiError";
+import { contextMiddleware } from "./backend/middlewares/contextMiddleware";
+import { globalErrorHandler } from "./backend/middlewares/globalErrorHandler";
 import gitlabRoutes from "./backend/routes/gitlabRoutes";
 import projectRoutes from "./backend/routes/projectRouter";
 import ruleRoutes from "./backend/routes/ruleRoutes";
-import { logError, logInfo } from "./backend/utils/logger";
-import { globalErrorHandler } from "./backend/middlewares/globalErrorHandler";
-import { SocketHandler } from "./backend/sockets";
-import { syncCommentJob } from "./backend/background-jobs/commentSync";
-import { syncGitlabJob } from "./backend/background-jobs/gitlabSync";
+import taskRoutes from "./backend/routes/taskRoutes";
+import "./backend/services/actions";
+import "./backend/services/emitters";
 import { GitlabService } from "./backend/services/gitlabService";
-import { MochiError } from "./backend/errors/mochiError";
-import { closeMergeMergeRequestsJob } from "./backend/background-jobs/closeMergedMergeRequests";
-import { contextMiddleware } from "./backend/middlewares/contextMiddleware";
-import { RuleEngine } from "./backend/ruleLogic/ruleEngine";
+import { SocketHandler } from "./backend/sockets";
+import { logError, logInfo } from "./backend/utils/logger";
+
+logInfo(`
+  
+  ███╗   ███╗ ██████╗  ██████╗██╗  ██╗██╗
+  ████╗ ████║██╔═══██╗██╔════╝██║  ██║██║
+  ██╔████╔██║██║   ██║██║     ███████║██║
+  ██║╚██╔╝██║██║   ██║██║     ██╔══██║██║
+  ██║ ╚═╝ ██║╚██████╔╝╚██████╗██║  ██║██║
+  ╚═╝     ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚═╝
+  `);
 
 const app = express();
 const server = http.createServer(app);
@@ -52,9 +63,6 @@ do {
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 } while (retries > 0);
-
-const ruleEngine = RuleEngine.getInstance();
-ruleEngine.initialize();
 
 app.use("/api/tasks", taskRoutes);
 app.use("/api/git", gitlabRoutes);

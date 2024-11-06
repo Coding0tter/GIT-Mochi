@@ -6,7 +6,11 @@ export enum MessageType {
 }
 
 export const addLog = (message: string, type: MessageType): void => {
-  console.log(`[BACKEND] [${type}] [${new Date().toISOString()}] ${message}`);
+  console.log(
+    `[BACKEND] [${type}] [${new Date().toLocaleString("de-DE", {
+      timeZone: "Europe/Berlin",
+    })}] ${message}`
+  );
 };
 
 export const logInfo = (message: string): void => {

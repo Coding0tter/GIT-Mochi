@@ -49,6 +49,15 @@ export class GitlabController {
     }
   };
 
+  getUsersAsync = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const users = await this.gitlabService.getUsersAsync();
+      res.status(200).json(users);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
   getProjectsAsync = async (
     req: Request,
     res: Response,

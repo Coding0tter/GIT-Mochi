@@ -1,0 +1,7 @@
+.kanban {
+  padding-inline: var(--spacing-sm);
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: space-between;
+  align-items: flex-start;
+}

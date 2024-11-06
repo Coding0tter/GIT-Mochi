@@ -1,6 +1,6 @@
 import { MochiResult } from "../utils/mochiResult";
 import { MochiError } from "../errors/mochiError";
-import { EventEmitterService } from "../events/eventEmitterService";
+import { EventEmitterHandler } from "../events/eventEmitterHandler";
 import { logError } from "../utils/logger";
 import { EventRegistry } from "../events/eventRegistry";
 import "reflect-metadata";
@@ -32,7 +32,7 @@ export function ruleEvent(eventNamespace: string, eventName: string) {
             ? result
             : new MochiResult(eventType, result);
 
-        EventEmitterService.getEmitter().emit(eventType, resultData);
+        EventEmitterHandler.getEmitter().emit(eventType, resultData);
 
         return result;
       } catch (error: any) {

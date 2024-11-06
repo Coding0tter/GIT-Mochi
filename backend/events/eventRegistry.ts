@@ -1,5 +1,5 @@
 import { logInfo } from "../utils/logger";
-import { EventEmitterService } from "./eventEmitterService";
+import { EventEmitterHandler } from "./eventEmitterHandler";
 
 type EventMetadata = {
   eventType: string;

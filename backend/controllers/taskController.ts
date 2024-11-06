@@ -3,14 +3,17 @@ import type { Request, Response, NextFunction } from "express";
 import { TaskService } from "../services/taskService.js";
 import { handleControllerError, MochiError } from "../errors/mochiError.js";
 import { ProjectService } from "../services/projectService.js";
+import TaskEventEmitter from "../services/emitters/taskEventEmitter.js";
 
 export class TaskController {
   private taskService: TaskService;
+  private taskEmitter: TaskEventEmitter;
   private projectService: ProjectService;
 
   constructor() {
     this.taskService = new TaskService();
     this.projectService = new ProjectService();
+    this.taskEmitter = new TaskEventEmitter();
   }
 
   createTaskAsync = async (req: Request, res: Response, next: NextFunction) => {
@@ -24,7 +27,7 @@ export class TaskController {
         throw new MochiError("No project selected", 404);
       }
 
-      const createdTask = await this.taskService.createTaskAsync(
+      const createdTask = await this.taskEmitter.createTaskAsync(
         currentProject.id,
         {
           title,
@@ -34,7 +37,11 @@ export class TaskController {
         }
       );
 
-      res.status(201).json(createdTask);
+      if (createdTask.error) {
+        throw createdTask.error;
+      }
+
+      res.status(201).json(createdTask.data);
     } catch (error) {
       handleControllerError(error, next);
     }
@@ -66,13 +73,17 @@ export class TaskController {
       const { id } = req.params;
       const { title, status, description } = req.body as Partial<TaskDto>;
 
-      const updatedTask = await this.taskService.updateTaskAsync(id, {
+      const updatedTask = await this.taskEmitter.updateTaskAsync(id, {
         title,
         status,
         description,
       });
 
-      res.status(200).json(updatedTask);
+      if (updatedTask.error) {
+        throw updatedTask.error;
+      }
+
+      res.status(200).json(updatedTask.data);
     } catch (error) {
       handleControllerError(error, next);
     }
@@ -118,7 +129,7 @@ export class TaskController {
     try {
       const { id } = req.params;
 
-      await this.taskService.deleteTaskAsync(id);
+      await this.taskEmitter.deleteTaskAsync(id);
 
       res.status(204).send();
     } catch (error) {

@@ -1,10 +1,10 @@
 services:
-  kanban-board:
-    build: ./kanban-board
+  frontend:
+    build: ./frontend
     ports:
-      - '3005:3005'
+      - "3005:3005"
     volumes:
-      - ./kanban-board:/app  # Mount local directory for hot-reloading
+      - ./frontend:/app # Mount local directory for hot-reloading
     depends_on:
       - backend
 
@@ -13,7 +13,7 @@ services:
     volumes:
       - ./:/app
     ports:
-      - '5000:5000'
+      - "5000:5000"
     command: ["bun", "run", "--watch", "index.ts"]
     depends_on:
       - mongo
@@ -21,7 +21,7 @@ services:
   mongo:
     image: mongo:latest
     ports:
-      - '27018:27017'
+      - "27018:27017"
     volumes:
       - mongo-data:/data/db
 

@@ -1,0 +1,6 @@
+.weekCalendarBody {
+  flex: 1; /* Allow it to grow within the .weekCalendar */
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Ensure it takes the full height of .weekCalendar */
+}
