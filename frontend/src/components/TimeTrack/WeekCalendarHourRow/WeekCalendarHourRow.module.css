@@ -75,3 +75,12 @@
 .currentDay {
   background-color: var(--color-crust);
 }
+
+.appointmentWrapper {
+  width: 100%;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  gap: var(--spacing-xxs);
+}

@@ -206,7 +206,7 @@ export class GitlabService {
 
     for (const entity of entities) {
       const task = await this.processEntity(entity, entityType, projectId);
-      if (task) {
+      if (task && !task.deleted) {
         updatedTasks.push(task);
       }
     }

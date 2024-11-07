@@ -39,7 +39,14 @@ const WeekCalendarHourRow: Component<WeekCalendarHourRowProps> = (props) => {
               }`}
             />
           ))}
-          {dayOfWeek === 0 && props.hour === 9 && <Appointment />}
+          <div class={styles.appointmentWrapper}>
+            {dayOfWeek === 0 && props.hour === 11 && (
+              <Appointment length={24} />
+            )}
+            {dayOfWeek === 0 && props.hour === 11 && (
+              <Appointment length={10} />
+            )}
+          </div>
         </div>
       ))}
     </div>

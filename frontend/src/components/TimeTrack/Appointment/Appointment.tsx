@@ -1,7 +1,7 @@
 import { createSignal, onMount } from "solid-js";
 import styles from "./Appointment.module.css";
 
-const Appointment = () => {
+const Appointment = ({ length }: { length: number }) => {
   const [containerHeight, setContainerHeight] = createSignal<number>(0);
 
   onMount(() => {
@@ -18,7 +18,7 @@ const Appointment = () => {
       class={styles.appointment}
       style={{
         "margin-top": containerHeight() * 2 - 1 + "px",
-        height: containerHeight() * 24 + 24 + "px",
+        height: containerHeight() * length + length + "px",
       }}
     >
       Test event
