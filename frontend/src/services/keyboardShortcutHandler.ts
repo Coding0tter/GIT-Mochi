@@ -35,50 +35,37 @@ export const handleKeyDown = async (
     return;
   }
 
-  ShortcutRegistry.getInstance().executeShortcut(key, event);
-
   if (event.ctrlKey) {
     switch (event.key) {
       case "p":
         event.preventDefault();
         event.stopPropagation();
         focusInput(InputMode.Commandline);
-        break;
+        return;
       case "f":
         event.preventDefault();
         event.stopPropagation();
         focusInput(InputMode.Search);
-        break;
+        return;
     }
-
-    return;
   }
 
   if (event.shiftKey) {
-    switch (event.key) {
-      case "!":
+    switch (event.code) {
+      case "Digit1":
         navigator("/kanban");
-        break;
-      case '"':
+        return;
+      case "Digit2":
         navigator("/timetrack");
-        break;
-      case "=":
+        return;
+      case "Digit3":
         navigator("/");
-        break;
-
-      default:
-        break;
+        return;
+      case "Slash":
+        openHelpModal();
+        return;
     }
-
-    return;
   }
 
-  switch (event.key) {
-    case "h":
-      openHelpModal();
-      break;
-
-    default:
-      break;
-  }
+  ShortcutRegistry.getInstance().executeShortcut(key, event);
 };

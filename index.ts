@@ -12,6 +12,7 @@ import gitlabRoutes from "./backend/routes/gitlabRoutes";
 import projectRoutes from "./backend/routes/projectRouter";
 import ruleRoutes from "./backend/routes/ruleRoutes";
 import taskRoutes from "./backend/routes/taskRoutes";
+import timeTrackRoutes from "./backend/routes/timeTrackRoutes";
 import "./backend/services/actions";
 import "./backend/services/emitters";
 import { GitlabService } from "./backend/services/gitlabService";
@@ -68,6 +69,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/git", gitlabRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/rules", ruleRoutes);
+app.use("/api/timetrack", timeTrackRoutes);
 
 // Sync comments every minute
 syncCommentJob();

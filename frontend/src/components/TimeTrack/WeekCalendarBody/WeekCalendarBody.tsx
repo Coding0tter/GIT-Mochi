@@ -12,7 +12,7 @@ interface WeekCalendarBodyProps {
 
 const WeekCalendarBody: Component<WeekCalendarBodyProps> = (props) => {
   return (
-    <div class={styles.weekCalendarBody}>
+    <div id="calendar-body" class={styles.weekCalendarBody}>
       {Array.from(
         { length: props.endHour - props.startHour + 1 },
         (_, idx) => props.startHour + idx

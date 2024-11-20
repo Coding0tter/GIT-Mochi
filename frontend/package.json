@@ -25,6 +25,7 @@
     "@types/dompurify": "^3.0.5",
     "@types/lodash": "^4.17.9",
     "axios": "^1.7.7",
+    "dayjs": "^1.11.13",
     "dompurify": "^3.1.7",
     "lodash": "^4.17.21",
     "socket.io-client": "^4.8.0",

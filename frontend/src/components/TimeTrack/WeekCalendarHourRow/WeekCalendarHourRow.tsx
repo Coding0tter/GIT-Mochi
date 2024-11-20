@@ -2,6 +2,9 @@ import { Component } from "solid-js";
 import styles from "./WeekCalendarHourRow.module.css";
 import { keyboardNavigationStore } from "../../../stores/keyboardNavigationStore";
 import Appointment from "../Appointment/Appointment";
+import { timeTrackStore } from "../../../stores/timeTrackStore";
+import dayjs from "dayjs";
+import { get } from "lodash";
 
 interface WeekCalendarHourRowProps {
   hour: number;
@@ -40,12 +43,24 @@ const WeekCalendarHourRow: Component<WeekCalendarHourRowProps> = (props) => {
             />
           ))}
           <div class={styles.appointmentWrapper}>
-            {dayOfWeek === 0 && props.hour === 11 && (
-              <Appointment length={24} />
-            )}
-            {dayOfWeek === 0 && props.hour === 11 && (
-              <Appointment length={10} />
-            )}
+            {props.hour == 8 &&
+              timeTrackStore.entries.map((entry) => {
+                const entryDate = dayjs(entry.start).day() - 1;
+
+                if (entryDate === dayOfWeek) {
+                  const end = entry?.end ? dayjs(entry.end) : dayjs();
+                  const start = dayjs(entry.start).subtract(1, "hour");
+                  const length = end.diff(start, "minute");
+
+                  return (
+                    <Appointment
+                      start={start}
+                      length={Math.max(Math.ceil(length / 15), 1)}
+                      title="Worktime"
+                    />
+                  );
+                }
+              })}
           </div>
         </div>
       ))}

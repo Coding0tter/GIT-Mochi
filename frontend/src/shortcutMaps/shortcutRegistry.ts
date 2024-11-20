@@ -5,7 +5,7 @@ class ShortcutRegistry {
 
   private static shortcutMaps: KeyboardShortcutMap[] = [];
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): ShortcutRegistry {
     if (!ShortcutRegistry.instance) {

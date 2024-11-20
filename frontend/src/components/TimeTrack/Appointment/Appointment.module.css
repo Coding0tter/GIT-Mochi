@@ -1,5 +1,6 @@
 .appointment {
-  background-color: var(--color-peach);
+  background-color: var(--color-teal);
+  filter: brightness(80%);
   color: var(--color-crust);
   border-radius: var(--spacing-xs);
   text-align: center;

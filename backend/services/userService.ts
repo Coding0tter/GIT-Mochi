@@ -16,6 +16,4 @@ export class UserService {
   async createUser(userData: Partial<IUser>): Promise<IUser> {
     return this.userRepo.createAsync(userData);
   }
-
-  // Other user-related methods...
 }

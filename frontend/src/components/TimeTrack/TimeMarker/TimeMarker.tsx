@@ -25,7 +25,7 @@ const TimeMarker: Component<TimeMarkerProps> = (props) => {
     setCurrentTimePosition(position);
   };
 
-  onMount(() => {
+  onMount(async () => {
     updateCurrentTimePosition();
     const interval = setInterval(updateCurrentTimePosition, 60000);
     onCleanup(() => clearInterval(interval));

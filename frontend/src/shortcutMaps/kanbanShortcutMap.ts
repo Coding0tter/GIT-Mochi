@@ -19,28 +19,26 @@ import {
   moveSelectedTasksAsync,
   restoreSelectedTaskAsync,
 } from "../services/taskService";
-import { focusInput } from "../services/uiService";
 import { toggleShowDeletedTasksAsync } from "../stores/taskStore";
-import { InputMode } from "../stores/uiStore";
 import ShortcutRegistry from "./shortcutRegistry";
 
 const shortcuts: KeyboardShortcutMap = {
   key: "kanban",
   shortcuts: [
     {
-      key: ["w", "ArrowUp"],
+      key: ["k", "ArrowUp"],
       action: () => moveSelection(Direction.Up),
     },
     {
-      key: ["s", "ArrowDown"],
+      key: ["j", "ArrowDown"],
       action: () => moveSelection(Direction.Down),
     },
     {
-      key: ["a", "ArrowLeft"],
+      key: ["h", "ArrowLeft"],
       action: () => moveSelection(Direction.Left),
     },
     {
-      key: ["d", "ArrowRight"],
+      key: ["l", "ArrowRight"],
       action: () => moveSelection(Direction.Right),
     },
     {
@@ -74,22 +72,22 @@ const shortcuts: KeyboardShortcutMap = {
 
     {
       shiftKey: true,
-      key: ["A", "ArrowLeft"],
+      key: ["H", "ArrowLeft"],
       action: async () => await moveSelectedTasksAsync(Direction.Left),
     },
     {
       shiftKey: true,
-      key: ["D", "ArrowRight"],
+      key: ["L", "ArrowRight"],
       action: async () => await moveSelectedTasksAsync(Direction.Right),
     },
     {
       shiftKey: true,
-      key: ["W", "ArrowUp"],
+      key: ["K", "ArrowUp"],
       action: () => addToSelection(Direction.Up),
     },
     {
       shiftKey: true,
-      key: ["S", "ArrowDown"],
+      key: ["J", "ArrowDown"],
       action: () => addToSelection(Direction.Down),
     },
     {
@@ -115,12 +113,12 @@ const shortcuts: KeyboardShortcutMap = {
 
     {
       ctrlKey: true,
-      key: ["w", "ArrowUp"],
+      key: ["k", "ArrowUp"],
       action: async () => moveSelectedTasksAsync(Direction.Up),
     },
     {
       ctrlKey: true,
-      key: ["s", "ArrowDown"],
+      key: ["j", "ArrowDown"],
       action: async () => moveSelectedTasksAsync(Direction.Down),
     },
   ],

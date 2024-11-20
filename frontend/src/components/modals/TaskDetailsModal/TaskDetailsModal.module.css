@@ -3,6 +3,7 @@
   gap: var(--spacing-sm);
   border-radius: var(--spacing-xs);
   color: var(--color-text);
+  align-items: flex-start;
 }
 
 .taskInfo {
@@ -98,4 +99,10 @@
   line-height: 1.4;
   padding-left: var(--spacing-xs);
   border-left: 2px solid var(--color-overlay0);
+}
+
+.mention {
+  color: var(--color-peach);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
 }

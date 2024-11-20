@@ -79,8 +79,10 @@
 .appointmentWrapper {
   width: 100%;
   position: absolute;
+  top: 0;
   display: flex;
   flex-direction: row;
   flex: 1;
+  z-index: 21;
   gap: var(--spacing-xxs);
 }

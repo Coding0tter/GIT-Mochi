@@ -10,7 +10,7 @@ export class GitlabApiClient {
     this.privateToken = process.env.PRIVATE_TOKEN || "";
   }
 
-  async request(endpoint: string, method: "GET" | "POST" = "GET", data?: any) {
+  async request(endpoint: string, method: "GET" | "POST" | "PUT" = "GET", data?: any) {
     try {
       const response = await axios({
         url: `${this.baseUrl}${endpoint}`,

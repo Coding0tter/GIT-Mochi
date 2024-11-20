@@ -8,6 +8,7 @@ import {
   setSelectedQuarterHourIndex,
   setSelectedQuarterHourIndexes,
 } from "../../../stores/keyboardNavigationStore";
+import { setCalendarHeight } from "../../../stores/uiStore";
 
 interface WeekCalendarProps {
   startHour?: number;
@@ -35,6 +36,13 @@ function WeekCalendar(props: WeekCalendarProps) {
       date.setDate(monday.getDate() + i);
       return date;
     });
+
+    const calendarHeight = document
+      .getElementById("calendar-body")
+      ?.getBoundingClientRect()
+      .height.toFixed(4) as unknown as number;
+
+    setCalendarHeight(calendarHeight);
 
     setSelectedDayIndex(dayOfWeek);
     setSelectedHourIndex(today.getHours());

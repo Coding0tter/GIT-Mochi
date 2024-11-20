@@ -91,7 +91,13 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
                   </div>
                   <div
                     class={styles.commentText}
-                    innerHTML={formatCommentBody(comment.body)}
+                    innerHTML={formatCommentBody(
+                      comment.body.replaceAll(
+                        /@\w+/g,
+                        (mention) =>
+                          `<strong class="${styles.mention}">${mention}</strong>`
+                      )
+                    )}
                   />
                   {comment.images?.map((src) =>
                     src.includes(".webm") || src.includes(".mp4") ? (

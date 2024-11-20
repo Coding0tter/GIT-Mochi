@@ -31,7 +31,12 @@ export const [uiStore, setUiStore] = createStore({
   loadingTarget: LoadingTarget.None,
   isConnected: false,
   inputMode: InputMode.None,
+  calendarHeight: 0,
 });
+
+export const setCalendarHeight = (height: number) => {
+  setUiStore("calendarHeight", height);
+};
 
 export const setConnected = (connected: boolean) => {
   setUiStore("isConnected", connected);

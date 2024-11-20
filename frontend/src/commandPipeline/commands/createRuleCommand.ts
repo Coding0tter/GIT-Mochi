@@ -183,9 +183,15 @@ const createRuleCommand: CommandPipeline = {
           repeat();
           return;
         }
-
+        const dropdownValue = getActiveDropdownValue().value;
         const rule = cloneDeep(commandStore.buffer) as Rule;
-        rule.actions[rule.actions.length - 1].value = input;
+        console.log(dropdownValue);
+        if (typeof dropdownValue === "string") {
+          rule.actions[rule.actions.length - 1].value = input;
+        }
+        else {
+          rule.actions[rule.actions.length - 1].value = dropdownValue;
+        }
 
         setBuffer(rule);
 

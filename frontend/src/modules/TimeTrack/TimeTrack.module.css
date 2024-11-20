@@ -4,6 +4,5 @@
   gap: var(--spacing-md);
   justify-content: space-between;
   align-items: flex-start;
-
   height: calc(100% - 30px - var(--spacing-sm));
 }
