@@ -17,6 +17,7 @@ import {
 } from "../services/taskNavigationService";
 import {
   moveSelectedTasksAsync,
+  moveSelectedTasksToEndAsync,
   restoreSelectedTaskAsync,
 } from "../services/taskService";
 import { toggleShowDeletedTasksAsync } from "../stores/taskStore";
@@ -40,14 +41,6 @@ const shortcuts: KeyboardShortcutMap = {
     {
       key: ["l", "ArrowRight"],
       action: () => moveSelection(Direction.Right),
-    },
-    {
-      key: "n",
-      action: async () => await moveSelectedTasksAsync(Direction.Right),
-    },
-    {
-      key: "p",
-      action: async () => await moveSelectedTasksAsync(Direction.Left),
     },
     {
       key: "x",
@@ -103,23 +96,35 @@ const shortcuts: KeyboardShortcutMap = {
     {
       shiftKey: true,
       key: "M",
-      action: () => createMergeRequestAndBranchForSelectedTaskAsync(),
+      action: async () =>
+        await createMergeRequestAndBranchForSelectedTaskAsync(),
     },
     {
       shiftKey: true,
       key: "R",
-      action: () => restoreSelectedTaskAsync(),
+      action: async () => await restoreSelectedTaskAsync(),
+    },
+
+    {
+      shiftKey: true,
+      key: ["^"],
+      action: async () => await moveSelectedTasksToEndAsync(Direction.Up),
+    },
+    {
+      shiftKey: true,
+      key: ["$"],
+      action: async () => await moveSelectedTasksToEndAsync(Direction.Down),
     },
 
     {
       ctrlKey: true,
       key: ["k", "ArrowUp"],
-      action: async () => moveSelectedTasksAsync(Direction.Up),
+      action: async () => await moveSelectedTasksAsync(Direction.Up),
     },
     {
       ctrlKey: true,
       key: ["j", "ArrowDown"],
-      action: async () => moveSelectedTasksAsync(Direction.Down),
+      action: async () => await moveSelectedTasksAsync(Direction.Down),
     },
   ],
 };

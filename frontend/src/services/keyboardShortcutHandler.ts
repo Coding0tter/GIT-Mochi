@@ -73,5 +73,10 @@ export const handleKeyDown = async (
     }
   }
 
+  if (event.key === ":") {
+    focusInput(InputMode.Commandline);
+    return;
+  }
+
   ShortcutRegistry.getInstance().executeShortcut(key, event);
 };

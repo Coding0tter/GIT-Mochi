@@ -96,6 +96,50 @@ export const moveSelectedTasksAsync = async (direction: Direction) => {
   }
 };
 
+export const moveSelectedTasksToEndAsync = async (direction: Direction) => {
+  const { selectedTaskIndexes } = keyboardNavigationStore;
+  const tasks = getColumnTasks();
+  const selectedTasks = tasks.filter((_task, index) =>
+    selectedTaskIndexes.includes(index)
+  );
+
+  // Remove selected tasks from the original array
+  const remainingTasks = tasks.filter(
+    (_task, index) => !selectedTaskIndexes.includes(index)
+  );
+
+  // Rebuild the task array based on the direction
+  const newTaskOrder =
+    direction === Direction.Up
+      ? [...selectedTasks, ...remainingTasks]
+      : [...remainingTasks, ...selectedTasks];
+
+  // Reassign orders based on the new position
+  const updatedTaskOrder = newTaskOrder.map((task, index) => ({
+    ...task,
+    order: index,
+  }));
+
+  // Extract IDs for the backend update
+  const updatedTaskIds = updatedTaskOrder.map((task) => task._id);
+
+  await updateTaskOrderAsync(updatedTaskIds);
+  await fetchTasksAsync();
+
+  // Reset selection
+  const newSelectedIndexes =
+    direction === Direction.Up
+      ? selectedTasks.map((_task, index) => index)
+      : selectedTasks.map(
+          (_task, index) => newTaskOrder.length - selectedTasks.length + index
+        );
+
+  setSelectedTaskIndexes(newSelectedIndexes);
+  setSelectedTaskIndex(
+    direction === Direction.Up ? 0 : newTaskOrder.length - 1
+  );
+};
+
 const moveSelectedTasksToColumn = async (
   tasksToMove: Task[],
   selectedColumnIndex: number,
