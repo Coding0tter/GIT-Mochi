@@ -22,6 +22,23 @@ export class TimeTrackController {
     }
   };
 
+  updateTimeTrackEntryAsync = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { id, entry } = req.body;
+      const result = await this.timeTrackService.updateTimeTrackEntryAsync(
+        id,
+        entry
+      );
+      res.status(200).json(result);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
   getRecoringStateAsync = async (
     req: Request,
     res: Response,

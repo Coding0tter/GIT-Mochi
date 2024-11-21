@@ -2,7 +2,12 @@ import { Location, Navigator } from "@solidjs/router";
 import ShortcutRegistry from "../shortcutMaps/shortcutRegistry";
 import { resetCommandline } from "../stores/commandStore";
 import { modalStore, ModalType } from "../stores/modalStore";
-import { InputMode, uiStore } from "../stores/uiStore";
+import {
+  CalendarMode,
+  InputMode,
+  setCalendarMode,
+  uiStore,
+} from "../stores/uiStore";
 import { openHelpModal } from "./modalService";
 import { closeModalAndUnfocus, focusInput } from "./uiService";
 
@@ -15,6 +20,7 @@ export const handleKeyDown = async (
 
   if (event.key === "Escape") {
     closeModalAndUnfocus();
+    setCalendarMode(CalendarMode.Time);
 
     if (
       uiStore.inputMode === InputMode.Commandline ||

@@ -7,6 +7,7 @@ import {
   uiStore,
 } from "./uiStore";
 import { CommandProcessor } from "../commandPipeline/commandProcessor";
+import { cloneDeep } from "lodash";
 
 export type Command = {
   text: string;
@@ -34,14 +35,30 @@ export const [commandStore, setCommandStore] = createStore({
   activeDropdownIndex: 0,
   buffer: null as any,
   pendingCommand: undefined as Command | undefined,
+  eventListener: undefined as { listener: any; event: string } | undefined,
 });
+
+export const addListener = (event: string, listener: any) => {
+  setCommandStore("eventListener", { listener, event });
+  window.addEventListener(event, listener);
+};
+
+export const removeListener = () => {
+  if (!commandStore.eventListener) return;
+
+  window.removeEventListener(
+    commandStore.eventListener.event,
+    commandStore.eventListener.listener
+  );
+  setCommandStore("eventListener", undefined);
+};
 
 export const setCommandProcessor = (processor: CommandProcessor) => {
   setCommandStore("activeCommandProcessor", processor);
 };
 
 export const setDropdownValues = (values: DropdownValue[]) => {
-  setCommandStore("dropdownValues", reconcile(values));
+  setCommandStore("dropdownValues", reconcile(cloneDeep(values)));
 };
 
 export const setActiveDropdownIndex = (index: number) => {
@@ -84,4 +101,5 @@ export const resetCommandline = () => {
   setCommandInputValue("");
 
   setCommandProcessor(undefined as any);
+  removeListener();
 };

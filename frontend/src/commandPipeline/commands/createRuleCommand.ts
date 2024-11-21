@@ -10,7 +10,7 @@ import {
   setBuffer,
   setDropdownValues,
 } from "../../stores/commandStore";
-import { Action, Rule } from "../../stores/ruleStore";
+import { Rule } from "../../stores/ruleStore";
 import { registerCommand } from "../commandRegistry";
 import { CommandPipeline } from "../types";
 import { addNotification } from "../../services/notificationService";
@@ -185,11 +185,10 @@ const createRuleCommand: CommandPipeline = {
         }
         const dropdownValue = getActiveDropdownValue().value;
         const rule = cloneDeep(commandStore.buffer) as Rule;
-        console.log(dropdownValue);
+
         if (typeof dropdownValue === "string") {
           rule.actions[rule.actions.length - 1].value = input;
-        }
-        else {
+        } else {
           rule.actions[rule.actions.length - 1].value = dropdownValue;
         }
 

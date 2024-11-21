@@ -3,7 +3,7 @@ import { useSpies } from "../../../base.test";
 import {
   openDeleteModal,
   openDetailsModal,
-  openEditModal,
+  openEditTaskModal,
   openHelpModal,
 } from "../modalService";
 import { ModalType } from "../../stores/modalStore";
@@ -77,7 +77,7 @@ describe("ModalService", () => {
       } as Task,
     ]);
 
-    openEditModal();
+    openEditTaskModal();
 
     expect(setActiveModalSpy).toHaveBeenCalledWith(ModalType.CreateTask);
     expect(setSelectedTaskForModalSpy).toHaveBeenCalledWith(

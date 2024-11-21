@@ -3,6 +3,7 @@ import { createStore } from "solid-js/store";
 import { addNotification } from "../services/notificationService";
 
 export type TimeTrackEntry = {
+  _id: string;
   start: Date;
   end: Date;
 };

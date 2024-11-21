@@ -74,6 +74,7 @@
 
 .currentDay {
   background-color: var(--color-crust);
+  background-clip: content-box;
 }
 
 .appointmentWrapper {

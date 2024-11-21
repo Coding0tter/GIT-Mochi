@@ -1,12 +1,20 @@
 import { createEffect, createSignal, onCleanup } from "solid-js";
 import { timeTrackStore } from "../../../stores/timeTrackStore";
-import { LoadingTarget, uiStore } from "../../../stores/uiStore";
+import { CalendarMode, LoadingTarget, uiStore } from "../../../stores/uiStore";
 import Badge from "../Badge/Badge";
 import styles from "./StatusBar.module.css";
+import { useLocation } from "@solidjs/router";
 
 const StatusBar = () => {
+  const location = useLocation();
+  const [trackedDuration, setTrackedDuration] = createSignal<string | null>(
+    null
+  );
+  const [isCalendar, setIsCalendar] = createSignal(false);
 
-  const [trackedDuration, setTrackedDuration] = createSignal<string | null>(null);
+  createEffect(() => {
+    setIsCalendar(location.pathname === "/timetrack");
+  }, [location]);
 
   createEffect(() => {
     let timer = null;
@@ -14,7 +22,8 @@ const StatusBar = () => {
       const updateDuration = () => {
         const lastEntry = timeTrackStore.entries.at(-1);
         if (lastEntry) {
-          const diff = new Date().getTime() - new Date(lastEntry.start).getTime();
+          const diff =
+            new Date().getTime() - new Date(lastEntry.start).getTime();
           const minutes = Math.floor(diff / 1000 / 60);
           const hours = Math.floor(minutes / 60);
 
@@ -40,6 +49,12 @@ const StatusBar = () => {
   return (
     <div class={styles.statusBar}>
       <div class={styles.left}>
+        {isCalendar() && (
+          <div class={`${styles.calendarMode} ${styles[uiStore.calendarMode]}`}>
+            {uiStore.calendarMode === CalendarMode.Time && "Time"}
+            {uiStore.calendarMode === CalendarMode.Appointment && "Appointment"}
+          </div>
+        )}
         {uiStore.loadingTarget === LoadingTarget.SyncGitlab && (
           <Badge type="none">
             <i class="fa-solid fa-sync"></i> Syncing with Gitlab...

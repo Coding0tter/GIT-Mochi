@@ -1,11 +1,12 @@
 import { KeyboardShortcutMap } from ".";
+import { openEditAppointmentModal } from "../services/modalService";
 import { Direction } from "../services/taskNavigationService";
 import {
   addToSelection,
   moveSelection,
 } from "../services/timetrackNavigationService";
-import { setSelectedQuarterHourIndex } from "../stores/keyboardNavigationStore";
 import { toggleTimetrackAsync } from "../stores/timeTrackStore";
+import { CalendarMode, setCalendarMode } from "../stores/uiStore";
 import ShortcutRegistry from "./shortcutRegistry";
 
 const shortcuts: KeyboardShortcutMap = {
@@ -28,8 +29,16 @@ const shortcuts: KeyboardShortcutMap = {
       action: () => moveSelection(Direction.Right),
     },
     {
+      key: "a",
+      action: () => setCalendarMode(CalendarMode.Appointment),
+    },
+    {
       key: "t",
-      action: async () => await toggleTimetrackAsync(),
+      action: () => setCalendarMode(CalendarMode.Time),
+    },
+    {
+      key: "e",
+      action: () => openEditAppointmentModal(),
     },
 
     {
@@ -52,6 +61,11 @@ const shortcuts: KeyboardShortcutMap = {
       ctrlKey: true,
       key: ["j", "ArrowDown"],
       action: () => moveSelection(Direction.Down, true),
+    },
+    {
+      ctrlKey: true,
+      key: "l",
+      action: async () => await toggleTimetrackAsync(),
     },
 
     {

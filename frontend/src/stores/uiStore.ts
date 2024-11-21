@@ -22,9 +22,27 @@ export enum LoadingTarget {
   None,
 }
 
-export const [uiStore, setUiStore] = createStore({
-  commandInputRef: null as HTMLInputElement | null,
-  currentProject: null as Project | null,
+export enum CalendarMode {
+  Time = "time",
+  Appointment = "appointment",
+}
+
+type UiState = {
+  commandInputRef: HTMLInputElement | null;
+  currentProject: Project | null;
+  commandInputValue: string;
+  commandPlaceholder: string;
+  commandReadonly: boolean;
+  loadingTarget: LoadingTarget;
+  isConnected: boolean;
+  inputMode: InputMode;
+  calendarHeight: number;
+  calendarMode: CalendarMode;
+};
+
+export const [uiStore, setUiStore] = createStore<UiState>({
+  commandInputRef: null,
+  currentProject: null,
   commandInputValue: "",
   commandPlaceholder: "",
   commandReadonly: false,
@@ -32,39 +50,30 @@ export const [uiStore, setUiStore] = createStore({
   isConnected: false,
   inputMode: InputMode.None,
   calendarHeight: 0,
+  calendarMode: CalendarMode.Time,
 });
 
-export const setCalendarHeight = (height: number) => {
-  setUiStore("calendarHeight", height);
+const updateField = <K extends keyof UiState>(field: K, value: UiState[K]) => {
+  setUiStore(field, value);
 };
 
-export const setConnected = (connected: boolean) => {
-  setUiStore("isConnected", connected);
-};
-
-export const setCommandInputRef = (ref: HTMLInputElement | null) => {
-  setUiStore("commandInputRef", ref);
-};
-
-export const setCommandPlaceholder = (placeholder: string) => {
-  setUiStore("commandPlaceholder", placeholder);
-};
-
-export const setCommandReadonly = (readonly: boolean) => {
-  setUiStore("commandReadonly", readonly);
-};
-
-export const setLoading = (loadingTarget: LoadingTarget) => {
-  setUiStore("loadingTarget", loadingTarget);
-};
-
-export const setInputMode = (mode: InputMode) => {
-  setUiStore("inputMode", mode);
-};
-
-export const setCommandInputValue = (value: string) => {
-  setUiStore("commandInputValue", value);
-};
+export const setCalendarMode = (mode: CalendarMode) =>
+  updateField("calendarMode", mode);
+export const setCalendarHeight = (height: number) =>
+  updateField("calendarHeight", height);
+export const setConnected = (connected: boolean) =>
+  updateField("isConnected", connected);
+export const setCommandInputRef = (ref: HTMLInputElement | null) =>
+  updateField("commandInputRef", ref);
+export const setCommandPlaceholder = (placeholder: string) =>
+  updateField("commandPlaceholder", placeholder);
+export const setCommandReadonly = (readonly: boolean) =>
+  updateField("commandReadonly", readonly);
+export const setLoading = (loadingTarget: LoadingTarget) =>
+  updateField("loadingTarget", loadingTarget);
+export const setInputMode = (mode: InputMode) => updateField("inputMode", mode);
+export const setCommandInputValue = (value: string) =>
+  updateField("commandInputValue", value);
 
 export const setCurrentProject = (project: Project | null) => {
   setUiStore("currentProject", reconcile(project));

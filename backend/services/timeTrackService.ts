@@ -1,6 +1,7 @@
 import { AppStateKey } from "../models/appState";
 import type { ITimeTrackEntry } from "../models/timeTrack";
 import { TimeTrackRepo } from "../repositories/timeTrackRepo";
+import { MochiResult } from "../utils/mochiResult";
 import { AppStateService } from "./appStateService";
 import { BaseService } from "./baseService";
 
@@ -11,6 +12,14 @@ class TimeTrackService extends BaseService<ITimeTrackEntry> {
     super(new TimeTrackRepo(), "TimeTrack");
 
     this.appStateService = new AppStateService();
+  }
+
+  public async updateTimeTrackEntryAsync(id: string, entry: ITimeTrackEntry) {
+    try {
+      return await super.updateAsync(id, entry);
+    } catch (error: any) {
+      return new MochiResult(null, error);
+    }
   }
 
   public async toggleRecordingAsync() {

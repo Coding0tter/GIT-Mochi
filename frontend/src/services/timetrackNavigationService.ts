@@ -1,14 +1,41 @@
 import { uniq } from "lodash";
 import {
   keyboardNavigationStore,
+  setSelectedAppointmentIndex,
   setSelectedDayIndex,
   setSelectedHourIndex,
   setSelectedQuarterHourIndex,
   setSelectedQuarterHourIndexes,
 } from "../stores/keyboardNavigationStore";
 import { Direction } from "./taskNavigationService";
+import { CalendarMode, uiStore } from "../stores/uiStore";
+import { timeTrackStore } from "../stores/timeTrackStore";
+import { setSelectedAppointmentForModal } from "../stores/modalStore";
 
 export const moveSelection = (direction: Direction, moveHourly = false) => {
+  if (uiStore.calendarMode === CalendarMode.Appointment) {
+    moveAppointmentSelection(direction);
+  } else if (uiStore.calendarMode === CalendarMode.Time) {
+    moveTimeSelection(direction, moveHourly);
+  }
+};
+
+const moveAppointmentSelection = (direction: Direction) => {
+  switch (direction) {
+    case Direction.Up:
+      setSelectedAppointmentIndex((prev) => Math.max(prev - 1, 0));
+      break;
+    case Direction.Down:
+      setSelectedAppointmentIndex(
+        (prev) => (prev + 1) % (timeTrackStore.entries.length)
+      );
+      break;
+  }
+
+  setSelectedAppointmentForModal(timeTrackStore.entries[keyboardNavigationStore.selectedAppointmentIndex])
+};
+
+const moveTimeSelection = (direction: Direction, moveHourly = false) => {
   const { selectedQuarterHourIndex, selectedHourIndex, selectedDayIndex } =
     keyboardNavigationStore;
 
@@ -61,7 +88,7 @@ export const moveSelection = (direction: Direction, moveHourly = false) => {
 
   setSelectedQuarterHourIndexes([
     keyboardNavigationStore.selectedHourIndex * 4 +
-      keyboardNavigationStore.selectedQuarterHourIndex,
+    keyboardNavigationStore.selectedQuarterHourIndex,
   ]);
 };
 
@@ -96,8 +123,8 @@ export const addToSelection = (direction: Direction, moveHourly = false) => {
         ...(prev.at(0)! > selectedQuarter
           ? moveHourly
             ? Array.from({ length: 4 }, (_, i) =>
-                Math.max(baseIndex - 4 + i, 0)
-              )
+              Math.max(baseIndex - 4 + i, 0)
+            )
             : [Math.max(baseIndex - 1, 0)]
           : [selectedQuarter]),
       ]);
@@ -122,8 +149,8 @@ export const addToSelection = (direction: Direction, moveHourly = false) => {
         ...(prev.at(0)! < selectedQuarter
           ? moveHourly
             ? Array.from({ length: 4 }, (_, i) =>
-                Math.min(baseIndex + 1 + i, endQuarters - 1)
-              )
+              Math.min(baseIndex + 1 + i, endQuarters - 1)
+            )
             : [Math.min(baseIndex + 1, endQuarters - 1)]
           : [selectedQuarter]),
       ]);

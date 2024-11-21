@@ -5,4 +5,4 @@ for (const path in commandModules) {
 }
 
 import { getRegisteredCommands } from "./commandRegistry";
-export const COMMANDS = getRegisteredCommands();
+export const COMMANDS = [...getRegisteredCommands()];

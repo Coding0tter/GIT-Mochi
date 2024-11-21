@@ -1,10 +1,11 @@
-import { Component } from "solid-js";
+import { Component, Index } from "solid-js";
 import styles from "./WeekCalendarHourRow.module.css";
 import { keyboardNavigationStore } from "../../../stores/keyboardNavigationStore";
 import Appointment from "../Appointment/Appointment";
 import { timeTrackStore } from "../../../stores/timeTrackStore";
 import dayjs from "dayjs";
 import { get } from "lodash";
+import { CalendarMode, uiStore } from "../../../stores/uiStore";
 
 interface WeekCalendarHourRowProps {
   hour: number;
@@ -28,7 +29,8 @@ const WeekCalendarHourRow: Component<WeekCalendarHourRowProps> = (props) => {
               } ${
                 keyboardNavigationStore.selectedDayIndex === dayOfWeek &&
                 keyboardNavigationStore.selectedHourIndex === props.hour &&
-                keyboardNavigationStore.selectedQuarterHourIndex === index
+                keyboardNavigationStore.selectedQuarterHourIndex === index &&
+                uiStore.calendarMode === CalendarMode.Time
                   ? styles.activeCell
                   : ""
               } ${
@@ -43,24 +45,29 @@ const WeekCalendarHourRow: Component<WeekCalendarHourRowProps> = (props) => {
             />
           ))}
           <div class={styles.appointmentWrapper}>
-            {props.hour == 8 &&
-              timeTrackStore.entries.map((entry) => {
-                const entryDate = dayjs(entry.start).day() - 1;
+            {props.hour == 8 && (
+              <Index each={timeTrackStore.entries}>
+                {(entry, index) => {
+                  const entryDate = dayjs(entry().start).day() - 1;
 
-                if (entryDate === dayOfWeek) {
-                  const end = entry?.end ? dayjs(entry.end) : dayjs();
-                  const start = dayjs(entry.start).subtract(1, "hour");
-                  const length = end.diff(start, "minute");
+                  if (entryDate === dayOfWeek) {
+                    const end = entry()?.end ? dayjs(entry().end) : dayjs();
+                    const start = dayjs(entry().start).subtract(1, "hour");
+                    const length = end.diff(start, "minute");
 
-                  return (
-                    <Appointment
-                      start={start}
-                      length={Math.max(Math.ceil(length / 15), 1)}
-                      title="Worktime"
-                    />
-                  );
-                }
-              })}
+                    return (
+                      <Appointment
+                        index={index}
+                        start={start}
+                        length={Math.max(Math.ceil(length / 15), 1)}
+                        title="Worktime"
+                      />
+                    );
+                  }
+                  return null;
+                }}
+              </Index>
+            )}
           </div>
         </div>
       ))}

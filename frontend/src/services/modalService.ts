@@ -3,9 +3,11 @@ import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
 import {
   ModalType,
   setActiveModal,
+  setSelectedAppointmentForModal,
   setSelectedTaskForModal,
 } from "../stores/modalStore";
 import { getColumnTasks } from "../stores/taskStore";
+import { timeTrackStore } from "../stores/timeTrackStore";
 
 export const openHelpModal = () => {
   setActiveModal(ModalType.Help);
@@ -27,10 +29,17 @@ export const openCreateModal = () => {
   });
 };
 
-export const openEditModal = () => {
+export const openEditTaskModal = () => {
   setActiveModal(ModalType.CreateTask);
   setSelectedTaskForModal(
     getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]
+  );
+};
+
+export const openEditAppointmentModal = () => {
+  setActiveModal(ModalType.EditAppointment);
+  setSelectedAppointmentForModal(
+    timeTrackStore.entries[keyboardNavigationStore.selectedAppointmentIndex]
   );
 };
 

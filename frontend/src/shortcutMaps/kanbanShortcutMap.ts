@@ -8,7 +8,7 @@ import {
   openCreateModal,
   openDeleteModal,
   openDetailsModal,
-  openEditModal,
+  openEditTaskModal,
 } from "../services/modalService";
 import {
   addToSelection,
@@ -59,7 +59,7 @@ const shortcuts: KeyboardShortcutMap = {
     },
     {
       key: "e",
-      action: () => openEditModal(),
+      action: () => openEditTaskModal(),
     },
     {
       key: "o",

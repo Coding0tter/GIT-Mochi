@@ -19,14 +19,11 @@ class GitlabActionHandler {
       const { id } = eventData;
       const { projectId, gitlabIid } = data.data;
 
-
       await this.gitlabApiClient.request(
         `/projects/${projectId}/merge_requests/${gitlabIid}`,
         "PUT",
         { assignee_id: id }
       );
-
-      console.log("Assignee updated");
     } catch (error: any) {
       throw error;
     }

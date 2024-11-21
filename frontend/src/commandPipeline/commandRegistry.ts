@@ -1,10 +1,11 @@
+import { cloneDeep } from "lodash";
 import { CommandPipeline } from "./types";
 
 const commandRegistry: CommandPipeline[] = [];
 
 export const registerCommand = (command: CommandPipeline) => {
   if (!commandRegistry.some((cmd) => cmd.name === command.name))
-    commandRegistry.push(command);
+    commandRegistry.push(cloneDeep(command));
 };
 
 export const getRegisteredCommands = () => {

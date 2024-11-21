@@ -1,16 +1,20 @@
-
 import { Dayjs } from "dayjs";
-import { createSignal, onMount, onCleanup } from "solid-js";
+import { createSignal, onMount, onCleanup, createEffect } from "solid-js";
 import styles from "./Appointment.module.css";
+import { CalendarMode, uiStore } from "../../../stores/uiStore";
+import { timeTrackStore } from "../../../stores/timeTrackStore";
+import { keyboardNavigationStore } from "../../../stores/keyboardNavigationStore";
 
 const Appointment = ({
   length,
   title,
   start,
+  index,
 }: {
   length: number;
   title: string;
   start: Dayjs;
+  index: number;
 }) => {
   const [minuteHeight, setMinuteHeight] = createSignal<number>(0);
 
@@ -40,8 +44,7 @@ const Appointment = ({
     const startMinute = start.minute();
 
     // Calculate total minutes since the calendar's start
-    const totalMinutes =
-      (startHour - calendarStartHour) * 60 + startMinute;
+    const totalMinutes = (startHour - calendarStartHour) * 60 + startMinute;
 
     // Return the total pixel margin from the top
     return totalMinutes * minuteHeight();
@@ -49,7 +52,12 @@ const Appointment = ({
 
   return (
     <div
-      class={styles.appointment}
+      class={`${styles.appointment} ${
+        index === keyboardNavigationStore.selectedAppointmentIndex &&
+        uiStore.calendarMode === CalendarMode.Appointment
+          ? styles.selected
+          : ""
+      }`}
       style={{
         "margin-top": `${getMarginTop()}px`,
         height: `${minuteHeight() * length * 15}px`, // Convert length (quarters) to minutes

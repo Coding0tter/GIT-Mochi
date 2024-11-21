@@ -31,13 +31,13 @@ const CommandLine = () => {
   createEffect(() => {
     if (uiStore.inputMode === InputMode.Commandline) {
       setCommandInputValue("");
-      setDropdownValues(
-        COMMANDS.map((command) => ({
+      setDropdownValues([
+        ...COMMANDS.map((command) => ({
           value: command,
           text: command.name,
           description: command.description,
-        }))
-      );
+        })),
+      ]);
     }
 
     getPlaceholder();

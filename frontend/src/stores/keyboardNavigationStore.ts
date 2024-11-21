@@ -9,6 +9,7 @@ export const [keyboardNavigationStore, setKeyboardNavigationStore] =
     selectedHourIndex: 0,
     selectedQuarterHourIndex: 0,
     selectedQuarterHourIndexes: [0] as number[],
+    selectedAppointmentIndex: 0,
   });
 
 const updateStoreIndex = <T>(
@@ -53,3 +54,7 @@ export const setSelectedQuarterHourIndex = (
 export const setSelectedQuarterHourIndexes = (
   updater: number[] | ((prev: number[]) => number[])
 ) => updateStoreIndex("selectedQuarterHourIndexes", updater);
+
+export const setSelectedAppointmentIndex = (
+  updater: number | ((prev: number) => number)
+) => updateStoreIndex("selectedAppointmentIndex", updater);
