@@ -45,20 +45,33 @@ export const [taskStore, setTaskStore] = createStore({
 });
 
 export const getColumnTasks = () => {
-  return filteredTasks().filter(
+  const tasks = filteredTasks().filter(
     (task) =>
-      task.status === STATES[keyboardNavigationStore.selectedColumnIndex].id,
+      task.status === STATES[keyboardNavigationStore.selectedColumnIndex].id
   );
+  if (keyboardNavigationStore.selectedColumnIndex === 0) {
+    return orderBy(tasks, (task) => {
+      const priorityLabel = task.labels
+        .find((label) => label.includes("priority"))
+        ?.toLowerCase();
+      if (priorityLabel?.includes("high")) return 1;
+      if (priorityLabel?.includes("medium")) return 2;
+      if (priorityLabel?.includes("low")) return 3;
+      return 4;
+    });
+  }
+
+  return tasks;
 };
 
 export const updateComments = (
-  values: { taskId: string; comments: Comment[] }[],
+  values: { taskId: string; comments: Comment[] }[]
 ) => {
   setTaskStore("tasks", (tasks: Task[]) =>
     tasks.map((task: Task) => {
       const updatedValue = values.find((value) => value.taskId === task._id);
       return updatedValue ? { ...task, comments: updatedValue.comments } : task;
-    }),
+    })
   );
 };
 
@@ -73,7 +86,7 @@ export const updateTasks = (values: Task[]) => {
   });
 
   const newTasks = values.filter(
-    (value) => !taskStore.tasks.some((task) => task._id === value._id),
+    (value) => !taskStore.tasks.some((task) => task._id === value._id)
   );
 
   setTaskStore("tasks", reconcile([...updatedTasks, ...newTasks]));
@@ -121,7 +134,7 @@ export const filteredTasks = () => {
   }
 
   const exactMatchTasks = taskStore.tasks.filter(
-    (task) => task.branch?.toLowerCase() === searchQuery,
+    (task) => task.branch?.toLowerCase() === searchQuery
   );
 
   if (exactMatchTasks.length > 0) {

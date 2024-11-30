@@ -210,6 +210,7 @@ export class GitlabService {
       projectId,
       userId
     );
+
     const updatedTasks: ITask[] = [];
 
     for (const entity of entities) {
@@ -228,7 +229,7 @@ export class GitlabService {
     userId: string
   ): Promise<any[]> {
     return this.gitlabApiClient.request(
-      `/projects/${projectId}/${endpoint}?assignee_id=${userId}`
+      `/projects/${projectId}/${endpoint}?assignee_id=${userId}&per_page=100`
     );
   }
 

@@ -9,6 +9,7 @@ import {
 } from "../../../stores/modalStore";
 import TaskCard from "../TaskCard/TaskCard";
 import { Task } from "../../../stores/taskStore";
+import { orderBy } from "lodash";
 
 interface TaskColumnProps {
   status: { display_name: string; id: string };
@@ -39,7 +40,21 @@ const TaskColumn = (props: TaskColumnProps) => {
         {props.status.display_name} ({props.tasks.length})
       </h2>
       <section>
-        <For each={props.tasks}>
+        <For
+          each={
+            props.status.id === "opened"
+              ? orderBy(props.tasks, (task) => {
+                  const priorityLabel = task.labels
+                    .find((label) => label.includes("priority"))
+                    ?.toLowerCase();
+                  if (priorityLabel?.includes("high")) return 1;
+                  if (priorityLabel?.includes("medium")) return 2;
+                  if (priorityLabel?.includes("low")) return 3;
+                  return 4;
+                })
+              : props.tasks
+          }
+        >
           {(task, taskIndex) => (
             <TaskCard
               task={task}

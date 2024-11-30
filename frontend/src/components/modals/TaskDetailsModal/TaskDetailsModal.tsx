@@ -79,6 +79,16 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
     );
   };
 
+  const getPriority = () => {
+    const priorityLabel = task?.labels.find((label) =>
+      label.includes("priority")
+    );
+    if (priorityLabel && priorityLabel.includes("/")) {
+      return priorityLabel.split("/")[1].toLowerCase();
+    }
+    return "default";
+  };
+
   return (
     <BaseModal {...props} closeText="Close">
       <div class={styles.dialogContent}>
@@ -128,9 +138,12 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
             <div class={styles.card}>
               {task?.labels && task.labels.length > 0 && (
                 <div class={styles.labelsContainer}>
-                  {task?.labels.map((label) => (
-                    <Badge>{label}</Badge>
-                  ))}
+                  <Badge type={getPriority()}>{getPriority()}</Badge>
+                  {task?.labels
+                    .filter((task) => !task.includes("priority"))
+                    .map((label) => (
+                      <Badge>{label}</Badge>
+                    ))}
                 </div>
               )}
             </div>
