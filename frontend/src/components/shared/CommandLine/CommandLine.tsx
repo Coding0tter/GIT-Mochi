@@ -53,7 +53,7 @@ const CommandLine = () => {
         break;
       default:
         setCommandPlaceholder(
-          "Strg + F to search / Strg + P to open commandline"
+          "Strg + F to search / Strg + P to open commandline",
         );
         break;
     }
@@ -117,7 +117,7 @@ const CommandLine = () => {
       await commandProcessor.start();
     } else if (commandStore.activeCommandProcessor) {
       commandStore.activeCommandProcessor?.receiveInput(
-        uiStore.commandInputValue
+        uiStore.commandInputValue,
       );
     }
   };

@@ -9,6 +9,6 @@ router.get("/", taskController.getTasksAsync);
 router.put("/order", taskController.updateTaskOrderAsync);
 router.put("/:id", taskController.updateTaskAsync);
 router.patch("/:id", taskController.restoreTaskAsync);
-router.delete("/:id", taskController.deleteTaskAsync);
+router.delete("/:ids", taskController.deleteTaskAsync);
 
 export default router;

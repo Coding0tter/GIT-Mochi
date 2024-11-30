@@ -1,4 +1,4 @@
-import { createStore } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
 import { STATES } from "../constants";
 import { addNotification } from "../services/notificationService";
 import { InputMode, LoadingTarget, setLoading, uiStore } from "./uiStore";
@@ -6,6 +6,7 @@ import { keyboardNavigationStore } from "./keyboardNavigationStore";
 import { syncGitlabAsync } from "../services/gitlabService";
 import axios from "axios";
 import { orderBy } from "lodash";
+import Fuse, { IFuseOptions } from "fuse.js";
 
 export interface Comment {
   body: string;
@@ -14,7 +15,9 @@ export interface Comment {
   author: {
     name: string;
     username: string;
+    avatar_url: string;
   };
+  created_at?: string;
   system: boolean;
 }
 
@@ -44,34 +47,36 @@ export const [taskStore, setTaskStore] = createStore({
 export const getColumnTasks = () => {
   return filteredTasks().filter(
     (task) =>
-      task.status === STATES[keyboardNavigationStore.selectedColumnIndex].id
+      task.status === STATES[keyboardNavigationStore.selectedColumnIndex].id,
   );
 };
 
 export const updateComments = (
-  values: { taskId: string; comments: Comment[] }[]
+  values: { taskId: string; comments: Comment[] }[],
 ) => {
-  setTaskStore("tasks", (tasks) =>
-    tasks.map((task) => {
+  setTaskStore("tasks", (tasks: Task[]) =>
+    tasks.map((task: Task) => {
       const updatedValue = values.find((value) => value.taskId === task._id);
       return updatedValue ? { ...task, comments: updatedValue.comments } : task;
-    })
+    }),
   );
 };
 
+export const setTasks = (tasks: Task[]) => {
+  setTaskStore("tasks", tasks);
+};
+
 export const updateTasks = (values: Task[]) => {
-  setTaskStore("tasks", (tasks) => {
-    const updatedTasks = tasks.map((task) => {
-      const updatedValue = values.find((value) => value._id === task._id);
-      return updatedValue ? updatedValue : task;
-    });
-
-    const newTasks = values.filter(
-      (value) => !tasks.some((task) => task._id === value._id)
-    );
-
-    return [...updatedTasks, ...newTasks];
+  const updatedTasks = taskStore.tasks.map((task) => {
+    const updatedValue = values.find((value) => value._id === task._id);
+    return updatedValue ? { ...task, ...updatedValue } : task;
   });
+
+  const newTasks = values.filter(
+    (value) => !taskStore.tasks.some((task) => task._id === value._id),
+  );
+
+  setTaskStore("tasks", reconcile([...updatedTasks, ...newTasks]));
 };
 
 export const fetchTasksAsync = async (): Promise<Task[]> => {
@@ -115,14 +120,29 @@ export const filteredTasks = () => {
     return orderBy(taskStore.tasks, "order");
   }
 
-  const filteredTasks = taskStore.tasks.filter(
-    (task) =>
-      task.title.toLowerCase().includes(searchQuery) ||
-      task.labels.some((label) => label.toLowerCase().includes(searchQuery)) ||
-      task.branch?.toString().includes(searchQuery) ||
-      (task.type === "issue" &&
-        task.gitlabIid?.toString().includes(searchQuery))
+  const exactMatchTasks = taskStore.tasks.filter(
+    (task) => task.branch?.toLowerCase() === searchQuery,
   );
 
-  return orderBy(filteredTasks, "order");
+  if (exactMatchTasks.length > 0) {
+    return orderBy(exactMatchTasks, "order");
+  }
+
+  const options: IFuseOptions<Task> = {
+    includeScore: true,
+    keys: [
+      "title",
+      {
+        name: "gitlabIid",
+        getFn: (task: any) =>
+          task.type === "issue" ? task.gitlabIid?.toString() : "",
+      },
+    ],
+    threshold: 0.6,
+  };
+
+  const fuse = new Fuse(taskStore.tasks, options);
+  const results = fuse.search(searchQuery).map((result) => result.item);
+
+  return orderBy(results, "order");
 };

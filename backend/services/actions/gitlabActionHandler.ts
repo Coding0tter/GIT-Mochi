@@ -19,6 +19,10 @@ class GitlabActionHandler {
       const { id } = eventData;
       const { projectId, gitlabIid } = data.data;
 
+      console.log(data.data);
+
+      //todo user gitlabService.assignToUser
+
       await this.gitlabApiClient.request(
         `/projects/${projectId}/merge_requests/${gitlabIid}`,
         "PUT",

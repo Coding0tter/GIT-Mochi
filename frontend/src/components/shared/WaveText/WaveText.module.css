@@ -1,0 +1,29 @@
+.waveText {
+  display: flex;
+  overflow: hidden;
+}
+
+.waveText span {
+  display: inline-block;
+  animation: wave 2s ease-in-out infinite, waveColor 2s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.2em);
+  }
+}
+
+@keyframes waveColor {
+  0%,
+  100% {
+    color: var(--color-green);
+  }
+  50% {
+    color: var(--color-red);
+  }
+}

@@ -8,8 +8,8 @@ export class WebSocketHandler {
   private taskSockets: TaskSockets = new TaskSockets();
   private static instance: WebSocketHandler | null = null;
   private reconnectAttempts: number = 0;
-  private maxReconnectAttempts: number = 5;
-  private reconnectInterval: number = 3000; // 3 seconds
+  private maxReconnectAttempts: number = 10;
+  private reconnectInterval: number = 5000; // 5 seconds
   private heartbeatInterval: number = 25000; // 25 seconds
   private heartbeatTimer: NodeJS.Timeout | null = null;
 

@@ -30,7 +30,7 @@ const createRuleCommand: CommandPipeline = {
   steps: [
     {
       prompt: "Loading events...",
-      executeAsync: async (_, next) => {
+      executeAsync: async ({ next }) => {
         const events = await fetchEmitters();
         setDropdownValues(
           events.map((event) => ({
@@ -44,7 +44,7 @@ const createRuleCommand: CommandPipeline = {
     {
       prompt: "Choose an event",
       awaitInput: true,
-      executeAsync: async (_, next) => {
+      executeAsync: async ({ next }) => {
         const eventType = getActiveDropdownValue().value;
 
         const rule = cloneDeep(BaseRule) as Rule;
@@ -74,7 +74,7 @@ const createRuleCommand: CommandPipeline = {
         ];
       },
       awaitInput: true,
-      executeAsync: async (input, next, repeat) => {
+      executeAsync: async ({ input, next, repeat }) => {
         if (input.trim() === "") {
           next();
           return;
@@ -106,7 +106,7 @@ const createRuleCommand: CommandPipeline = {
     {
       key: "loadActions",
       prompt: "Loading actions...",
-      executeAsync: async (_, next) => {
+      executeAsync: async ({ next }) => {
         const actions = await fetchListeners();
         setDropdownValues([
           ...actions.map((action) => ({
@@ -125,7 +125,7 @@ const createRuleCommand: CommandPipeline = {
     {
       prompt: "Add an action. Or choose 'Finish' to complete the rule",
       awaitInput: true,
-      executeAsync: async (input, next, repeat, goto) => {
+      executeAsync: async ({ next, repeat, goto }) => {
         const action = getActiveDropdownValue().value;
 
         if (action === "finish") {
@@ -149,7 +149,7 @@ const createRuleCommand: CommandPipeline = {
     },
     {
       prompt: "Loading values...",
-      executeAsync: async (_, next) => {
+      executeAsync: async ({ next }) => {
         // TODO: move to backend (something like allowedValuesGenerator)
         const rule = cloneDeep(commandStore.buffer) as Rule;
         const parts = rule.actions.at(-1)?.targetPath.split(".");
@@ -178,7 +178,7 @@ const createRuleCommand: CommandPipeline = {
     {
       prompt: "Enter a value",
       awaitInput: true,
-      executeAsync: async (input, _, repeat, goto) => {
+      executeAsync: async ({ input, repeat, goto }) => {
         if (input.trim() === "finish") {
           repeat();
           return;
@@ -202,7 +202,7 @@ const createRuleCommand: CommandPipeline = {
       prompt: "Enter a name for the rule",
       awaitInput: true,
       cleanDropdown: true,
-      executeAsync: async (input, next) => {
+      executeAsync: async ({ input, next }) => {
         const rule = cloneDeep(commandStore.buffer) as Rule;
         rule.name = input;
 
@@ -214,7 +214,7 @@ const createRuleCommand: CommandPipeline = {
     {
       prompt: "Saving...",
       cleanDropdown: true,
-      executeAsync: async (_, next) => {
+      executeAsync: async ({ next }) => {
         const rule = cloneDeep(commandStore.buffer) as Rule;
         await createRuleAsync(rule);
         next();

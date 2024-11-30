@@ -10,7 +10,9 @@ import {
   fetchTasksAsync,
   filteredTasks,
   getColumnTasks,
+  setTasks,
   Task,
+  taskStore,
 } from "../stores/taskStore";
 import { addNotification } from "./notificationService";
 import { Direction } from "./taskNavigationService";
@@ -75,21 +77,24 @@ export const updateTaskOrderAsync = async (taskOrder: string[]) => {
   }
 };
 
-export const deleteTaskAsync = async (taskId: string) => {
-  await axios.delete(`/tasks/${taskId}`);
+export const deleteTasksAsync = async (taskIndexes: number[]) => {
+  const tasks = getColumnTasks();
+  const ids = taskIndexes.map((index) => tasks[index]._id);
+
+  await axios.delete(`/tasks/${ids.join(",")}`);
 };
 
 export const moveSelectedTasksAsync = async (direction: Direction) => {
   const { selectedColumnIndex, selectedTaskIndexes } = keyboardNavigationStore;
   const tasksToMove = getColumnTasks().filter((_task, index) =>
-    selectedTaskIndexes.includes(index)
+    selectedTaskIndexes.includes(index),
   );
 
   if (direction === Direction.Left || direction === Direction.Right) {
     await moveSelectedTasksToColumn(
       tasksToMove,
       selectedColumnIndex,
-      direction
+      direction,
     );
   } else if (direction === Direction.Up || direction === Direction.Down) {
     await moveSelectedTasksInColumn(tasksToMove, direction);
@@ -100,12 +105,12 @@ export const moveSelectedTasksToEndAsync = async (direction: Direction) => {
   const { selectedTaskIndexes } = keyboardNavigationStore;
   const tasks = getColumnTasks();
   const selectedTasks = tasks.filter((_task, index) =>
-    selectedTaskIndexes.includes(index)
+    selectedTaskIndexes.includes(index),
   );
 
   // Remove selected tasks from the original array
   const remainingTasks = tasks.filter(
-    (_task, index) => !selectedTaskIndexes.includes(index)
+    (_task, index) => !selectedTaskIndexes.includes(index),
   );
 
   // Rebuild the task array based on the direction
@@ -131,19 +136,19 @@ export const moveSelectedTasksToEndAsync = async (direction: Direction) => {
     direction === Direction.Up
       ? selectedTasks.map((_task, index) => index)
       : selectedTasks.map(
-          (_task, index) => newTaskOrder.length - selectedTasks.length + index
+          (_task, index) => newTaskOrder.length - selectedTasks.length + index,
         );
 
   setSelectedTaskIndexes(newSelectedIndexes);
   setSelectedTaskIndex(
-    direction === Direction.Up ? 0 : newTaskOrder.length - 1
+    direction === Direction.Up ? 0 : newTaskOrder.length - 1,
   );
 };
 
 const moveSelectedTasksToColumn = async (
   tasksToMove: Task[],
   selectedColumnIndex: number,
-  direction: Direction
+  direction: Direction,
 ) => {
   const newStatusIndex =
     direction === Direction.Right
@@ -152,30 +157,39 @@ const moveSelectedTasksToColumn = async (
 
   const results = await Promise.all(
     tasksToMove.map((task) =>
-      updateTaskAsync(task._id, { status: STATES[newStatusIndex].id })
-    )
+      updateTaskAsync(task._id, { status: STATES[newStatusIndex].id }),
+    ),
   );
 
   if (results.every((res) => res?.status === 200)) {
-    await fetchTasksAsync();
+    const newTasks = taskStore.tasks.map((task) => {
+      if (tasksToMove.some((t) => t._id === task._id)) {
+        return { ...task, status: STATES[newStatusIndex].id };
+      }
+      return task;
+    });
 
-    const newColumnTasks = filteredTasks().filter(
-      (task) => task.status === STATES[newStatusIndex].id
-    );
+    document.startViewTransition(() => {
+      setTasks(newTasks);
 
-    const movedTaskIndexes = tasksToMove.map((task) =>
-      newColumnTasks.findIndex((t) => t._id === task._id)
-    );
+      const newColumnTasks = filteredTasks().filter(
+        (task) => task.status === STATES[newStatusIndex].id,
+      );
 
-    setSelectedColumnIndex(newStatusIndex);
-    setSelectedTaskIndex(movedTaskIndexes[0]);
-    setSelectedTaskIndexes(movedTaskIndexes);
+      const movedTaskIndexes = tasksToMove.map((task) =>
+        newColumnTasks.findIndex((t) => t._id === task._id),
+      );
+
+      setSelectedColumnIndex(newStatusIndex);
+      setSelectedTaskIndex(movedTaskIndexes[0]);
+      setSelectedTaskIndexes(movedTaskIndexes);
+    });
   }
 };
 
 const moveSelectedTasksInColumn = async (
   tasksToMove: Task[],
-  direction: Direction
+  direction: Direction,
 ) => {
   const columnTasks = getColumnTasks();
   const sortedTasks = [...tasksToMove].sort((a, b) => a.order - b.order);
@@ -220,14 +234,14 @@ const moveSelectedTasksInColumn = async (
   });
 
   const updatedTaskOrder = orderBy(newTaskOrder, "order").map(
-    (task) => task._id
+    (task) => task._id,
   );
 
   await updateTaskOrderAsync(updatedTaskOrder);
   await fetchTasksAsync();
 
   const movedTaskIndexes = sortedTasks.map(
-    (task) => newTaskOrder.findIndex((t) => t._id === task._id) + shift
+    (task) => newTaskOrder.findIndex((t) => t._id === task._id) + shift,
   );
 
   setSelectedTaskIndexes(movedTaskIndexes);

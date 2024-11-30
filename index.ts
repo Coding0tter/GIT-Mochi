@@ -2,10 +2,9 @@ import cors from "cors";
 import express from "express";
 import http from "http";
 import { connect } from "mongoose";
-import { closeMergeMergeRequestsJob } from "./backend/background-jobs/closeMergedMergeRequests";
+import { closeMergedMRJob } from "./backend/background-jobs/closeMergedMergeRequests";
 import { syncCommentJob } from "./backend/background-jobs/commentSync";
 import { syncGitlabJob } from "./backend/background-jobs/gitlabSync";
-import { MochiError } from "./backend/errors/mochiError";
 import { contextMiddleware } from "./backend/middlewares/contextMiddleware";
 import { globalErrorHandler } from "./backend/middlewares/globalErrorHandler";
 import gitlabRoutes from "./backend/routes/gitlabRoutes";
@@ -52,16 +51,18 @@ do {
     break;
   } catch (error) {
     retries--;
+    console.error(
+      `Failed to retrieve user from Gitlab. Retries left: ${retries}`
+    );
 
     if (retries === 0) {
-      throw new MochiError(
-        "Failed to retrieve user after multiple attempts",
-        500,
-        error as Error
+      console.error(
+        "Failed to retrieve user from Gitlab after 5 retries. Maybe the Gitlab server is down?"
       );
+      retries = 5;
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 60000));
   }
 } while (retries > 0);
 
@@ -76,7 +77,7 @@ syncCommentJob();
 syncGitlabJob();
 
 // Close merged merge requests every minute
-closeMergeMergeRequestsJob();
+closeMergedMRJob();
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () =>

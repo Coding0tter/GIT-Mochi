@@ -47,7 +47,7 @@ const StatusBar = () => {
   }, [timeTrackStore.entries, timeTrackStore.recording]);
 
   return (
-    <div class={styles.statusBar}>
+    <div class={styles.statusBar} style={{ "view-transition-name": "footer" }}>
       <div class={styles.left}>
         {isCalendar() && (
           <div class={`${styles.calendarMode} ${styles[uiStore.calendarMode]}`}>

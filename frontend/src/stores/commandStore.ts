@@ -81,8 +81,12 @@ export const filteredDropdownValues = () => {
   return commandStore.dropdownValues.filter(
     (value) =>
       value.showAlways ||
-      value.text?.toLowerCase().includes(uiStore.commandInputValue) ||
-      value.description?.toLowerCase().includes(uiStore.commandInputValue)
+      value.text
+        ?.toLowerCase()
+        .includes(uiStore.commandInputValue.toLowerCase()) ||
+      value.description
+        ?.toLowerCase()
+        .includes(uiStore.commandInputValue.toLowerCase())
   );
 };
 

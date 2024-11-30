@@ -11,6 +11,10 @@
   border-radius: var(--spacing-xs);
 }
 
+.subHeading {
+  margin-bottom: var(--spacing-md);
+}
+
 .keybindingsWrapper {
   display: flex;
   flex-direction: row;
@@ -44,6 +48,7 @@
   background-color: var(--color-base);
   color: var(--color-text);
   padding: var(--spacing-xxs) var(--spacing-xs);
+  padding-bottom: 2px;
   border-radius: var(--spacing-xxs);
   margin-right: var(--spacing-xxs);
   font-size: var(--font-size-xs);

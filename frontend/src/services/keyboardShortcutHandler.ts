@@ -8,8 +8,7 @@ import {
   setCalendarMode,
   uiStore,
 } from "../stores/uiStore";
-import { openHelpModal } from "./modalService";
-import { closeModalAndUnfocus, focusInput } from "./uiService";
+import { closeModalAndUnfocus } from "./uiService";
 
 export const handleKeyDown = async (
   event: KeyboardEvent,
@@ -41,21 +40,6 @@ export const handleKeyDown = async (
     return;
   }
 
-  if (event.ctrlKey) {
-    switch (event.key) {
-      case "p":
-        event.preventDefault();
-        event.stopPropagation();
-        focusInput(InputMode.Commandline);
-        return;
-      case "f":
-        event.preventDefault();
-        event.stopPropagation();
-        focusInput(InputMode.Search);
-        return;
-    }
-  }
-
   if (event.shiftKey) {
     switch (event.code) {
       case "Digit1":
@@ -67,15 +51,7 @@ export const handleKeyDown = async (
       case "Digit3":
         navigator("/");
         return;
-      case "Slash":
-        openHelpModal();
-        return;
     }
-  }
-
-  if (event.key === ":") {
-    focusInput(InputMode.Commandline);
-    return;
   }
 
   ShortcutRegistry.getInstance().executeShortcut(key, event);

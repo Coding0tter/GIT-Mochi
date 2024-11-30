@@ -40,10 +40,23 @@ export const syncGitlabAsync = async () => {
   }
 };
 
+export const assignTaskAsync = async (taskId: string, userId: string) => {
+  try {
+    const res = await axios.post(`/git/assign`, { userId, taskId });
+    return res;
+  } catch (error) {
+    addNotification({
+      title: "Error",
+      description: "Failed to assign task",
+      type: "error",
+    });
+  }
+};
+
 export const openSelectedTaskLink = () => {
   window.open(
     getColumnTasks()[keyboardNavigationStore.selectedTaskIndex].web_url,
-    "_blank"
+    "_blank",
   );
 };
 
@@ -51,7 +64,7 @@ export const createMergeRequestAndBranchForSelectedTaskAsync = async () => {
   const columnTasks = getColumnTasks();
   if (columnTasks[keyboardNavigationStore.selectedTaskIndex].type === "issue") {
     const { mergeRequest } = await createMergeRequestAndBranchAsync(
-      columnTasks[keyboardNavigationStore.selectedTaskIndex].gitlabIid!
+      columnTasks[keyboardNavigationStore.selectedTaskIndex].gitlabIid!,
     );
 
     addNotification({

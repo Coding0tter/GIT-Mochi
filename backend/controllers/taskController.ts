@@ -34,7 +34,7 @@ export class TaskController {
           status,
           description,
           custom,
-        }
+        },
       );
 
       if (createdTask.error) {
@@ -59,7 +59,7 @@ export class TaskController {
 
       const tasks = await this.taskService.getTasksAsync(
         currentProject.id,
-        showDeleted === "true"
+        showDeleted === "true",
       );
 
       res.json(tasks);
@@ -92,7 +92,7 @@ export class TaskController {
   updateTaskOrderAsync = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const { taskOrder } = req.body;
@@ -112,7 +112,7 @@ export class TaskController {
   restoreTaskAsync = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const { id } = req.params;
@@ -127,9 +127,13 @@ export class TaskController {
 
   deleteTaskAsync = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
+      const { ids } = req.params;
 
-      await this.taskEmitter.deleteTaskAsync(id);
+      const deletePromises = ids
+        .split(",")
+        .map(async (id: string) => await this.taskEmitter.deleteTaskAsync(id));
+
+      await Promise.all(deletePromises);
 
       res.status(204).send();
     } catch (error) {

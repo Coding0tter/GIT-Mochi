@@ -1,5 +1,19 @@
 import { Schema, model, Document } from "mongoose";
 
+export interface IComment {
+  originalId?: number;
+  body: string;
+  images?: string[];
+  resolved: boolean;
+  author: {
+    name: string;
+    username: string;
+    avatar_url: string;
+  };
+  created_at?: string;
+  system: boolean;
+}
+
 export interface ITask extends Document {
   gitlabIid?: number;
   gitlabId?: number;
@@ -15,17 +29,7 @@ export interface ITask extends Document {
   custom?: boolean;
   deleted?: boolean;
   order?: number;
-  comments: Array<{
-    originalId?: number;
-    body: string;
-    images?: string[];
-    resolved: boolean;
-    author: {
-      name: string;
-      username: string;
-    };
-    system: boolean;
-  }>;
+  comments: IComment[];
   projectId?: string;
 }
 
@@ -54,8 +58,10 @@ const TaskSchema = new Schema<ITask>({
       author: {
         name: { type: String, required: true },
         username: { type: String, required: true },
+        avatar_url: { type: String, required: true },
       },
       system: { type: Boolean, default: false },
+      created_at: String,
     },
   ],
 });

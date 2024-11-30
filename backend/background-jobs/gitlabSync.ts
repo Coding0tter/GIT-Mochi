@@ -1,7 +1,7 @@
 import { GitlabService } from "../services/gitlabService";
 import { SocketHandler } from "../sockets";
 import { MochiError } from "../errors/mochiError";
-import { logInfo } from "../utils/logger";
+import { logError, logInfo } from "../utils/logger";
 
 const syncGitlabJob = async () => {
   setInterval(async () => {
@@ -16,10 +16,12 @@ const syncGitlabJob = async () => {
 
       logInfo("Gitlab Issues and MergeRequests synced!");
     } catch (error) {
-      throw new MochiError(
-        "Failed to sync Gitlab Issues and MergeRequests",
-        500,
-        error as Error
+      logError(
+        new MochiError(
+          "Failed to sync Gitlab Issues and MergeRequests",
+          500,
+          error as Error
+        )
       );
     }
   }, 60000);

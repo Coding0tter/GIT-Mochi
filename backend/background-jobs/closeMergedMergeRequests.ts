@@ -1,9 +1,9 @@
 import { GitlabService } from "../services/gitlabService";
 import { SocketHandler } from "../sockets";
 import { MochiError } from "../errors/mochiError";
-import { logInfo } from "../utils/logger";
+import { logError, logInfo } from "../utils/logger";
 
-const closeMergeMergeRequestsJob = async () => {
+const closeMergedMRJob = async () => {
   setInterval(async () => {
     try {
       logInfo("Close merged MergeRequests...");
@@ -16,13 +16,11 @@ const closeMergeMergeRequestsJob = async () => {
 
       logInfo("Closed merged MergeRequests synced!");
     } catch (error) {
-      throw new MochiError(
-        "Failed to close merge requests",
-        500,
-        error as Error
+      logError(
+        new MochiError("Failed to close merge requests", 500, error as Error)
       );
     }
   }, 60000);
 };
 
-export { closeMergeMergeRequestsJob };
+export { closeMergedMRJob };

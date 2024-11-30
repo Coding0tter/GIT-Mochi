@@ -15,6 +15,22 @@
   }
 }
 
+.badge.default {
+  background-color: var(--color-lavender);
+  color: var(--color-crust);
+}
+
+.badge.secondary {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.badge.outline {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-crust);
+}
+
 .badge.none {
   background-color: var(--color-crust);
   color: var(--color-text);

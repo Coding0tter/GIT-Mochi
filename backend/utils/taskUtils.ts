@@ -33,23 +33,3 @@ export function detectChanges(
   }
   return false;
 }
-
-export function parseComments(comments: any[], projectId: string): any[] {
-  return comments
-    .filter(
-      (comment) => !comment.system && comment.author.username !== "merge_train"
-    )
-    .map((comment) => {
-      const imageRegex = /!\[.*?\]\((.*?)\)/g;
-      const matches = [...comment.body.matchAll(imageRegex)];
-      const images = matches.map(
-        (match) => `${process.env.GIT_URL}/-/project/${projectId}` + match[1]
-      );
-
-      comment.body = comment.body.replace(imageRegex, "").trim();
-      comment.images = images;
-      comment.originalId = comment.id;
-
-      return comment;
-    });
-}

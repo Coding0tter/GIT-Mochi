@@ -23,7 +23,7 @@ const listRulesCommand: CommandPipeline = {
       cleanDropdown: true,
       prompt: "Loading...",
       key: "loadrules",
-      executeAsync: async (_, next) => {
+      executeAsync: async ({ next }) => {
         const rules = await fetchRules();
 
         if (!rules) {
@@ -69,7 +69,7 @@ const listRulesCommand: CommandPipeline = {
     {
       prompt:
         "press <kbd>T</kbd> to toggle a rule, press <kbd>D</kbd> to delete a rule, press <kbd>Q</kbd> to quit",
-      executeAsync: async (_, next, repeat, goto) => {
+      executeAsync: async ({ next, goto }) => {
         const handleKeydown = async (event: KeyboardEvent) => {
           if (["t", "d", "q", "j", "k"].includes(event.key.toLowerCase())) {
             event.preventDefault();
@@ -78,29 +78,21 @@ const listRulesCommand: CommandPipeline = {
               await toggleRuleAsync(getActiveDropdownValue().value._id);
               goto("loadrules");
               removeListener();
-            }
-
-            if (event.key.toLowerCase() === "d") {
+            } else if (event.key.toLowerCase() === "d") {
               await deleteRuleAsync(getActiveDropdownValue().value._id);
               goto("loadrules");
               removeListener();
-            }
-
-            if (event.key.toLowerCase() === "q") {
+            } else if (event.key.toLowerCase() === "q") {
               next();
               removeListener();
-            }
-
-            if (event.key.toLowerCase() === "j") {
+            } else if (event.key.toLowerCase() === "j") {
               setActiveDropdownIndex(
                 Math.min(
                   commandStore.activeDropdownIndex + 1,
                   commandStore.dropdownValues.length - 1
                 )
               );
-            }
-
-            if (event.key.toLowerCase() === "k") {
+            } else if (event.key.toLowerCase() === "k") {
               setActiveDropdownIndex(
                 Math.max(commandStore.activeDropdownIndex - 1, 0)
               );

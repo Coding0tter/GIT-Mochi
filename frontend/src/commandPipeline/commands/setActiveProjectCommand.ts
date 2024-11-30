@@ -1,4 +1,5 @@
 import {
+  deleteProjectAsync,
   getProjectAsync,
   loadCustomProjectsAsync,
   setProjectAsync,
@@ -6,7 +7,11 @@ import {
 import { loadGitLabProjectsAsync } from "../../services/gitlabService";
 import { addNotification } from "../../services/notificationService";
 import {
+  addListener,
+  commandStore,
   getActiveDropdownValue,
+  removeListener,
+  setActiveDropdownIndex,
   setDropdownValues,
 } from "../../stores/commandStore";
 import {
@@ -24,12 +29,12 @@ import { registerCommand } from "../commandRegistry";
 import { CommandPipeline } from "../types";
 
 const setActiveProjectCommand: CommandPipeline = {
-  name: "setProject",
-  description: "Set a project as active",
+  name: "listProjects",
+  description: "View all projects",
   steps: [
     {
-      cleanDropdown: true,
-      executeAsync: async (_, next) => {
+      key: "loadProjects",
+      executeAsync: async ({ next }) => {
         const gitlabProjects = await loadGitLabProjectsAsync();
         const customProjects = await loadCustomProjectsAsync();
 
@@ -55,43 +60,63 @@ const setActiveProjectCommand: CommandPipeline = {
       },
     },
     {
-      awaitInput: true,
-      executeAsync: async (input, next) => {
-        const selectedProject = getActiveDropdownValue().value as Project;
-        let projectId = selectedProject.id;
+      executeAsync: async ({ next, goto }) => {
+        const handleKeydown = async (event: KeyboardEvent) => {
+          if (["Enter", "d", "q", "j", "k"].includes(event.key)) {
+            event.preventDefault();
 
-        if (selectedProject.custom) {
-          projectId = "custom_project/" + selectedProject.id;
-        }
+            if (event.key === "Enter") {
+              const selectedProject = getActiveDropdownValue().value as Project;
+              let projectId = selectedProject.id;
 
-        await setProjectAsync(projectId);
-        setCurrentProject(await getProjectAsync());
+              if (selectedProject.custom) {
+                projectId = "custom_project/" + selectedProject.id;
+              }
 
-        if (!selectedProject.custom) await handleGitlabSyncAsync();
+              await setProjectAsync(projectId);
+              setCurrentProject(await getProjectAsync());
 
-        await fetchTasksAsync();
+              if (!selectedProject.custom) await handleGitlabSyncAsync();
 
-        setSelectedTaskIndex(0);
-        setSelectedColumnIndex(0);
-        setSelectedTaskIndexes([0]);
+              await fetchTasksAsync();
 
-        addNotification({
-          title: "Success",
-          description: "Project set successfully",
-          type: "success",
-        });
+              setSelectedTaskIndex(0);
+              setSelectedColumnIndex(0);
+              setSelectedTaskIndexes([0]);
 
-        next();
+              addNotification({
+                title: "Success",
+                description: "Project set successfully",
+                type: "success",
+              });
+
+              next();
+            } else if (event.key.toLowerCase() === "d") {
+              const project = getActiveDropdownValue().value as Project;
+              await deleteProjectAsync(project.id);
+              goto("loadProjects");
+            } else if (event.key.toLowerCase() === "q") {
+              next();
+              removeListener();
+            } else if (event.key.toLowerCase() === "j") {
+              setActiveDropdownIndex(
+                Math.min(
+                  commandStore.activeDropdownIndex + 1,
+                  commandStore.dropdownValues.length - 1
+                )
+              );
+            } else if (event.key.toLowerCase() === "k") {
+              setActiveDropdownIndex(
+                Math.max(commandStore.activeDropdownIndex - 1, 0)
+              );
+            }
+          }
+        };
+
+        addListener("keydown", handleKeydown);
       },
-      prompt: "Select a project to set as active",
-      onError: (error, repeat) => {
-        addNotification({
-          title: "Error",
-          description: "Failed to set project",
-          type: "error",
-        });
-        repeat();
-      },
+      prompt:
+        "press <kbd>Enter</kbd> to set project, press <kbd>D</kbd> to delete, press <kbd>Q</kbd> to quit",
     },
   ],
 };

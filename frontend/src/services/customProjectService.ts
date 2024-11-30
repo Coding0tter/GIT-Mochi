@@ -24,6 +24,26 @@ export const createProjectAsync = async (name: string) => {
   }
 };
 
+export const deleteProjectAsync = async (projectId: string) => {
+  try {
+    const response = await axios.delete(`/projects/${projectId}`);
+    if (response.status === 200) {
+      addNotification({
+        title: "Project deleted",
+        description: `Project has been deleted`,
+        type: "success",
+      });
+    }
+  } catch (error) {
+    if (error instanceof AxiosError)
+      addNotification({
+        title: "Error",
+        description: error.message,
+        type: "error",
+      });
+  }
+};
+
 export const loadCustomProjectsAsync = async () => {
   try {
     const response = await axios.get("/projects");

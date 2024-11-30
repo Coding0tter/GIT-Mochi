@@ -63,14 +63,18 @@ export class CommandProcessor {
 
     try {
       if (step.awaitInput) {
-        await step.executeAsync(
-          await this.waitForUserInput(),
-          this.next,
-          this.repeat,
-          this.goto
-        );
+        await step.executeAsync({
+          input: await this.waitForUserInput(),
+          next: this.next,
+          repeat: this.repeat,
+          goto: this.goto,
+        });
       } else {
-        await step.executeAsync(undefined, this.next, this.repeat, this.goto);
+        await step.executeAsync({
+          next: this.next,
+          repeat: this.repeat,
+          goto: this.goto,
+        });
       }
     } catch (error: any) {
       if (step.onError) {

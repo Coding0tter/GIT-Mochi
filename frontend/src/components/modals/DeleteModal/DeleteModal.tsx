@@ -24,7 +24,7 @@ const DeleteModal = (props: DeleteModalProps): JSX.Element => {
   return (
     <BaseModal {...props} closeText="(N)o, keep it" submitText="(Y)es, delete">
       <h2>Delete Task</h2>
-      <p>Are you sure you want to delete this task?</p>
+      <p>Are you sure you want to delete selected tasks?</p>
       <p>{modalStore.selectedTask?.title}</p>
     </BaseModal>
   );

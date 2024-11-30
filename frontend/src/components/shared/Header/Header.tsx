@@ -5,8 +5,8 @@ import { getUserAsync } from "../../../services/userService";
 import { setCurrentProject } from "../../../stores/uiStore";
 import CommandLine from "../../shared/CommandLine/CommandLine";
 import styles from "./Header.module.css";
-
-interface HeaderProps {}
+import { random } from "lodash";
+import { WaveText } from "../WaveText/WaveText";
 
 interface IUser {
   gitlabId: number;
@@ -16,27 +16,30 @@ interface IUser {
   avatar_url: string;
 }
 
-const Header = (props: HeaderProps): JSX.Element => {
+const slogans = ["vim-like", "keyboard-first", "mice-are-for-cats", "h-j-k-l"];
+
+const Header = (): JSX.Element => {
   const [user, setUser] = createSignal<IUser | null>(null);
+  const [slogan, setSlogan] = createSignal<string>("");
 
   onMount(async () => {
+    const randomIndex = random(slogans.length);
+    setSlogan(slogans.at(randomIndex) || "happy-little-accidents");
+
     setUser(await getUserAsync());
     setCurrentProject(await getProjectAsync());
   });
 
   return (
-    <div class={styles.headerContainer}>
+    <div
+      class={styles.headerContainer}
+      style={{ "view-transition-name": "header" }}
+    >
       <div class={styles.headerRow}>
         <div class={styles.headerLogo}>
           <img src={logo} alt="GitLab-Mochi Logo"></img>
           <h1>Mochi</h1>
-          <div class="wave-text">
-            {"keyboard-first".split("").map((char, index) => (
-              <span class="wave-char" style={{ "--index": index }}>
-                {char}
-              </span>
-            ))}
-          </div>
+          <WaveText text={slogan} />
         </div>
         <CommandLine />
         <div class={styles.userInfo}>

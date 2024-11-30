@@ -1,11 +1,11 @@
-import { KeyboardShortcutMap } from ".";
+import { KeyboardShortcutMap, Shortcut } from "./types";
 
 class ShortcutRegistry {
   private static instance: ShortcutRegistry;
 
   private static shortcutMaps: KeyboardShortcutMap[] = [];
 
-  private constructor() { }
+  private constructor() {}
 
   public static getInstance(): ShortcutRegistry {
     if (!ShortcutRegistry.instance) {
@@ -28,7 +28,7 @@ class ShortcutRegistry {
     }
   }
 
-  private getShortcutsByKey(key: string) {
+  public getShortcutsByKey(key: string) {
     return ShortcutRegistry.shortcutMaps.find((sc) => sc.key === key);
   }
 
@@ -38,11 +38,14 @@ class ShortcutRegistry {
 
   public executeShortcut(mapKey: string, event: KeyboardEvent) {
     const { key, shiftKey, ctrlKey } = event;
+
+    const baseMap = this.getShortcutsByKey("base");
     const map = this.getShortcutsByKey(mapKey);
 
-    if (!map) return;
+    const shortCuts = baseMap?.shortcuts.concat(map?.shortcuts || []);
+    if (shortCuts === undefined || shortCuts?.length === 0) return;
 
-    const shortcut = map?.shortcuts.find((sc) => {
+    const shortcut = shortCuts.find((sc: Shortcut) => {
       if (Array.isArray(sc.key)) {
         return (
           sc.key.includes(key) &&

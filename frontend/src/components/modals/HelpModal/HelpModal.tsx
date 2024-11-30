@@ -1,104 +1,45 @@
-import { JSX } from "solid-js";
+import { useLocation } from "@solidjs/router";
+import { createSignal, JSX, onMount } from "solid-js";
+import ShortcutRegistry from "../../../shortcutMaps/shortcutRegistry";
+import Badge from "../../shared/Badge/Badge";
 import BaseModal, { BaseModalProps } from "../BaseModal/BaseModal";
 import styles from "./HelpModal.module.css";
-import Badge from "../../shared/Badge/Badge";
-
-const KEYBINDINGS = [
-  // Navigation
-  { section: "Navigation", key: "W / ↑", description: "Move up through tasks" },
-  {
-    section: "Navigation",
-    key: "S / ↓",
-    description: "Move down through tasks",
-  },
-  {
-    section: "Navigation",
-    key: "A / ←",
-    description: "Switch to the previous column",
-  },
-  {
-    section: "Navigation",
-    key: "D / →",
-    description: "Switch to the next column",
-  },
-  {
-    section: "Navigation",
-    key: "N / Shift + → / Shift + D",
-    description: "Move task to the next state",
-  },
-  {
-    section: "Navigation",
-    key: "P / Shift + ← / Shift + A",
-    description: "Move task to the previous state",
-  },
-
-  // Task Management
-  { section: "Task Management", key: "C", description: "Create new task" },
-  { section: "Task Management", key: "E", description: "Edit selected task" },
-  { section: "Task Management", key: "X", description: "Delete selected task" },
-  { section: "Task Management", key: "V", description: "View deleted tasks" },
-  {
-    section: "Task Management",
-    key: "Shift + R",
-    description: "Restore selected task",
-  },
-
-  // Viewing & Searching
-  {
-    section: "Viewing & Searching",
-    key: "Strg + F",
-    description: "Search for tasks",
-  },
-  {
-    section: "Viewing & Searching",
-    key: "Strg + P",
-    description: "Open commandline",
-  },
-  {
-    section: "Viewing & Searching",
-    key: "Spacebar",
-    description: "Toggle resolved comments visibility",
-  },
-
-  // GitLab Actions
-  {
-    section: "GitLab Actions",
-    key: "Shift + M",
-    description: "Create merge request and branch from issue",
-  },
-  {
-    section: "GitLab Actions",
-    key: "Shift + O",
-    description: "Open selected task in GitLab",
-  },
-  {
-    section: "GitLab Actions",
-    key: "Shift + S",
-    description: "Sync merge requests from GitLab",
-  },
-
-  // Utility Commands
-  {
-    section: "Utility Commands",
-    key: "Escape",
-    description: "Close all modals",
-  },
-  {
-    section: "Utility Commands",
-    key: "H",
-    description: "Open this help modal",
-  },
-];
+import { Shortcut } from "../../../shortcutMaps/types";
 
 interface HelpModalProps extends BaseModalProps {}
 
 const HelpModal = (props: HelpModalProps): JSX.Element => {
-  // Group keybindings by section
-  const groupedKeybindings = KEYBINDINGS.reduce((groups, binding) => {
-    if (!groups[binding.section]) groups[binding.section] = [];
-    groups[binding.section].push(binding);
-    return groups;
-  }, {} as Record<string, typeof KEYBINDINGS>);
+  const location = useLocation();
+  const [shortcuts, setShortcuts] = createSignal<Shortcut[]>([]);
+
+  const groupShortcutsByCategory = (shortcuts: Shortcut[]) => {
+    return shortcuts.reduce(
+      (acc: Record<string, Shortcut[]>, shortcut: Shortcut) => {
+        const { category } = shortcut;
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(shortcut);
+        return acc;
+      },
+      {},
+    );
+  };
+
+  onMount(() => {
+    const { pathname } = location;
+    const baseMap = ShortcutRegistry.getInstance().getShortcutsByKey("base");
+
+    const locationMap = ShortcutRegistry.getInstance().getShortcutsByKey(
+      pathname.split("/")[1],
+    );
+
+    const allShortcuts = baseMap?.shortcuts.concat(
+      locationMap?.shortcuts || [],
+    );
+
+    setShortcuts(allShortcuts || []);
+  });
+
+  const groupedShortcuts = () => groupShortcutsByCategory(shortcuts());
 
   return (
     <BaseModal {...props} closeText="Close">
@@ -106,21 +47,33 @@ const HelpModal = (props: HelpModalProps): JSX.Element => {
         <div class={styles.helpSection}>
           <h2>Keybindings</h2>
 
-          <p>
+          <p class={styles.subHeading}>
             This tool allows you to manage tasks efficiently. Here are the
             keyboard shortcuts:
           </p>
           <div class={styles.keybindingsWrapper}>
-            {Object.keys(groupedKeybindings).map((section) => (
+            {Object.entries(groupedShortcuts()).map(([category, bindings]) => (
               <div>
-                <h3>{section}</h3>
+                <h3>{category}</h3>
                 <ul class={styles["keybindings-list"]}>
-                  {groupedKeybindings[section].map((binding) => (
+                  {bindings.map((binding) => (
                     <li>
                       <strong>
-                        {binding.key.split(" / ").map((key) => (
-                          <kbd>{key}</kbd>
-                        ))}
+                        {Array.isArray(binding.key) ? (
+                          binding.key.map((key, index) => (
+                            <kbd>
+                              {binding.ctrlKey ? "Ctrl + " : ""}
+                              {binding.shiftKey ? "Shift + " : ""}
+                              {key}
+                            </kbd>
+                          ))
+                        ) : (
+                          <kbd>
+                            {binding.ctrlKey ? "Ctrl + " : ""}
+                            {binding.shiftKey ? "Shift + " : ""}
+                            {binding.key}
+                          </kbd>
+                        )}
                         :
                       </strong>{" "}
                       {binding.description}

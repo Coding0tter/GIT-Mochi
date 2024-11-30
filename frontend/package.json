@@ -27,8 +27,11 @@
     "axios": "^1.7.7",
     "dayjs": "^1.11.13",
     "dompurify": "^3.1.7",
+    "fuse.js": "^7.0.0",
     "lodash": "^4.17.21",
+    "marked": "^15.0.3",
     "socket.io-client": "^4.8.0",
-    "solid-js": "^1.8.11"
+    "solid-js": "^1.8.11",
+    "solid-motionone": "^1.0.2"
   }
 }

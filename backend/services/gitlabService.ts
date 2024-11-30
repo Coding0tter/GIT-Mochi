@@ -1,23 +1,19 @@
 // services/GitlabService.ts
 
 import { SettingRepo } from "../repositories/settingRepo";
-import {
-  createTaskData,
-  detectChanges,
-  parseComments,
-} from "../utils/taskUtils";
+import { createTaskData, detectChanges } from "../utils/taskUtils";
 import SocketHandler from "../sockets";
 import { GitlabApiClient } from "../clients/gitlabApiClient";
 import { TaskService } from "./taskService";
 import { UserService } from "./userService";
 import { GitlabError } from "../errors/gitlabError";
-import type { ITask } from "../models/task";
+import type { ITask, IComment } from "../models/task";
 import { ContextKeys, getContext } from "../utils/asyncContext";
 import { ruleEvent } from "../decorators/ruleEventDecorator";
 import { EventNamespaces, EventTypes } from "../events/eventTypes";
-import type { ObjectId } from "mongoose";
 import TaskEventEmitter from "./emitters/taskEventEmitter";
 import type { MochiResult } from "../utils/mochiResult";
+import { MochiError } from "../errors/mochiError";
 
 export class GitlabService {
   private gitlabApiClient: GitlabApiClient;
@@ -106,7 +102,8 @@ export class GitlabService {
     const newMergeRequestTask = newMergeRequestTaskResult.data;
 
     const comments = await this.getMergeRequestCommentsAsync(
-      newMergeRequestTask.id
+      newMergeRequestTask.projectId,
+      newMergeRequestTask.gitlabIid
     );
     newMergeRequestTask.comments = comments;
 
@@ -122,12 +119,23 @@ export class GitlabService {
       .getIO()
       .emit("updateTasks", [
         newMergeRequestTask,
-        { ...issue, status: "closed" },
+        { _id: issue._id, status: "closed" },
       ]);
 
     return {
       mergeRequest: mergeRequestData,
     };
+  }
+
+  async assignToUserAsync(taskId: string, userId: string) {
+    const task = await this.taskService.findOneAsync({ _id: taskId });
+    if (!task) throw new MochiError("Task not found", 404);
+
+    await this.gitlabApiClient.request(
+      `/projects/${task.projectId}/merge_requests/${task.gitlabIid}`,
+      "PUT",
+      { assignee_id: userId }
+    );
   }
 
   async getUserByAccessTokenAsync() {
@@ -155,16 +163,16 @@ export class GitlabService {
     return this.gitlabApiClient.request("/users?per_page=100");
   }
 
-  async getMergeRequestCommentsAsync(taskId: ObjectId) {
-    const mergeRequest = await this.taskService.findOneAsync({ _id: taskId });
-    if (!mergeRequest) throw new GitlabError("Merge request not found", 404);
-
+  async getMergeRequestCommentsAsync(projectId: string, gitlabIid: string) {
     const comments = await this.fetchMergeRequestCommentsAsync(
-      mergeRequest.projectId!,
-      mergeRequest.gitlabIid?.toString()!
+      projectId,
+      gitlabIid
     );
 
-    return parseComments(comments, mergeRequest.projectId!);
+    comments.forEach((comment: any) => {
+      comment.originalId = comment.id;
+    });
+    return comments;
   }
 
   async closeMergedMergeRequestsAsync(): Promise<Partial<ITask>[]> {
@@ -236,11 +244,17 @@ export class GitlabService {
     const taskData = createTaskData(entity, entityType);
 
     let taskResult: MochiResult | null = null;
+    let comments: IComment[];
+
+    if (entityType === "merge_request") {
+      comments = await this.getMergeRequestCommentsAsync(projectId, entity.iid);
+      taskData.comments = comments;
+    }
 
     if (existingTask) {
       const hasChanges = detectChanges(existingTask, taskData);
       if (hasChanges) {
-        taskResult = await this.taskEmitter.updateTaskAsync(
+        taskResult = await this.taskService.updateTaskAsync(
           existingTask._id as string,
           {
             labels: taskData.labels,
@@ -256,20 +270,7 @@ export class GitlabService {
       throw taskResult.error;
     }
 
-    const task = taskResult?.data as ITask;
-
-    // TODO: refactor to only update task once
-    if (task && entityType === "merge_request") {
-      const comments = await this.getMergeRequestCommentsAsync(
-        task._id as ObjectId
-      );
-      task.comments = comments;
-      await this.taskEmitter.updateTaskAsync(task._id as string, {
-        comments: task.comments,
-      });
-    }
-
-    return task;
+    return taskResult?.data;
   }
 
   @ruleEvent(EventNamespaces.GitLab, EventTypes.CreateBranch)

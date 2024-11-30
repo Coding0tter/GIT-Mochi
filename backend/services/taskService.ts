@@ -2,6 +2,7 @@ import type { ITask } from "../models/task";
 import { TaskRepo } from "../repositories/taskRepo";
 import { MochiError } from "../errors/mochiError";
 import { BaseService } from "./baseService";
+import { MochiResult } from "../utils/mochiResult";
 
 class TaskService extends BaseService<ITask> {
   constructor() {
@@ -34,6 +35,16 @@ class TaskService extends BaseService<ITask> {
     });
 
     await Promise.all(updatePromises);
+  }
+
+  async updateTaskAsync(id: string, task: Partial<ITask>) {
+    const updatedTask = await super.updateAsync(id, task);
+
+    if (!updatedTask) {
+      throw new MochiError("Task not found", 404);
+    }
+
+    return new MochiResult(updatedTask);
   }
 
   async restoreTaskAsync(id: string) {

@@ -21,7 +21,7 @@ const createProjectCommand: CommandPipeline = {
     {
       awaitInput: true,
       cleanDropdown: true,
-      executeAsync: async (input, next, repeat) => {
+      executeAsync: async ({ input, next, repeat }) => {
         if (input === "") {
           repeat();
           return;
@@ -45,7 +45,7 @@ const createProjectCommand: CommandPipeline = {
     },
     {
       awaitInput: true,
-      executeAsync: async (_, next) => {
+      executeAsync: async ({ next }) => {
         const choice = getActiveDropdownValue().value;
         if (choice === "yes") {
           await setProjectAsync("custom_project/" + commandStore.buffer);

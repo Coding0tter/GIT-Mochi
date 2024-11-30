@@ -4,4 +4,6 @@
   gap: var(--spacing-md);
   justify-content: space-between;
   align-items: flex-start;
+  padding-bottom: 30px;
+  padding-top: var(--spacing-sm);
 }

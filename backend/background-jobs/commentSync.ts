@@ -1,20 +1,8 @@
-import { Task } from "../models/task";
+import { Task, type IComment } from "../models/task";
 import { GitlabService } from "../services/gitlabService";
 import { SocketHandler } from "../sockets";
 import { MochiError } from "../errors/mochiError";
-import { logInfo } from "../utils/logger";
-
-export interface Comment {
-  body: string;
-  images?: string[];
-  resolved: boolean;
-  author: {
-    name: string;
-    username: string;
-  };
-  system: boolean;
-  originalId?: number;
-}
+import { logError, logInfo } from "../utils/logger";
 
 const syncCommentJob = async () => {
   setInterval(async () => {
@@ -31,7 +19,8 @@ const syncCommentJob = async () => {
 
       for (const mr of merge_requests) {
         const newComments = await gitlabService.getMergeRequestCommentsAsync(
-          mr._id as string
+          mr.projectId!,
+          mr.gitlabIid?.toString()!
         );
 
         if (newComments) {
@@ -41,10 +30,14 @@ const syncCommentJob = async () => {
           if (hasChanges) {
             if (
               mr.comments.filter(
-                (item) => !item.resolved && item.body.includes("@maxi")
+                (item) =>
+                  !item.resolved && item.body.includes("@maxi") && !item.system
               ).length <
                 newComments.filter(
-                  (item: any) => !item.resolved && item.body.includes("@maxi")
+                  (item: any) =>
+                    !item.resolved &&
+                    item.body.includes("@maxi") &&
+                    !item.system
                 ).length &&
               (mr.status === "done" || mr.status === "review")
             ) {
@@ -74,14 +67,14 @@ const syncCommentJob = async () => {
 
       logInfo("Comments synced!");
     } catch (error) {
-      throw new MochiError("Failed to sync comments", 500, error as Error);
+      logError(new MochiError("Failed to sync comments", 500, error as Error));
     }
   }, 60000);
 };
 
 const detectCommentChanges = (
-  oldComments: Comment[],
-  newComments: Comment[]
+  oldComments: IComment[],
+  newComments: IComment[]
 ): boolean => {
   if (oldComments.length !== newComments.length) {
     return true;

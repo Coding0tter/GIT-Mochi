@@ -1,13 +1,12 @@
 .task {
-  background: rgba(200, 200, 255, 0.1);
+  background-color: var(--color-surface0);
   min-height: 100px;
   color: var(--color-text);
   padding: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
   border-radius: var(--spacing-xs);
   position: relative;
-  transition: transform 0.2s ease, background-color 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
   border-left: 5px solid var(--color-blue);
 
   p {

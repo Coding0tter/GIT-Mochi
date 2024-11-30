@@ -24,6 +24,20 @@ export class GitlabController {
     }
   };
 
+  assignToUserAsync = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { taskId, userId } = req.body;
+      const result = await this.gitlabService.assignToUserAsync(taskId, userId);
+      res.status(200).json(result);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
   createMergeRequestAsync = async (
     req: Request,
     res: Response,

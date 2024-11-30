@@ -11,11 +11,13 @@ type BadgeProps = {
     | "high"
     | "medium"
     | "low"
+    | "outline"
     | string;
   cutOffText?: boolean;
   clipBoardText?: string;
   hasTooltip?: boolean;
   children: JSXElement;
+  onClick?: (event: MouseEvent) => void;
 };
 
 const Badge = ({
@@ -23,6 +25,7 @@ const Badge = ({
   children,
   cutOffText,
   clipBoardText,
+  onClick,
   hasTooltip,
 }: BadgeProps) => {
   const copyToClipboard = (event: MouseEvent) => {
@@ -40,7 +43,7 @@ const Badge = ({
   };
 
   return (
-    <span onClick={copyToClipboard}>
+    <span onClick={onClick || copyToClipboard}>
       {hasTooltip ? (
         <Tooltip text={children}>
           <span

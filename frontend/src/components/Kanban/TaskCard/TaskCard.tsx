@@ -33,6 +33,9 @@ const TaskCard = (props: TaskCardProps) => {
       } ${props.task.deleted ? styles.deletedTask : ""} ${
         styles[props.task.type as string]
       }`}
+      style={{
+        "view-transition-name": "card-" + props.task._id,
+      }}
     >
       <p>{props.task.title}</p>
       {props.task.description && <div class="divider" />}

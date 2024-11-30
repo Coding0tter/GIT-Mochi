@@ -5,7 +5,7 @@ import { STATES } from "../../constants";
 import { addNotification } from "../../services/notificationService";
 import {
   createTaskAsync,
-  deleteTaskAsync,
+  deleteTasksAsync,
   updateTaskAsync,
 } from "../../services/taskService";
 import {
@@ -18,6 +18,7 @@ import {
 import { fetchTasksAsync, filteredTasks } from "../../stores/taskStore";
 import styles from "./KanbanBoard.module.css";
 import TaskColumn from "../../components/Kanban/TaskColumn/TaskColumn";
+import { keyboardNavigationStore } from "../../stores/keyboardNavigationStore";
 
 const KanbanBoard = () => {
   onMount(async () => {
@@ -76,7 +77,7 @@ const KanbanBoard = () => {
 
   const handleDeleteTask = async () => {
     try {
-      await deleteTaskAsync(modalStore.selectedTask?._id || "");
+      await deleteTasksAsync(keyboardNavigationStore.selectedTaskIndexes);
       setActiveModal(ModalType.None);
 
       addNotification({
