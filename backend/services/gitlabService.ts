@@ -175,6 +175,30 @@ export class GitlabService {
     return comments;
   }
 
+  async getLatestPipelineAsync(projectId: string, mergeRequestIid: string) {
+    const pipelines = await this.gitlabApiClient.request(
+      `/projects/${projectId}/merge_requests/${mergeRequestIid}/pipelines`
+    );
+
+    if (pipelines.length === 0) {
+      return null;
+    }
+
+    return pipelines[0];
+  }
+
+  async getFaultyTestCasesAsync(projectId: string, pipelineId: number) {
+    const report = await this.gitlabApiClient.request(
+      `/projects/${projectId}/pipelines/${pipelineId}/test_report`
+    );
+
+    const cases = report.test_suites.flatMap((suite: any) => {
+      return suite.test_cases.filter((test: any) => test.status === "failed");
+    });
+
+    return cases;
+  }
+
   async closeMergedMergeRequestsAsync(): Promise<Partial<ITask>[]> {
     const changes: Partial<ITask>[] = [];
 

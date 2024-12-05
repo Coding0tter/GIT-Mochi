@@ -1,6 +1,7 @@
 import { GitlabApiClient } from "../../clients/gitlabApiClient";
 import { ruleAction } from "../../decorators/ruleActionDecorator";
 import { EventNamespaces, ActionTypes } from "../../events/eventTypes";
+import { GitlabService } from "../gitlabService";
 
 class GitlabActionHandler {
   private gitlabApiClient: GitlabApiClient;
@@ -18,10 +19,6 @@ class GitlabActionHandler {
     try {
       const { id } = eventData;
       const { projectId, gitlabIid } = data.data;
-
-      console.log(data.data);
-
-      //todo user gitlabService.assignToUser
 
       await this.gitlabApiClient.request(
         `/projects/${projectId}/merge_requests/${gitlabIid}`,

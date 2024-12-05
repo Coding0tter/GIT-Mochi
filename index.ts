@@ -17,6 +17,7 @@ import "./backend/services/emitters";
 import { GitlabService } from "./backend/services/gitlabService";
 import { SocketHandler } from "./backend/sockets";
 import { logError, logInfo } from "./backend/utils/logger";
+import { syncPipelineStatusJob } from "./backend/background-jobs/pipelineStatusSync";
 
 logInfo(`
   
@@ -73,8 +74,11 @@ app.use("/api/rules", ruleRoutes);
 app.use("/api/timetrack", timeTrackRoutes);
 
 // Sync comments every minute
-syncCommentJob();
-syncGitlabJob();
+setInterval(() => {
+  syncCommentJob();
+  syncGitlabJob();
+  syncPipelineStatusJob();
+}, 60000);
 
 // Close merged merge requests every minute
 closeMergedMRJob();

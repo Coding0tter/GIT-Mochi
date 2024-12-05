@@ -49,3 +49,10 @@ export const openDetailsModal = () => {
   );
   setActiveModal(ModalType.TaskDetails);
 };
+
+export const openPipelineModal = () => {
+  setSelectedTaskForModal(
+    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]
+  );
+  setActiveModal(ModalType.Pipeline);
+};

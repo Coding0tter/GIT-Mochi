@@ -19,6 +19,7 @@ import { fetchTasksAsync, filteredTasks } from "../../stores/taskStore";
 import styles from "./KanbanBoard.module.css";
 import TaskColumn from "../../components/Kanban/TaskColumn/TaskColumn";
 import { keyboardNavigationStore } from "../../stores/keyboardNavigationStore";
+import PipelineModal from "../../components/modals/PipelineModal/PipelineModal";
 
 const KanbanBoard = () => {
   onMount(async () => {
@@ -107,6 +108,9 @@ const KanbanBoard = () => {
       )}
       {modalStore.activeModal === ModalType.TaskDetails && (
         <TaskDetailsModal onClose={handleCloseModal} />
+      )}
+      {modalStore.activeModal === ModalType.Pipeline && (
+        <PipelineModal onClose={handleCloseModal} />
       )}
       <div class={styles.kanban}>
         {STATES.map((status, columnIndex) => (

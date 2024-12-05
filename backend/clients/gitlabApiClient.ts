@@ -10,7 +10,11 @@ export class GitlabApiClient {
     this.privateToken = process.env.PRIVATE_TOKEN || "";
   }
 
-  async request(endpoint: string, method: "GET" | "POST" | "PUT" = "GET", data?: any) {
+  async request(
+    endpoint: string,
+    method: "GET" | "POST" | "PUT" = "GET",
+    data?: any
+  ) {
     try {
       const response = await axios({
         url: `${this.baseUrl}${endpoint}`,
@@ -24,7 +28,13 @@ export class GitlabApiClient {
 
       return response.data;
     } catch (error: any) {
-      throw new MochiError("GitLab API request failed", 500, error);
+      throw new MochiError(
+        `GitLab API request failed for ${endpoint} with method ${method} and ${
+          data ? data : "no data"
+        }`,
+        500,
+        error
+      );
     }
   }
 }

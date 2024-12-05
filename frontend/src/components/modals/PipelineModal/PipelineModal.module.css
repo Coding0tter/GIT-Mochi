@@ -1,0 +1,100 @@
+.content {
+  max-width: 60vw;
+  display: flex;
+  gap: var(--spacing-md);
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  color: var(--color-subtext1);
+
+  a {
+    color: var(--color-crust);
+  }
+
+  img {
+    max-height: 200px;
+  }
+}
+
+.card {
+  background-color: var(--color-surface1);
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  padding: var(--spacing-xs);
+  border-radius: var(--spacing-xs);
+
+  &.selected {
+    border: 2px solid var(--color-blue);
+  }
+}
+
+.pipelineState {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  border-radius: var(--spacing-xs);
+
+  &.success {
+    color: var(--color-green);
+    border: 1px solid var(--color-green);
+    background-color: var(--color-surface1);
+  }
+
+  &.failed {
+    color: var(--color-red);
+    border: 1px solid var(--color-red);
+    background-color: var(--color-surface1);
+  }
+
+  &.running {
+    color: var(--color-blue);
+    border: 1px solid var(--color-blue);
+    background-color: var(--color-surface1);
+  }
+
+  &.canceled {
+    color: var(--color-yellow);
+    border: 1px solid var(--color-yellow);
+    background-color: var(--color-surface1);
+  }
+
+  &.skipped {
+    color: var(--color-peach);
+    border: 1px solid var(--color-peach);
+    background-color: var(--color-surface1);
+  }
+}
+
+.divider {
+  border-top: 2px solid var(--color-overlay2);
+  border-radius: var(--spacing-xs);
+  width: 100%;
+}
+
+.reports {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-height: 50vh;
+  overflow-y: auto;
+  align-items: flex-start;
+
+  .pipelineReportTitle {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-bold);
+  }
+
+  img {
+    border-radius: var(--spacing-xs);
+    margin-top: var(--spacing-xs);
+    width: 100%;
+  }
+}

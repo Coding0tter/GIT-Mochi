@@ -56,7 +56,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
   const filteredComments = () => {
     return (
       task?.comments.filter(
-        (comment) => toggleSystemComments() || !comment.system,
+        (comment) => toggleSystemComments() || !comment.system
       ) || []
     );
   };
@@ -65,16 +65,14 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
     const sanitized = DOMPurify.sanitize(input);
     const markdown = marked(sanitized, { async: false });
 
-    console.log(sanitized);
-
     return markdown
       .replaceAll(
         'src="/',
-        `src="${GIT_URL}/-/project/${uiStore.currentProject?.id}/`,
+        `src="${GIT_URL}/-/project/${uiStore.currentProject?.id}/`
       )
       .replaceAll(
         /<img\s+src="([^"]+\.webm)"\s+alt="([^"]*)"\s*\/?>/g,
-        '<video width="700" controls><source src="$1" type="video/webm"></video>',
+        '<video width="700" controls><source src="$1" type="video/webm"></video>'
       );
   };
 
@@ -82,13 +80,13 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
     toggleCommentExpansion((prev) =>
       prev.includes(index.toString())
         ? prev.filter((i) => i !== index.toString())
-        : [...prev, index.toString()],
+        : [...prev, index.toString()]
     );
   };
 
   const getPriority = () => {
     const priorityLabel = task?.labels.find((label) =>
-      label.includes("priority"),
+      label.includes("priority")
     );
     if (priorityLabel && priorityLabel.includes("/")) {
       return priorityLabel.split("/")[1].toLowerCase();
@@ -148,7 +146,9 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
                   <Badge type={getPriority()}>{getPriority()}</Badge>
                   {task?.labels
                     .filter((task) => !task.includes("priority"))
-                    .map((label) => <Badge>{label}</Badge>)}
+                    .map((label) => (
+                      <Badge>{label}</Badge>
+                    ))}
                 </div>
               )}
             </div>

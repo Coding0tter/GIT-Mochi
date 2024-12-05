@@ -8,6 +8,7 @@ import {
   openDeleteModal,
   openDetailsModal,
   openEditTaskModal,
+  openPipelineModal,
 } from "../services/modalService";
 import {
   addToSelection,
@@ -75,6 +76,12 @@ const shortcuts: KeyboardShortcutMap = {
       action: () => openDetailsModal(),
       category: KeyboardShortcutCategory.TaskManagement,
       description: "Open details of selected task",
+    },
+    {
+      key: "p",
+      action: () => openPipelineModal(),
+      category: KeyboardShortcutCategory.TaskManagement,
+      description: "Open pipeline modal",
     },
     {
       key: "t",

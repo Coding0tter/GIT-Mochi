@@ -1,6 +1,8 @@
+import { get } from "lodash";
 import { Task } from "../../../stores/taskStore";
 import Badge from "../../shared/Badge/Badge";
 import styles from "./TaskCard.module.css";
+import Tooltip from "../../shared/Tooltip/Tooltip";
 
 interface TaskCardProps {
   task: Task;
@@ -22,6 +24,21 @@ const TaskCard = (props: TaskCardProps) => {
     }
 
     return "";
+  };
+
+  const getPipelinesStatus = (status: string) => {
+    switch (status) {
+      case "success":
+        return <i class="fa-regular fa-thumbs-up"></i>;
+      case "failed":
+        return <i class="fa-regular fa-thumbs-down"></i>;
+      case "running":
+        return <i class="fa-solid fa-person-running"></i>;
+      case "canceled":
+        return <i class="fa-solid fa-person-running"></i>;
+      case "skipped":
+        return <i class="fa-solid fa-forward"></i>;
+    }
   };
 
   return (
@@ -59,6 +76,17 @@ const TaskCard = (props: TaskCardProps) => {
       )}
       {props.commentsCount > 0 && (
         <div class={styles.commentCount}>{props.commentsCount}</div>
+      )}
+      {props.task.pipelineStatus && (
+        <div
+          class={`${styles.pipelineStatus} ${
+            styles[props.task.pipelineStatus]
+          }`}
+        >
+          <Tooltip text={props.task.pipelineStatus}>
+            {getPipelinesStatus(props.task.pipelineStatus)}
+          </Tooltip>
+        </div>
       )}
     </div>
   );

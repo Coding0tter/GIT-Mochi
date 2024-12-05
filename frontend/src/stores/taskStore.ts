@@ -21,6 +21,12 @@ export interface Comment {
   system: boolean;
 }
 
+export interface PipelineReport {
+  name: string;
+  classname: string;
+  attachment_url: string;
+}
+
 export interface Task {
   _id: string;
   gitlabId?: string;
@@ -31,6 +37,8 @@ export interface Task {
   status: string;
   type?: string;
   comments: Comment[];
+  pipelineStatus?: string;
+  pipelineReports?: PipelineReport[];
   order: number;
   custom?: boolean;
   branch: string;

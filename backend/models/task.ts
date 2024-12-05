@@ -14,6 +14,12 @@ export interface IComment {
   system: boolean;
 }
 
+export interface IPipelineReport {
+  name: string;
+  classname: string;
+  attachment_url: string;
+}
+
 export interface ITask extends Document {
   gitlabIid?: number;
   gitlabId?: number;
@@ -31,6 +37,9 @@ export interface ITask extends Document {
   order?: number;
   comments: IComment[];
   projectId?: string;
+  latestPipelineId?: number;
+  pipelineStatus?: string;
+  pipelineReports?: IPipelineReport[];
 }
 
 const TaskSchema = new Schema<ITask>({
@@ -62,6 +71,15 @@ const TaskSchema = new Schema<ITask>({
       },
       system: { type: Boolean, default: false },
       created_at: String,
+    },
+  ],
+  latestPipelineId: Number,
+  pipelineStatus: String,
+  pipelineReports: [
+    {
+      name: String,
+      classname: String,
+      attachment_url: String,
     },
   ],
 });
