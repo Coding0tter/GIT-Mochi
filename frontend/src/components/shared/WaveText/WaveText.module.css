@@ -5,7 +5,9 @@
 
 .waveText span {
   display: inline-block;
-  animation: wave 2s ease-in-out infinite, waveColor 2s ease-in-out infinite;
+  animation:
+    wave 2s ease-in-out infinite,
+    waveColor 2s ease-in-out infinite;
 }
 
 @keyframes wave {
@@ -21,9 +23,9 @@
 @keyframes waveColor {
   0%,
   100% {
-    color: var(--color-green);
+    color: var(--color-blue);
   }
   50% {
-    color: var(--color-red);
+    color: var(--color-sapphire);
   }
 }

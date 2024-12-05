@@ -13,6 +13,8 @@ import {
   addToSelection,
   Direction,
   moveSelection,
+  moveSelectionToBottom,
+  moveSelectionToTop,
 } from "../services/taskNavigationService";
 import {
   moveSelectedTasksAsync,
@@ -80,6 +82,12 @@ const shortcuts: KeyboardShortcutMap = {
       category: KeyboardShortcutCategory.TaskManagement,
       description: "Toggle show deleted tasks",
     },
+    {
+      key: "g",
+      action: () => moveSelectionToTop(),
+      category: KeyboardShortcutCategory.Navigation,
+      description: "Move selection to top",
+    },
 
     {
       shiftKey: true,
@@ -138,7 +146,6 @@ const shortcuts: KeyboardShortcutMap = {
       category: KeyboardShortcutCategory.TaskManagement,
       description: "Restore selected task",
     },
-
     {
       shiftKey: true,
       key: ["^"],
@@ -152,6 +159,13 @@ const shortcuts: KeyboardShortcutMap = {
       action: async () => await moveSelectedTasksToEndAsync(Direction.Down),
       category: KeyboardShortcutCategory.Navigation,
       description: "Move selected tasks to bottom",
+    },
+    {
+      shiftKey: true,
+      key: "G",
+      action: () => moveSelectionToBottom(),
+      category: KeyboardShortcutCategory.Navigation,
+      description: "Move selection to bottom",
     },
 
     {

@@ -19,7 +19,7 @@ export const moveSelection = (direction: Direction) => {
   switch (direction) {
     case Direction.Up:
       setSelectedTaskIndex(
-        (prev) => (prev - 1 + columnTasks.length) % columnTasks.length
+        (prev) => (prev - 1 + columnTasks.length) % columnTasks.length,
       );
       setSelectedTaskIndexes([keyboardNavigationStore.selectedTaskIndex]);
       break;
@@ -31,7 +31,7 @@ export const moveSelection = (direction: Direction) => {
     case Direction.Left:
       do {
         setSelectedColumnIndex(
-          (prev) => (prev - 1 + STATES.length) % STATES.length
+          (prev) => (prev - 1 + STATES.length) % STATES.length,
         );
       } while (filteredTasks().length > 0 && getColumnTasks().length === 0);
       setSelectedTaskIndexes([0]);
@@ -47,6 +47,16 @@ export const moveSelection = (direction: Direction) => {
   }
 };
 
+export const moveSelectionToTop = () => {
+  setSelectedTaskIndex(0);
+  setSelectedTaskIndexes([0]);
+};
+
+export const moveSelectionToBottom = () => {
+  setSelectedTaskIndex(getColumnTasks().length - 1);
+  setSelectedTaskIndexes([getColumnTasks().length - 1]);
+};
+
 export const addToSelection = (direction: Direction) => {
   const columnTasks = getColumnTasks();
   switch (direction) {
@@ -57,21 +67,21 @@ export const addToSelection = (direction: Direction) => {
         ...prev.filter(
           (index) =>
             index <= prev.at(0)! ||
-            index < keyboardNavigationStore.selectedTaskIndex
+            index < keyboardNavigationStore.selectedTaskIndex,
         ),
         keyboardNavigationStore.selectedTaskIndex,
       ]);
       break;
     case Direction.Down:
       setSelectedTaskIndex((prev) =>
-        Math.min(prev + 1, columnTasks.length - 1)
+        Math.min(prev + 1, columnTasks.length - 1),
       );
 
       setSelectedTaskIndexes((prev) => [
         ...prev.filter(
           (index) =>
             index >= prev.at(0)! ||
-            index > keyboardNavigationStore.selectedTaskIndex
+            index > keyboardNavigationStore.selectedTaskIndex,
         ),
         keyboardNavigationStore.selectedTaskIndex,
       ]);
