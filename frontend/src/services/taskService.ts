@@ -41,6 +41,19 @@ export const restoreSelectedTaskAsync = async () => {
   }
 };
 
+export const copyBranchToClipboard = () => {
+  const task = getColumnTasks()[keyboardNavigationStore.selectedTaskIndex];
+  const branch = task.branch;
+
+  navigator.clipboard.writeText(branch);
+
+  addNotification({
+    title: "Copied to clipboard",
+    description: "Branch name has been copied",
+    type: "success",
+  });
+};
+
 export const createTaskAsync = async (task: Partial<Task>) => {
   const res = await axios.post(`/tasks`, {
     title: task.title,

@@ -18,6 +18,7 @@ import {
   moveSelectionToTop,
 } from "../services/taskNavigationService";
 import {
+  copyBranchToClipboard,
   moveSelectedTasksAsync,
   moveSelectedTasksToEndAsync,
   restoreSelectedTaskAsync,
@@ -94,6 +95,12 @@ const shortcuts: KeyboardShortcutMap = {
       action: () => moveSelectionToTop(),
       category: KeyboardShortcutCategory.Navigation,
       description: "Move selection to top",
+    },
+    {
+      key: "b",
+      action: () => copyBranchToClipboard(),
+      category: KeyboardShortcutCategory.Navigation,
+      description: "Copy branch name to clipboard",
     },
 
     {

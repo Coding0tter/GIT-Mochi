@@ -13,6 +13,12 @@ const shortcuts: KeyboardShortcutMap = {
       category: KeyboardShortcutCategory.Commands,
       description: "Open commandline",
     },
+    {
+      key: "/",
+      action: () => focusInput(InputMode.Search),
+      category: KeyboardShortcutCategory.Commands,
+      description: "Open search",
+    },
 
     {
       shiftKey: true,
