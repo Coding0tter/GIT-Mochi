@@ -52,6 +52,8 @@ const PipelineModal = (props: PipelineModalProps) => {
         return <i class="fa-solid fa-person-running"></i>;
       case "skipped":
         return <i class="fa-solid fa-forward"></i>;
+      default:
+        return <i class="fa-solid fa-question"></i>;
     }
   };
 
