@@ -1,6 +1,8 @@
 import { Task } from "../../../stores/taskStore";
 import Badge from "../../shared/Badge/Badge";
 import styles from "./TaskCard.module.css";
+import Tooltip from "../../shared/Tooltip/Tooltip";
+import { Show } from "solid-js";
 
 interface TaskCardProps {
   task: Task;
@@ -14,7 +16,7 @@ interface TaskCardProps {
 const TaskCard = (props: TaskCardProps) => {
   const getPriorityLabel = (task: Task) => {
     const label = task.labels.find((item: string) =>
-      item.toLowerCase().includes("priority")
+      item.toLowerCase().includes("priority"),
     );
 
     if (label) {
@@ -22,6 +24,21 @@ const TaskCard = (props: TaskCardProps) => {
     }
 
     return "";
+  };
+
+  const getIcon = (status: string) => {
+    switch (status) {
+      case "success":
+        return <i class="fa-regular fa-thumbs-up"></i>;
+      case "failed":
+        return <i class="fa-regular fa-thumbs-down"></i>;
+      case "running":
+        return <i class="fa-solid fa-person-running"></i>;
+      case "canceled":
+        return <i class="fa-solid fa-person-running"></i>;
+      case "skipped":
+        return <i class="fa-solid fa-forward"></i>;
+    }
   };
 
   return (
@@ -60,6 +77,18 @@ const TaskCard = (props: TaskCardProps) => {
       {props.commentsCount > 0 && (
         <div class={styles.commentCount}>{props.commentsCount}</div>
       )}
+
+      <Show when={props.task.pipelineStatus !== undefined}>
+        <div
+          class={`${styles.pipelineStatus} ${
+            styles[props.task.pipelineStatus!]
+          }`}
+        >
+          <Tooltip text={props.task.pipelineStatus}>
+            {getIcon(props.task.pipelineStatus!)}
+          </Tooltip>
+        </div>
+      </Show>
     </div>
   );
 };

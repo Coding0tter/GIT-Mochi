@@ -1,10 +1,7 @@
-// solid.d.ts
-import "solid-js";
+interface ImportMetaEnv {
+  readonly VITE_GIT_URL: string;
+}
 
-declare module "solid-js" {
-  namespace JSX {
-    interface Directives {
-      dndzone: any;
-    }
-  }
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
 }

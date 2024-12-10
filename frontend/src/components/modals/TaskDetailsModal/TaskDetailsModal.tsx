@@ -1,12 +1,12 @@
-import { createSignal, onMount, onCleanup } from "solid-js";
+import { createSignal, onMount, onCleanup, Show } from "solid-js";
 import BaseModal, { BaseModalProps } from "../BaseModal/BaseModal";
 import { modalStore } from "../../../stores/modalStore";
 import DOMPurify from "dompurify";
 import styles from "./TaskDetailsModal.module.css";
 import Badge from "../../shared/Badge/Badge";
-import { GIT_URL } from "../../../constants";
 import { marked } from "marked";
 import { uiStore } from "../../../stores/uiStore";
+import { GIT_URL } from "../../../constants";
 
 interface TaskDetailsModalProps extends BaseModalProps {}
 
@@ -56,7 +56,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
   const filteredComments = () => {
     return (
       task?.comments.filter(
-        (comment) => toggleSystemComments() || !comment.system,
+        (comment) => toggleSystemComments() || !comment.system
       ) || []
     );
   };
@@ -65,16 +65,14 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
     const sanitized = DOMPurify.sanitize(input);
     const markdown = marked(sanitized, { async: false });
 
-    console.log(sanitized);
-
     return markdown
       .replaceAll(
         'src="/',
-        `src="${GIT_URL}/-/project/${uiStore.currentProject?.id}/`,
+        `src="${GIT_URL}/-/project/${uiStore.currentProject?.id}/`
       )
       .replaceAll(
         /<img\s+src="([^"]+\.webm)"\s+alt="([^"]*)"\s*\/?>/g,
-        '<video width="700" controls><source src="$1" type="video/webm"></video>',
+        '<video width="700" controls><source src="$1" type="video/webm"></video>'
       );
   };
 
@@ -82,13 +80,13 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
     toggleCommentExpansion((prev) =>
       prev.includes(index.toString())
         ? prev.filter((i) => i !== index.toString())
-        : [...prev, index.toString()],
+        : [...prev, index.toString()]
     );
   };
 
   const getPriority = () => {
     const priorityLabel = task?.labels.find((label) =>
-      label.includes("priority"),
+      label.includes("priority")
     );
     if (priorityLabel && priorityLabel.includes("/")) {
       return priorityLabel.split("/")[1].toLowerCase();
@@ -125,12 +123,14 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
               )}
             </div>
 
-            <div class={styles.card}>
-              <p
-                class={styles.descriptionText}
-                innerHTML={parseMarkdown(task?.description || "")}
-              />
-            </div>
+            <Show when={task?.description}>
+              <div class={styles.card}>
+                <p
+                  class={styles.descriptionText}
+                  innerHTML={parseMarkdown(task?.description || "")}
+                />
+              </div>
+            </Show>
 
             <div class={styles.card}>
               <div class={styles.badgeContainer}>
@@ -142,16 +142,18 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
               </div>
             </div>
 
-            <div class={styles.card}>
-              {task?.labels && task.labels.length > 0 && (
+            {task?.labels && task.labels.length > 0 && (
+              <div class={styles.card}>
                 <div class={styles.labelsContainer}>
                   <Badge type={getPriority()}>{getPriority()}</Badge>
                   {task?.labels
                     .filter((task) => !task.includes("priority"))
-                    .map((label) => <Badge>{label}</Badge>)}
+                    .map((label) => (
+                      <Badge>{label}</Badge>
+                    ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           <div class={styles.divider} />

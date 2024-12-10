@@ -10,6 +10,7 @@ export enum ModalType {
   Help,
   EditAppointment,
   None,
+  Pipeline,
 }
 
 export const [modalStore, setModalStore] = createStore({
