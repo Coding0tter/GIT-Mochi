@@ -2,22 +2,22 @@ import cors from "cors";
 import express from "express";
 import http from "http";
 import { connect } from "mongoose";
-import { closeMergedMRJob } from "./backend/background-jobs/closeMergedMergeRequests";
-import { syncCommentJob } from "./backend/background-jobs/commentSync";
-import { syncGitlabJob } from "./backend/background-jobs/gitlabSync";
-import { contextMiddleware } from "./backend/middlewares/contextMiddleware";
-import { globalErrorHandler } from "./backend/middlewares/globalErrorHandler";
-import gitlabRoutes from "./backend/routes/gitlabRoutes";
-import projectRoutes from "./backend/routes/projectRouter";
-import ruleRoutes from "./backend/routes/ruleRoutes";
-import taskRoutes from "./backend/routes/taskRoutes";
-import timeTrackRoutes from "./backend/routes/timeTrackRoutes";
-import "./backend/services/actions";
-import "./backend/services/emitters";
-import { GitlabService } from "./backend/services/gitlabService";
-import { SocketHandler } from "./backend/sockets";
-import { logError, logInfo } from "./backend/utils/logger";
-import { syncPipelineStatusJob } from "./backend/background-jobs/pipelineStatusSync";
+import { closeMergedMRJob } from "./background-jobs/closeMergedMergeRequests";
+import { syncCommentJob } from "./background-jobs/commentSync";
+import { syncGitlabJob } from "./background-jobs/gitlabSync";
+import { contextMiddleware } from "./middlewares/contextMiddleware";
+import { globalErrorHandler } from "./middlewares/globalErrorHandler";
+import gitlabRoutes from "./routes/gitlabRoutes";
+import projectRoutes from "./routes/projectRouter";
+import ruleRoutes from "./routes/ruleRoutes";
+import taskRoutes from "./routes/taskRoutes";
+import timeTrackRoutes from "./routes/timeTrackRoutes";
+import "./services/actions";
+import "./services/emitters";
+import { GitlabService } from "./services/gitlabService";
+import { SocketHandler } from "./sockets";
+import { logError, logInfo } from "./utils/logger";
+import { syncPipelineStatusJob } from "./background-jobs/pipelineStatusSync";
 
 logInfo(`
   
@@ -83,7 +83,7 @@ setInterval(() => {
 // Close merged merge requests every minute
 closeMergedMRJob();
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 server.listen(PORT, () =>
   logInfo(`Gitlab-Mochi backend running on port ${PORT}`)
 );

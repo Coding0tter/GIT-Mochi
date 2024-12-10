@@ -1,22 +1,31 @@
+version: "3.9"
 services:
   frontend:
     build: ./frontend
     ports:
       - "3005:3005"
     volumes:
-      - ./frontend:/app # Mount local directory for hot-reloading
+      - ./frontend:/app
     depends_on:
       - backend
+    env_file: .env
+    environment:
+      VITE_GIT_URL: ${GIT_URL}
 
   backend:
-    build: .
+    build: ./backend
     volumes:
-      - ./:/app
+      - ./backend:/app
     ports:
       - "5000:5000"
     command: ["bun", "run", "--watch", "index.ts"]
     depends_on:
       - mongo
+    env_file: .env
+    environment:
+      PRIVATE_TOKEN: ${PRIVATE_TOKEN}
+      GIT_URL: ${GIT_URL}
+      PORT: ${PORT}
 
   mongo:
     image: mongo:latest

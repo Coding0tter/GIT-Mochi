@@ -43,7 +43,7 @@ export class ProjectService extends BaseService<IProject> {
   getGitlabProjectAsync = async (projectId: string) => {
     try {
       const projectResponse = await axios.get(
-        `${process.env.GIT_API_URL}/projects/${projectId}`,
+        `${process.env.GIT_URL}/api/v4/projects/${projectId}`,
         {
           headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
         }

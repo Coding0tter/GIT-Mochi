@@ -1,12 +1,12 @@
-import { createSignal, onMount, onCleanup } from "solid-js";
+import { createSignal, onMount, onCleanup, Show } from "solid-js";
 import BaseModal, { BaseModalProps } from "../BaseModal/BaseModal";
 import { modalStore } from "../../../stores/modalStore";
 import DOMPurify from "dompurify";
 import styles from "./TaskDetailsModal.module.css";
 import Badge from "../../shared/Badge/Badge";
-import { GIT_URL } from "../../../constants";
 import { marked } from "marked";
 import { uiStore } from "../../../stores/uiStore";
+import { GIT_URL } from "../../../constants";
 
 interface TaskDetailsModalProps extends BaseModalProps {}
 
@@ -123,12 +123,14 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
               )}
             </div>
 
-            <div class={styles.card}>
-              <p
-                class={styles.descriptionText}
-                innerHTML={parseMarkdown(task?.description || "")}
-              />
-            </div>
+            <Show when={task?.description}>
+              <div class={styles.card}>
+                <p
+                  class={styles.descriptionText}
+                  innerHTML={parseMarkdown(task?.description || "")}
+                />
+              </div>
+            </Show>
 
             <div class={styles.card}>
               <div class={styles.badgeContainer}>
@@ -140,8 +142,8 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
               </div>
             </div>
 
-            <div class={styles.card}>
-              {task?.labels && task.labels.length > 0 && (
+            {task?.labels && task.labels.length > 0 && (
+              <div class={styles.card}>
                 <div class={styles.labelsContainer}>
                   <Badge type={getPriority()}>{getPriority()}</Badge>
                   {task?.labels
@@ -150,8 +152,8 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
                       <Badge>{label}</Badge>
                     ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           <div class={styles.divider} />

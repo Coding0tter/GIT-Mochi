@@ -5,7 +5,7 @@ import { modalStore } from "../../../stores/modalStore";
 import { uiStore } from "../../../stores/uiStore";
 import BaseModal, { BaseModalProps } from "../BaseModal/BaseModal";
 import styles from "./PipelineModal.module.css";
-import { createSignal, For, onCleanup, onMount } from "solid-js";
+import { createSignal, For, onCleanup, onMount, Show } from "solid-js";
 
 interface PipelineModalProps extends BaseModalProps {}
 
@@ -74,12 +74,14 @@ const PipelineModal = (props: PipelineModalProps) => {
     <BaseModal {...props} closeText="Close">
       <div class={styles.content}>
         <div class={styles.title}>{task?.title}</div>
-        <div class={styles.card}>
-          <div
-            class={styles.description}
-            innerHTML={parseMarkdown(task?.description || "")}
-          ></div>
-        </div>
+        <Show when={task?.description}>
+          <div class={styles.card}>
+            <div
+              class={styles.description}
+              innerHTML={parseMarkdown(task?.description || "")}
+            ></div>
+          </div>
+        </Show>
         <div
           class={`${styles.pipelineState} ${
             styles[task?.pipelineStatus || ""]

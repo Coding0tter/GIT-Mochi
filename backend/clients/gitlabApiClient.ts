@@ -6,8 +6,22 @@ export class GitlabApiClient {
   private readonly privateToken: string;
 
   constructor() {
-    this.baseUrl = process.env.GIT_API_URL || "";
-    this.privateToken = process.env.PRIVATE_TOKEN || "";
+    if (!process.env.GIT_URL) {
+      throw new MochiError(
+        "GitLab API URL not found in environment variables",
+        500
+      );
+    }
+
+    if (!process.env.PRIVATE_TOKEN) {
+      throw new MochiError(
+        "GitLab Private Token not found in environment variables",
+        500
+      );
+    }
+
+    this.baseUrl = process.env.GIT_URL + "/api/v4";
+    this.privateToken = process.env.PRIVATE_TOKEN;
   }
 
   async request(
