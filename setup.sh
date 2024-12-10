@@ -61,3 +61,4 @@ echo
 echo -e "${BOLD}Please run the following command to start the application:${RESET}"
 echo -e "${CYAN}docker-compose up -d${RESET}"
 echo
+
