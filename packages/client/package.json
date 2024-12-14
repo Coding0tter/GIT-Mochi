@@ -1,0 +1,38 @@
+{
+  "author": {
+    "name": "Coding0tter",
+    "url": "https://github.com/Coding0tter"
+  },
+  "name": "mochi-client",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "bun-types": "^1.1.38",
+    "solid-devtools": "^0.29.3",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11",
+    "vite-plugin-solid": "^2.11.0"
+  },
+  "dependencies": {
+    "shared": "file:../shared",
+    "@solidjs/router": "^0.15.1",
+    "@types/dompurify": "^3.2.0",
+    "@types/lodash": "^4.17.13",
+    "axios": "^1.7.9",
+    "dayjs": "^1.11.13",
+    "dompurify": "^3.2.3",
+    "fuse.js": "^7.0.0",
+    "lodash": "^4.17.21",
+    "marked": "^15.0.3",
+    "socket.io-client": "^4.8.1",
+    "solid-js": "^1.9.3",
+    "solid-motionone": "^1.0.2"
+  }
+}

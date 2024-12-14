@@ -1,0 +1,120 @@
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "sans-serif";
+  background-color: var(--color-mantle);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--color-rosewater);
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--font-size-xxl);
+}
+
+h2 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-sm);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: var(--spacing-sm);
+}
+
+p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.divider {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin: var(--spacing-sm) 0;
+}
+
+input,
+textarea,
+select {
+  background-color: var(--color-surface1);
+  color: var(--color-text);
+  border: 1px solid var(--color-sky);
+  border-radius: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+input::placeholder {
+  color: var(--color-text);
+}
+
+select {
+  padding: var(--spacing-sm);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-sky) !important;
+}
+
+kbd {
+  background: var(--color-surface1);
+  border: 1px solid var(--color-sky);
+  border-radius: var(--spacing-xxs);
+  color: var(--color-text);
+  padding: var(--spacing-xxs) var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-family: "Courier New", Courier, monospace !important;
+}
+
+section {
+  min-height: 200px;
+  padding: var(--spacing-sm);
+  padding-bottom: 0px;
+  border-radius: var(--spacing-md);
+  border: 2px dashed rgba(200, 200, 255, 0.3);
+}
+
+/* Wave Text Animation */
+.wave-text {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.wave-char {
+  display: inline-block;
+  position: relative;
+  animation: wave 3s cubic-bezier(0.39, 0, 0.565, 1) infinite;
+  animation-delay: calc(var(--index) * 0.05s);
+}
+
+@keyframes wave {
+  0% {
+    transform: translateY(4px);
+    color: var(--color-text);
+  }
+  50% {
+    transform: translateY(-4px);
+    color: var(--color-teal);
+  }
+  100% {
+    transform: translateY(4px);
+    color: var(--color-sky);
+  }
+}
+
+.mention {
+  display: inline-block;
+  color: var(--color-teal);
+  font-weight: bold;
+}
