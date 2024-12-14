@@ -1,0 +1,15 @@
+.card {
+  background-color: var(--color-surface1);
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  padding: var(--spacing-xs);
+  border-radius: var(--spacing-xs);
+  position: relative;
+
+  &.blue {
+    border: 2px solid var(--color-blue);
+  }
+
+  &.green {
+    border: 2px solid var(--color-green);
+  }
+}

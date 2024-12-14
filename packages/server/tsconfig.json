@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "types": ["bun-types"],
+    "noEmit": true,
+    "isolatedModules": true,
+
+    "baseUrl": "./",
+    "paths": {
+      "@server/*": ["*"]
+    }
+  }
+}

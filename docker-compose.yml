@@ -1,34 +1,39 @@
-version: "3.9"
 services:
-  frontend:
-    build: ./frontend
+  client:
+    build:
+      context: .
+      dockerfile: ./docker/client.Dockerfile
     ports:
       - "3005:3005"
-    volumes:
-      - ./frontend:/app
     depends_on:
-      - backend
+      - server
+    volumes:
+      - ./packages/client:/app/packages/client
+      - ./packages/shared:/app/packages/shared
     env_file: .env
     environment:
       VITE_GIT_URL: ${GIT_URL}
 
-  backend:
-    build: ./backend
+  server:
+    build:
+      context: .
+      dockerfile: ./docker/server.Dockerfile
     volumes:
-      - ./backend:/app
+      - ./packages/server:/app/packages/server
+      - ./packages/shared:/app/packages/shared
     ports:
       - "5000:5000"
-    command: ["bun", "run", "--watch", "index.ts"]
+      - "6499:6499"
     depends_on:
       - mongo
     env_file: .env
     environment:
       PRIVATE_TOKEN: ${PRIVATE_TOKEN}
       GIT_URL: ${GIT_URL}
-      PORT: ${PORT}
 
   mongo:
     image: mongo:latest
+    restart: always
     ports:
       - "27018:27017"
     volumes:

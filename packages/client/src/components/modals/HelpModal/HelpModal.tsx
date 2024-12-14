@@ -1,0 +1,102 @@
+import { useLocation } from "@solidjs/router";
+import styles from "./HelpModal.module.css";
+import BaseModal, {
+  type BaseModalProps,
+} from "@client/components/modals/BaseModal/BaseModal";
+import Badge from "@client/components/shared/Badge/Badge";
+import ShortcutRegistry from "@client/shortcutMaps/shortcutRegistry";
+import type { Shortcut } from "@client/shortcutMaps/types";
+import { type JSXElement, createSignal, onMount } from "solid-js";
+
+interface HelpModalProps extends BaseModalProps {}
+
+const HelpModal = (props: HelpModalProps): JSXElement => {
+  const location = useLocation();
+  const [shortcuts, setShortcuts] = createSignal<Shortcut[]>([]);
+
+  const groupShortcutsByCategory = (shortcuts: Shortcut[]) => {
+    return shortcuts.reduce(
+      (acc: Record<string, Shortcut[]>, shortcut: Shortcut) => {
+        const { category } = shortcut;
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(shortcut);
+        return acc;
+      },
+      {}
+    );
+  };
+
+  onMount(() => {
+    const { pathname } = location;
+    const baseMap = ShortcutRegistry.getInstance().getShortcutsByKey("base");
+
+    const locationMap = ShortcutRegistry.getInstance().getShortcutsByKey(
+      pathname.split("/")[1]
+    );
+
+    const allShortcuts = baseMap?.shortcuts.concat(
+      locationMap?.shortcuts || []
+    );
+
+    setShortcuts(allShortcuts || []);
+  });
+
+  const groupedShortcuts = () => groupShortcutsByCategory(shortcuts());
+
+  return (
+    <BaseModal {...props} closeText="Close">
+      <div class={styles.helpWrapper}>
+        <div class={styles.helpSection}>
+          <h2>Keybindings</h2>
+
+          <p class={styles.subHeading}>
+            This tool allows you to manage tasks efficiently. Here are the
+            keyboard shortcuts:
+          </p>
+          <div class={styles.keybindingsWrapper}>
+            {Object.entries(groupedShortcuts()).map(([category, bindings]) => (
+              <div>
+                <h3>{category}</h3>
+                <ul class={styles["keybindings-list"]}>
+                  {bindings.map((binding) => (
+                    <li>
+                      <strong>
+                        {Array.isArray(binding.key) ? (
+                          binding.key.map((key, index) => (
+                            <kbd>
+                              {binding.ctrlKey ? "Ctrl + " : ""}
+                              {binding.shiftKey ? "Shift + " : ""}
+                              {key}
+                            </kbd>
+                          ))
+                        ) : (
+                          <kbd>
+                            {binding.ctrlKey ? "Ctrl + " : ""}
+                            {binding.shiftKey ? "Shift + " : ""}
+                            {binding.key}
+                          </kbd>
+                        )}
+                        :
+                      </strong>{" "}
+                      {binding.description}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class={styles.helpSection}>
+          <h2>Legend</h2>
+          <Badge type="deleted">Deleted</Badge>
+          <Badge type="custom">Custom Task</Badge>
+          <Badge type="mergeRequest">Merge Request</Badge>
+          <Badge type="issue">Issue</Badge>
+        </div>
+      </div>
+    </BaseModal>
+  );
+};
+
+export default HelpModal;
