@@ -11,7 +11,7 @@ import SocketHandler from "@server/sockets";
 import { getContext, ContextKeys } from "@server/utils/asyncContext";
 import type { MochiResult } from "@server/utils/mochiResult";
 import { createTaskData, detectChanges } from "@server/utils/taskUtils";
-import type { ITask, IComment, IDiscussion } from "shared/types/task";
+import type { ITask, IComment, IDiscussion, IAuthor } from "shared/types/task";
 import type { IPagination } from "shared/types/pagination";
 
 export class GitlabService {
@@ -126,6 +126,36 @@ export class GitlabService {
     };
   }
 
+  async resolveThreadAsync(task: ITask, discussion: IDiscussion) {
+    const payload = {
+      resolved: true,
+    };
+
+    const response = await this.gitlabApiClient.request(
+      `/projects/${task.projectId}/merge_requests/${task.gitlabIid}/discussions/${discussion.discussionId}`,
+      "PUT",
+      payload
+    );
+
+    const updateTask = await this.taskService.findOneAsync({ _id: task._id });
+
+    updateTask.discussions = updateTask.discussions?.map((d) => {
+      if (d.discussionId === discussion.discussionId) {
+        d.notes = d.notes?.map((n) => {
+          if (n.noteId === discussion.notes?.at(0)?.noteId) {
+            n.resolved = true;
+          }
+          return n;
+        });
+      }
+      return d;
+    });
+
+    SocketHandler.getInstance().getIO().emit("updateTasks", [updateTask]);
+
+    return response;
+  }
+
   async commentOnTaskAsync(
     task: ITask,
     discussion: IDiscussion,
@@ -134,10 +164,7 @@ export class GitlabService {
     const payload = {
       body: reply,
       type: "DiscussionNote",
-      discussion_id: discussion.discussionId,
       note_id: discussion.notes?.at(0)?.noteId,
-      issue_iid: task.gitlabIid,
-      merge_request_iid: task.gitlabIid,
     };
 
     const response = await this.gitlabApiClient.request(

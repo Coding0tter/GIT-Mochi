@@ -54,6 +54,23 @@ export class GitlabController {
     }
   };
 
+  resolveThreadAsync = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { task, discussion } = req.body;
+      const result = await this.gitlabService.resolveThreadAsync(
+        task,
+        discussion
+      );
+      res.status(200).json(result);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
   commentOnTaskAsync = async (
     req: Request,
     res: Response,
