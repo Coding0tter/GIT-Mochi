@@ -11,7 +11,7 @@ import SocketHandler from "@server/sockets";
 import { getContext, ContextKeys } from "@server/utils/asyncContext";
 import type { MochiResult } from "@server/utils/mochiResult";
 import { createTaskData, detectChanges } from "@server/utils/taskUtils";
-import type { ITask, IComment, IDiscussion, IAuthor } from "shared/types/task";
+import type { ITask, IDiscussion } from "shared/types/task";
 import type { IPagination } from "shared/types/pagination";
 
 export class GitlabService {
@@ -99,16 +99,6 @@ export class GitlabService {
     }
 
     const newMergeRequestTask = newMergeRequestTaskResult.data;
-
-    const comments = await this.getMergeRequestCommentsAsync(
-      newMergeRequestTask.projectId,
-      newMergeRequestTask.gitlabIid
-    );
-    newMergeRequestTask.comments = comments;
-
-    await this.taskEmitter.updateTaskAsync(newMergeRequestTask.id, {
-      comments: newMergeRequestTask.comments,
-    });
 
     await this.taskEmitter.updateTaskAsync(issue._id as string, {
       status: "closed",
@@ -235,18 +225,6 @@ export class GitlabService {
     return this.gitlabApiClient.request("/users?per_page=100");
   }
 
-  async getMergeRequestCommentsAsync(projectId: string, gitlabIid: string) {
-    const comments = await this.fetchMergeRequestCommentsAsync(
-      projectId,
-      gitlabIid
-    );
-
-    comments.forEach((comment: any) => {
-      comment.originalId = comment.id;
-    });
-    return comments;
-  }
-
   async getDiscussionsAsync(
     projectId: string,
     gitlabIid: string,
@@ -347,7 +325,7 @@ export class GitlabService {
 
     const openMergeRequests = await this.taskService.getAllAsync({
       type: "merge_request",
-      status: "review",
+      $or: [{ status: "inprogress" }, { status: "review" }],
     });
 
     for (const mr of openMergeRequests) {
@@ -380,12 +358,14 @@ export class GitlabService {
 
     const updatedTasks: ITask[] = [];
 
-    for (const entity of entities) {
+    const entitiesToProcess = entities.map(async (entity) => {
       const task = await this.processEntity(entity, entityType, projectId);
       if (task && !task.deleted) {
         updatedTasks.push(task);
       }
-    }
+    });
+
+    await Promise.all(entitiesToProcess);
 
     return updatedTasks;
   }
@@ -412,11 +392,20 @@ export class GitlabService {
     const taskData = createTaskData(entity, entityType);
 
     let taskResult: MochiResult | null = null;
-    let comments: IComment[];
 
-    if (entityType === "merge_request") {
-      comments = await this.getMergeRequestCommentsAsync(projectId, entity.iid);
-      taskData.comments = comments;
+    const discussions = await this.getDiscussionsAsync(
+      projectId,
+      entity.iid,
+      entityType === "issue" ? "issues" : "merge_requests"
+    );
+
+    taskData.discussions = discussions;
+
+    if (taskData.type === "merge_request") {
+      const pipelineState = await this.getPipelineState(taskData);
+      taskData.pipelineStatus = pipelineState.pipelineStatus;
+      taskData.latestPipelineId = pipelineState.latestPipelineId;
+      taskData.pipelineReports = pipelineState.pipelineReports;
     }
 
     if (existingTask) {
@@ -454,6 +443,43 @@ export class GitlabService {
     );
   }
 
+  private async getPipelineState(task: Partial<ITask>) {
+    const result = {
+      pipelineStatus: "",
+      latestPipelineId: 0,
+      pipelineReports: [],
+    };
+
+    const pipeline = await this.getLatestPipelineAsync(
+      task.projectId!,
+      task.gitlabIid?.toString()!
+    );
+
+    if (pipeline) {
+      if (task.pipelineStatus !== pipeline.status) {
+        result.pipelineStatus = pipeline.status;
+        result.latestPipelineId = pipeline.id;
+
+        if (pipeline.status === "failed") {
+          const failedTests = await this.getFaultyTestCasesAsync(
+            task.projectId!,
+            pipeline.id
+          );
+
+          result.pipelineReports = failedTests.map((test: any) => {
+            return {
+              name: test.name ?? "Unknown",
+              classname: test.classname ?? "Unknown",
+              attachment_url: test.attachment_url ?? "",
+            };
+          });
+        }
+      }
+    }
+
+    return result;
+  }
+
   private async createMergeRequest(
     projectId: string,
     issue: ITask,
@@ -472,15 +498,6 @@ export class GitlabService {
         labels: issue.labels?.join(","),
         milestone_id: issue.milestoneId,
       }
-    );
-  }
-
-  private async fetchMergeRequestCommentsAsync(
-    projectId: string,
-    mergeRequestIid: string
-  ) {
-    return this.gitlabApiClient.request(
-      `/projects/${projectId}/merge_requests/${mergeRequestIid}/notes`
     );
   }
 }

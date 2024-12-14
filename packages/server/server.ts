@@ -3,10 +3,7 @@ import express from "express";
 import http from "http";
 import { connect } from "mongoose";
 import { closeMergedMRJob } from "./background-jobs/closeMergedMergeRequests";
-import { syncCommentJob } from "./background-jobs/commentSync";
 import { syncGitlabJob } from "./background-jobs/gitlabSync";
-import { syncDiscussionJob } from "./background-jobs/discussionSync";
-import { syncPipelineStatusJob } from "./background-jobs/pipelineStatusSync";
 import { contextMiddleware } from "./middlewares/contextMiddleware";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import gitlabRoutes from "./routes/gitlabRoutes";
@@ -88,16 +85,13 @@ setInterval(async () => {
   }
 
   try {
-    syncCommentJob();
     syncGitlabJob();
-    syncPipelineStatusJob();
-    syncDiscussionJob();
 
     closeMergedMRJob();
   } catch (error) {
     logError(new MochiError("Failed to sync jobs", 500, error as Error));
   }
-}, 60000);
+}, 60000 * 10);
 
 const PORT = 5000;
 server.listen(PORT, () =>
