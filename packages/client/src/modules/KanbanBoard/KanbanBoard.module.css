@@ -7,3 +7,14 @@
   padding-bottom: 30px;
   padding-top: var(--spacing-sm);
 }
+
+.noProject {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  width: 100%;
+  padding: var(--spacing-md);
+
+  font-size: var(--font-size-lg);
+}

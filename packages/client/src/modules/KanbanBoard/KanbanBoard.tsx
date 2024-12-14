@@ -1,4 +1,4 @@
-import { onMount } from "solid-js";
+import { onMount, Show } from "solid-js";
 import { EditOrCreateTaskModal, DeleteModal } from "../../components/modals";
 import TaskDetailsModal from "../../components/modals/TaskDetailsModal/TaskDetailsModal";
 import { STATES } from "../../constants";
@@ -21,6 +21,7 @@ import TaskColumn from "../../components/Kanban/TaskColumn/TaskColumn";
 import { keyboardNavigationStore } from "../../stores/keyboardNavigationStore";
 import PipelineModal from "../../components/modals/PipelineModal/PipelineModal";
 import ReplyModal from "../../components/modals/ReplyModal/ReplyModal";
+import { uiStore } from "@client/stores/uiStore";
 
 const KanbanBoard = () => {
   onMount(async () => {
@@ -117,13 +118,24 @@ const KanbanBoard = () => {
         <ReplyModal onClose={handleCloseModal} />
       )}
       <div class={styles.kanban}>
-        {STATES.map((status, columnIndex) => (
-          <TaskColumn
-            status={status}
-            tasks={filteredTasks().filter((task) => task.status === status.id)}
-            columnIndex={columnIndex}
-          />
-        ))}
+        <Show
+          when={uiStore.currentProject}
+          fallback={
+            <div class={styles.noProject}>
+              No project selected. Please select one via the commandline.
+            </div>
+          }
+        >
+          {STATES.map((status, columnIndex) => (
+            <TaskColumn
+              status={status}
+              tasks={filteredTasks().filter(
+                (task) => task.status === status.id
+              )}
+              columnIndex={columnIndex}
+            />
+          ))}
+        </Show>
       </div>
     </>
   );
