@@ -37,7 +37,7 @@ class ShortcutRegistry {
   }
 
   public executeShortcut(mapKey: string, event: KeyboardEvent) {
-    const { key, shiftKey, ctrlKey } = event;
+    const { key, shiftKey, ctrlKey, altKey } = event;
 
     const baseMap = this.getShortcutsByKey("base");
     const map = this.getShortcutsByKey(mapKey);
@@ -51,14 +51,16 @@ class ShortcutRegistry {
           sc.key.includes(key) &&
           ((sc.shiftKey === undefined && !shiftKey) ||
             sc.shiftKey === shiftKey) &&
-          ((sc.ctrlKey === undefined && !ctrlKey) || sc.ctrlKey === ctrlKey)
+          ((sc.ctrlKey === undefined && !ctrlKey) || sc.ctrlKey === ctrlKey) &&
+          ((sc.altKey === undefined && !altKey) || sc.altKey === altKey)
         );
       } else {
         return (
           sc.key === key &&
           ((sc.shiftKey === undefined && !shiftKey) ||
             sc.shiftKey === shiftKey) &&
-          ((sc.ctrlKey === undefined && !ctrlKey) || sc.ctrlKey === ctrlKey)
+          ((sc.ctrlKey === undefined && !ctrlKey) || sc.ctrlKey === ctrlKey) &&
+          ((sc.altKey === undefined && !altKey) || sc.altKey === altKey)
         );
       }
     });

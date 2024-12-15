@@ -85,13 +85,15 @@ setInterval(async () => {
   }
 
   try {
+    console.time("Background Jobs");
     syncGitlabJob();
 
     closeMergedMRJob();
+    console.timeEnd("Background Jobs");
   } catch (error) {
     logError(new MochiError("Failed to sync jobs", 500, error as Error));
   }
-}, 60000 * 10);
+}, 60000);
 
 const PORT = 5000;
 server.listen(PORT, () =>
