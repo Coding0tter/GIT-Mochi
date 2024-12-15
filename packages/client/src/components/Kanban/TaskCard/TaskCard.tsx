@@ -3,6 +3,8 @@ import Tooltip from "@client/components/shared/Tooltip/Tooltip";
 import type { ITask } from "shared/types/task";
 import { Show } from "solid-js";
 import styles from "./TaskCard.module.css";
+import xMasHat from "@client/assets/xmas.png";
+import dayjs from "dayjs";
 
 interface TaskCardProps {
   task: Partial<ITask>;
@@ -35,7 +37,7 @@ const TaskCard = (props: TaskCardProps) => {
       case "running":
         return <i class="fa-solid fa-person-running"></i>;
       case "canceled":
-        return <i class="fa-solid fa-person-running"></i>;
+        return <i class="fa-solid fa-stop"></i>;
       case "skipped":
         return <i class="fa-solid fa-forward"></i>;
       default:
@@ -90,6 +92,10 @@ const TaskCard = (props: TaskCardProps) => {
             {getIcon(props.task.pipelineStatus!)}
           </Tooltip>
         </div>
+      </Show>
+
+      <Show when={dayjs().month() === 11 && Math.random() > 0.8}>
+        <img src={xMasHat} class={styles.xMasHat} />
       </Show>
     </div>
   );

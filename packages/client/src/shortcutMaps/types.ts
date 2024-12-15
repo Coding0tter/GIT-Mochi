@@ -16,6 +16,7 @@ export type Shortcut = {
   key: string[] | string;
   ctrlKey?: boolean;
   shiftKey?: boolean;
+  altKey?: boolean;
   category: KeyboardShortcutCategory;
   description: string;
 };

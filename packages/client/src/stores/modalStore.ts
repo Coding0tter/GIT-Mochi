@@ -12,6 +12,7 @@ export enum ModalType {
   EditAppointment,
   None,
   Pipeline,
+  Feedback,
   Reply,
 }
 

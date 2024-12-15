@@ -1,4 +1,4 @@
-import type { ITask } from "@shared/types/task";
+import type { ITask } from "shared/types/task";
 
 export function createTaskData(
   entity: any,
@@ -25,7 +25,17 @@ export function detectChanges(
   taskData: Partial<ITask>
 ): boolean {
   for (const key of Object.keys(taskData)) {
-    if (taskData[key as keyof ITask] !== existingTask[key as keyof ITask]) {
+    const newValue = taskData[key as keyof ITask];
+    const existingValue = existingTask[key as keyof ITask];
+
+    if (
+      (typeof newValue === "object" || Array.isArray(newValue)) &&
+      JSON.stringify(newValue) !== JSON.stringify(existingValue)
+    ) {
+      return true;
+    }
+
+    if (newValue !== existingValue) {
       return true;
     }
   }

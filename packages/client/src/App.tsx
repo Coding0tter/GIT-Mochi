@@ -21,6 +21,7 @@ import { onMount, onCleanup } from "solid-js";
 import styles from "./App.module.css";
 
 import weekday from "dayjs/plugin/weekday";
+import FeedbackModal from "@client/components/modals/FeedbackModal/FeedbackModal";
 
 dayjs.extend(weekday);
 
@@ -54,6 +55,10 @@ const App = (props: any) => {
       </div>
       {modalStore.activeModal === ModalType.Help && (
         <HelpModal onClose={handleCloseModal} />
+      )}
+
+      {modalStore.activeModal === ModalType.Feedback && (
+        <FeedbackModal onClose={handleCloseModal} />
       )}
     </div>
   );

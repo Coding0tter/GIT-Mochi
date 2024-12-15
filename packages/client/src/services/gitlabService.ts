@@ -1,10 +1,6 @@
 import axios from "axios";
 import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
-import {
-  fetchTasksAsync,
-  getColumnTasks,
-  updateDiscussions,
-} from "../stores/taskStore";
+import { fetchTasksAsync, getColumnTasks } from "../stores/taskStore";
 import {
   LoadingTarget,
   type Project,
@@ -64,6 +60,37 @@ export const fetchDiscussionsPaginatedAsync = async (
     addNotification({
       title: "Error",
       description: "Failed to fetch discussions",
+      type: "error",
+    });
+  }
+};
+
+export const resolveThreadAsync = async (discussion: IDiscussion) => {
+  try {
+    const task = getColumnTasks().at(keyboardNavigationStore.selectedTaskIndex);
+    const res = await axios.post(`/git/resolve`, {
+      task,
+      discussion,
+    });
+
+    if (res.status !== 200) {
+      addNotification({
+        title: "Error",
+        description: "Failed to resolve thread",
+        type: "error",
+      });
+      return;
+    }
+
+    addNotification({
+      title: "Resolved thread",
+      description: "The thread has been resolved",
+      type: "success",
+    });
+  } catch (error) {
+    addNotification({
+      title: "Error",
+      description: "Failed to resolve thread",
       type: "error",
     });
   }

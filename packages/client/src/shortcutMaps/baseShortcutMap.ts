@@ -1,4 +1,4 @@
-import { openHelpModal } from "../services/modalService";
+import { openFeedbackModal, openHelpModal } from "../services/modalService";
 import { focusInput } from "../services/uiService";
 import { InputMode } from "../stores/uiStore";
 import ShortcutRegistry from "./shortcutRegistry";
@@ -19,6 +19,13 @@ const shortcuts: KeyboardShortcutMap = {
       category: KeyboardShortcutCategory.Commands,
       description: "Open search",
     },
+    {
+      key: "f",
+      altKey: true,
+      action: () => openFeedbackModal(),
+      category: KeyboardShortcutCategory.Commands,
+      description: "Open feedback modal",
+    },
 
     {
       shiftKey: true,
@@ -34,6 +41,7 @@ const shortcuts: KeyboardShortcutMap = {
       category: KeyboardShortcutCategory.Commands,
       description: "Open help",
     },
+
     {
       ctrlKey: true,
       key: "p",

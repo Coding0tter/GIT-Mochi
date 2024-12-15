@@ -11,6 +11,7 @@ import Badge from "../../shared/Badge/Badge";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
 import DiscussionCard from "../../shared/DiscussionCard/DiscussionCard";
 import { orderBy } from "lodash";
+import { resolveThreadAsync } from "@client/services/gitlabService";
 
 interface TaskDetailsModalProps extends BaseModalProps {}
 
@@ -50,15 +51,15 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
       setToggleSystemDiscussions(!toggleSystemDiscussions());
     } else if (event.shiftKey && event.key === "O") {
       window.open(task.web_url, "_blank");
-    } else if (event.key === "r" && event.altKey) {
+    } else if (event.key === "c") {
       event.preventDefault();
 
       setSelectedDiscussionForModal(
         filteredDiscussions().at(selectedDiscussion()) || null
       );
       setActiveModal(ModalType.Reply);
-    } else if (event.key === "R" && event.shiftKey) {
-      console.log("Set resolved");
+    } else if (event.key === "d") {
+      resolveThreadAsync(filteredDiscussions().at(selectedDiscussion())!);
     } else if (event.key === "r") {
       setToggleResolvedDiscussions(!toggleResolvedDiscussions());
     }

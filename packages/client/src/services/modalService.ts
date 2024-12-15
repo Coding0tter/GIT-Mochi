@@ -13,6 +13,10 @@ export const openHelpModal = () => {
   setActiveModal(ModalType.Help);
 };
 
+export const openFeedbackModal = () => {
+  setActiveModal(ModalType.Feedback);
+};
+
 export const openDeleteModal = () => {
   setActiveModal(ModalType.DeleteTask);
   setSelectedTaskForModal(

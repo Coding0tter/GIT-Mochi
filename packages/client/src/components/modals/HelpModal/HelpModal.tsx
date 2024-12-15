@@ -62,10 +62,11 @@ const HelpModal = (props: HelpModalProps): JSXElement => {
                     <li>
                       <strong>
                         {Array.isArray(binding.key) ? (
-                          binding.key.map((key, index) => (
+                          binding.key.map((key) => (
                             <kbd>
                               {binding.ctrlKey ? "Ctrl + " : ""}
                               {binding.shiftKey ? "Shift + " : ""}
+                              {binding.altKey ? "Alt + " : ""}
                               {key}
                             </kbd>
                           ))
@@ -73,6 +74,7 @@ const HelpModal = (props: HelpModalProps): JSXElement => {
                           <kbd>
                             {binding.ctrlKey ? "Ctrl + " : ""}
                             {binding.shiftKey ? "Shift + " : ""}
+                            {binding.altKey ? "Alt + " : ""}
                             {binding.key}
                           </kbd>
                         )}
