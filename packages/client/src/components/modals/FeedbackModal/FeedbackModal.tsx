@@ -17,7 +17,7 @@ const FeedbackModal = (props: FeedbackModalProps) => {
   const handleSubmit = () => {
     const mailto = document.getElementById("send") as HTMLAnchorElement;
     if (mailto) {
-      mailto.href = `mailto:maximilian.kriegl@gmx.at?subject=Feedback-Mochi&body=${encodeURIComponent(
+      mailto.href = `mailto:muxim97@gmx.at?subject=Feedback-Mochi&body=${encodeURIComponent(
         message()
       )}`;
       mailto.click();
