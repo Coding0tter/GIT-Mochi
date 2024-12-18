@@ -45,13 +45,13 @@ export class GitlabService {
         "merge_requests",
         "merge_request",
         project.value,
-        user.gitlabId.toString()
+        user.gitlabId.toString(),
       ),
       this.syncEntities(
         "issues",
         "issue",
         project.value,
-        user.gitlabId.toString()
+        user.gitlabId.toString(),
       ),
     ]);
 
@@ -75,7 +75,7 @@ export class GitlabService {
     const mergeRequestData = await this.createMergeRequest(
       currentProject.id,
       issue,
-      user.gitlabId.toString()
+      user.gitlabId.toString(),
     );
 
     const newMergeRequestTaskResult = await this.taskEmitter.createTaskAsync(
@@ -91,7 +91,7 @@ export class GitlabService {
         description: mergeRequestData.description,
         status: "inprogress",
         custom: false,
-      }
+      },
     );
 
     if (newMergeRequestTaskResult.error) {
@@ -124,7 +124,7 @@ export class GitlabService {
     const response = await this.gitlabApiClient.request(
       `/projects/${task.projectId}/merge_requests/${task.gitlabIid}/discussions/${discussion.discussionId}`,
       "PUT",
-      payload
+      payload,
     );
 
     const updateTask = await this.taskService.findOneAsync({ _id: task._id });
@@ -149,7 +149,7 @@ export class GitlabService {
   async commentOnTaskAsync(
     task: ITask,
     discussion: IDiscussion,
-    reply: string
+    reply: string,
   ) {
     const payload = {
       body: reply,
@@ -162,7 +162,7 @@ export class GitlabService {
         task.type === "issue" ? "issues" : "merge_requests"
       }/${task.gitlabIid}/discussions/${discussion.discussionId}/notes`,
       "POST",
-      payload
+      payload,
     );
 
     const updateTask = await this.taskService.findOneAsync({ _id: task._id });
@@ -196,7 +196,7 @@ export class GitlabService {
     await this.gitlabApiClient.request(
       `/projects/${task.projectId}/merge_requests/${task.gitlabIid}`,
       "PUT",
-      { assignee_id: userId }
+      { assignee_id: userId },
     );
   }
 
@@ -228,7 +228,7 @@ export class GitlabService {
   async getDiscussionsAsync(
     projectId: string,
     gitlabIid: string,
-    type: string
+    type: string,
   ) {
     let pagination: Partial<IPagination> = {
       currentPage: 1,
@@ -240,7 +240,7 @@ export class GitlabService {
     do {
       const { data, pagination: nextPagination } =
         await this.gitlabApiClient.paginatedRequest(
-          `/projects/${projectId}/${type}/${gitlabIid}/discussions?page${pagination.currentPage}&per_page=${pagination.limit}`
+          `/projects/${projectId}/${type}/${gitlabIid}/discussions?page${pagination.currentPage}&per_page=${pagination.limit}`,
         );
 
       totalDiscussions = totalDiscussions.concat(data);
@@ -267,7 +267,7 @@ export class GitlabService {
 
   async getDiscussionsPaginatedAsync(
     taskId: string,
-    pagination: Pick<IPagination, "currentPage" | "limit">
+    pagination: Pick<IPagination, "currentPage" | "limit">,
   ) {
     const task = await this.taskService.findOneAsync({ _id: taskId });
 
@@ -277,7 +277,7 @@ export class GitlabService {
           task.type === "issue" ? "issues" : "merge_requests"
         }/${task.gitlabIid}/discussions?per_page=${pagination.limit}&page=${
           pagination.currentPage
-        }&order_by=created_at&sort=asc`
+        }&order_by=created_at&sort=asc`,
       );
 
     discussions.forEach((discussion: any) => {
@@ -298,7 +298,7 @@ export class GitlabService {
 
   async getLatestPipelineAsync(projectId: string, mergeRequestIid: string) {
     const pipelines = await this.gitlabApiClient.request(
-      `/projects/${projectId}/merge_requests/${mergeRequestIid}/pipelines`
+      `/projects/${projectId}/merge_requests/${mergeRequestIid}/pipelines`,
     );
 
     if (pipelines.length === 0) {
@@ -310,7 +310,7 @@ export class GitlabService {
 
   async getFaultyTestCasesAsync(projectId: string, pipelineId: number) {
     const report = await this.gitlabApiClient.request(
-      `/projects/${projectId}/pipelines/${pipelineId}/test_report?per_page=100`
+      `/projects/${projectId}/pipelines/${pipelineId}/test_report?per_page=100`,
     );
 
     const cases = report.test_suites.flatMap((suite: any) => {
@@ -330,7 +330,7 @@ export class GitlabService {
 
     for (const mr of openMergeRequests) {
       const mergeRequest = await this.gitlabApiClient.request(
-        `/projects/${mr.projectId}/merge_requests/${mr.gitlabIid}`
+        `/projects/${mr.projectId}/merge_requests/${mr.gitlabIid}`,
       );
 
       if (mergeRequest.state === "merged") {
@@ -348,12 +348,12 @@ export class GitlabService {
     endpoint: string,
     entityType: "merge_request" | "issue",
     projectId: string,
-    userId: string
+    userId: string,
   ): Promise<ITask[]> {
     const entities = await this.fetchEntitiesFromGitlab(
       endpoint,
       projectId,
-      userId
+      userId,
     );
 
     const updatedTasks: ITask[] = [];
@@ -373,17 +373,17 @@ export class GitlabService {
   private async fetchEntitiesFromGitlab(
     endpoint: string,
     projectId: string,
-    userId: string
+    userId: string,
   ): Promise<any[]> {
     return this.gitlabApiClient.request(
-      `/projects/${projectId}/${endpoint}?assignee_id=${userId}&per_page=100`
+      `/projects/${projectId}/${endpoint}?assignee_id=${userId}&per_page=100`,
     );
   }
 
   private async processEntity(
     entity: any,
     entityType: "merge_request" | "issue",
-    projectId: string
+    projectId: string,
   ): Promise<ITask | null> {
     const existingTask = await this.taskService.findOneAsync({
       gitlabId: entity.id,
@@ -396,7 +396,7 @@ export class GitlabService {
     const discussions = await this.getDiscussionsAsync(
       projectId,
       entity.iid,
-      entityType === "issue" ? "issues" : "merge_requests"
+      entityType === "issue" ? "issues" : "merge_requests",
     );
 
     taskData.discussions = discussions;
@@ -416,7 +416,11 @@ export class GitlabService {
           {
             labels: taskData.labels,
             branch: taskData.branch,
-          }
+            pipelineStatus: taskData.pipelineStatus,
+            latestPipelineId: taskData.latestPipelineId,
+            pipelineReports: taskData.pipelineReports,
+            discussions: taskData.discussions,
+          },
         );
       }
     } else {
@@ -439,7 +443,7 @@ export class GitlabService {
         id: projectId,
         branch: issue.gitlabIid,
         ref: "develop",
-      }
+      },
     );
   }
 
@@ -452,28 +456,26 @@ export class GitlabService {
 
     const pipeline = await this.getLatestPipelineAsync(
       task.projectId!,
-      task.gitlabIid?.toString()!
+      task.gitlabIid?.toString()!,
     );
 
     if (pipeline) {
-      if (task.pipelineStatus !== pipeline.status) {
-        result.pipelineStatus = pipeline.status;
-        result.latestPipelineId = pipeline.id;
+      result.pipelineStatus = pipeline.status;
+      result.latestPipelineId = pipeline.id;
 
-        if (pipeline.status === "failed") {
-          const failedTests = await this.getFaultyTestCasesAsync(
-            task.projectId!,
-            pipeline.id
-          );
+      if (pipeline.status === "failed") {
+        const failedTests = await this.getFaultyTestCasesAsync(
+          task.projectId!,
+          pipeline.id,
+        );
 
-          result.pipelineReports = failedTests.map((test: any) => {
-            return {
-              name: test.name ?? "Unknown",
-              classname: test.classname ?? "Unknown",
-              attachment_url: test.attachment_url ?? "",
-            };
-          });
-        }
+        result.pipelineReports = failedTests.map((test: any) => {
+          return {
+            name: test.name ?? "Unknown",
+            classname: test.classname ?? "Unknown",
+            attachment_url: test.attachment_url ?? "",
+          };
+        });
       }
     }
 
@@ -483,7 +485,7 @@ export class GitlabService {
   private async createMergeRequest(
     projectId: string,
     issue: ITask,
-    userId: string
+    userId: string,
   ) {
     return this.gitlabApiClient.request(
       `/projects/${projectId}/merge_requests`,
@@ -497,7 +499,7 @@ export class GitlabService {
         assignee_id: userId,
         labels: issue.labels?.join(","),
         milestone_id: issue.milestoneId,
-      }
+      },
     );
   }
 }

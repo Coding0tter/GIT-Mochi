@@ -44,6 +44,7 @@ const PipelineModal = (props: PipelineModalProps) => {
       case "failed":
         return <i class="fa-regular fa-thumbs-down"></i>;
       case "running":
+      case "pending":
         return <i class="fa-solid fa-person-running"></i>;
       case "canceled":
         return <i class="fa-solid fa-person-running"></i>;

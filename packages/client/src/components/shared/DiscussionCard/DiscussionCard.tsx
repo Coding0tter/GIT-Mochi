@@ -11,24 +11,43 @@ interface DiscussionCardProps {
   discussion: IDiscussion;
   selected: () => boolean;
   id: string;
+  focusThread: (value: boolean) => void;
 }
 
 const DiscussionCard = (props: DiscussionCardProps) => {
   const firstNote = props.discussion.notes?.at(0);
   const [expand, setExpand] = createSignal<boolean>(false);
   const [showThread, setShowThread] = createSignal<boolean>(false);
+  const [threadIndex, setThreadIndex] = createSignal<number>(0);
 
   onMount(() => {
     const handleKeydown = (event: KeyboardEvent) => {
       if (!props.selected()) return;
 
       if (event.code === "Space") {
+        event.preventDefault();
+
         setExpand(!expand());
+      } else if (event.key === "l") {
+        setShowThread(true);
+        props.focusThread(true);
+      } else if (event.key === "h") {
+        setShowThread(false);
+        props.focusThread(false);
+      } else if (event.key === "j" && showThread()) {
+        event.preventDefault();
+
+        setThreadIndex(
+          Math.min(threadIndex() + 1, props.discussion.notes!.length - 2),
+        );
+      } else if (event.key === "k" && showThread()) {
+        event.preventDefault();
+
+        setThreadIndex(Math.max(threadIndex() - 1, 0));
       }
 
-      if (event.key === "l") {
-        setShowThread(!showThread());
-      }
+      const thread = document.getElementById(`thread-${props.id}-${threadIndex()}`);
+      thread?.scrollIntoView({ behavior: "smooth", block: "center" });
     };
 
     window.addEventListener("keydown", handleKeydown);
@@ -169,8 +188,11 @@ const DiscussionCard = (props: DiscussionCardProps) => {
             >
               <div class={styles.discussionThread}>
                 <For each={props.discussion.notes?.slice(1)}>
-                  {(note) => (
-                    <div class={styles.discussionThreadNote}>
+                  {(note, index) => (
+                    <div
+                      id={`thread-${props.id}-${index()}`}
+                      class={`${styles.discussionThreadNote} ${threadIndex() === index() ? styles.selected : ""}`}
+                    >
                       <div class={styles.discussionThreadNoteHeader}>
                         {note.system ? (
                           <>
@@ -182,7 +204,7 @@ const DiscussionCard = (props: DiscussionCardProps) => {
                             <span class={styles.discussionAuthor}>
                               System (
                               {dayjs(note.created_at).format(
-                                "DD.MM.YYYY HH:mm"
+                                "DD.MM.YYYY HH:mm",
                               )}
                               )
                             </span>
@@ -200,7 +222,7 @@ const DiscussionCard = (props: DiscussionCardProps) => {
                             <span class={styles.discussionAuthor}>
                               {note.author.name} (
                               {dayjs(note.created_at).format(
-                                "DD.MM.YYYY HH:mm"
+                                "DD.MM.YYYY HH:mm",
                               )}
                               )
                             </span>

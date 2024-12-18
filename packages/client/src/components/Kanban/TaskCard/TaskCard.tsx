@@ -5,6 +5,7 @@ import { Show } from "solid-js";
 import styles from "./TaskCard.module.css";
 import xMasHat from "@client/assets/xmas.png";
 import dayjs from "dayjs";
+import { random } from "shared/utils/random";
 
 interface TaskCardProps {
   task: Partial<ITask>;
@@ -18,7 +19,7 @@ interface TaskCardProps {
 const TaskCard = (props: TaskCardProps) => {
   const getPriorityLabel = (task: Partial<ITask>) => {
     const label = task.labels?.find((item: string) =>
-      item.toLowerCase().includes("priority")
+      item.toLowerCase().includes("priority"),
     );
 
     if (label) {
@@ -35,6 +36,7 @@ const TaskCard = (props: TaskCardProps) => {
       case "failed":
         return <i class="fa-regular fa-thumbs-down"></i>;
       case "running":
+      case "pending":
         return <i class="fa-solid fa-person-running"></i>;
       case "canceled":
         return <i class="fa-solid fa-stop"></i>;
@@ -89,12 +91,15 @@ const TaskCard = (props: TaskCardProps) => {
           }`}
         >
           <Tooltip text={props.task.pipelineStatus}>
-            {getIcon(props.task.pipelineStatus!)}
+            <div style={{ display: "none" }}>{props.task.pipelineStatus}</div>
+            <>{getIcon(props.task.pipelineStatus!)}</>
           </Tooltip>
         </div>
       </Show>
 
-      <Show when={dayjs().month() === 11 && Math.random() > 0.8}>
+      <Show
+        when={dayjs().month() === 11 && random(props.task?._id || "") > 0.6}
+      >
         <img src={xMasHat} class={styles.xMasHat} />
       </Show>
     </div>

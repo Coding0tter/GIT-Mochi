@@ -9,6 +9,7 @@ import { orderBy } from "lodash";
 import { createEffect, For } from "solid-js";
 import type { ITask } from "shared/types/task";
 import styles from "./TaskColumn.module.css";
+import { uiStore } from "@client/stores/uiStore";
 
 interface TaskColumnProps {
   status: { display_name: string; id: string };
@@ -62,7 +63,7 @@ const TaskColumn = (props: TaskColumnProps) => {
                   props.columnIndex &&
                 (keyboardNavigationStore.selectedTaskIndex === taskIndex() ||
                   keyboardNavigationStore.selectedTaskIndexes.includes(
-                    taskIndex()
+                    taskIndex(),
                   ))
               }
               onClick={() => {
@@ -72,11 +73,13 @@ const TaskColumn = (props: TaskColumnProps) => {
               taskIndex={taskIndex()}
               setTaskRef={(el) => (taskRefs[taskIndex()] = el)}
               commentsCount={
-                task.comments?.filter(
+                task.discussions?.filter(
                   (item) =>
-                    !item.system &&
-                    !item.resolved &&
-                    item.body.includes("@maxi")
+                    !item.notes?.some((note) => note.system) &&
+                    !item.notes?.some((note) => note.resolved) &&
+                    item.notes?.some((note) =>
+                      note.body.includes(`@${uiStore.user?.username}`),
+                    ),
                 ).length || 0
               }
             />

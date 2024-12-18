@@ -6,7 +6,9 @@
   margin-bottom: var(--spacing-sm);
   border-radius: var(--spacing-xs);
   position: relative;
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.3s ease;
   border-left: 5px solid var(--color-blue);
 
   p {
@@ -103,6 +105,7 @@
     background-color: var(--color-surface1);
   }
 
+  &.pending,
   &.running {
     color: var(--color-blue);
     border: 1px solid var(--color-blue);
@@ -141,4 +144,6 @@
 
   width: 50px;
   height: 50px;
+
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
 }

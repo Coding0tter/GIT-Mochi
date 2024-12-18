@@ -23,6 +23,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
     createSignal(false);
   const [toggleResolvedDiscussions, setToggleResolvedDiscussions] =
     createSignal(false);
+  const [isThreadFocused, setIsThreadFocused] = createSignal(false);
 
   onMount(async () => {
     window.addEventListener("keydown", handleKeyDown);
@@ -35,33 +36,37 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
   const handleKeyDown = (event: KeyboardEvent) => {
     if (!task?.discussions || task?.discussions.length === 0) return;
 
-    if (event.key === "j" || event.key === "ArrowDown") {
+    if (
+      (event.key === "j" || event.key === "ArrowDown") &&
+      !isThreadFocused()
+    ) {
       if (selectedDiscussion() < filteredDiscussions().length - 1) {
         setSelectedDiscussion(selectedDiscussion() + 1);
       } else {
         setSelectedDiscussion(0);
       }
-    } else if (event.key === "k" || event.key === "ArrowUp") {
+    } else if (
+      (event.key === "k" || event.key === "ArrowUp") &&
+      !isThreadFocused()
+    ) {
       if (selectedDiscussion() > 0) {
         setSelectedDiscussion(selectedDiscussion() - 1);
       } else {
         setSelectedDiscussion(filteredDiscussions().length - 1);
       }
-    } else if (event.key === "t") {
+    } else if (event.key === "s") {
       setToggleSystemDiscussions(!toggleSystemDiscussions());
+    } else if (event.key === "t") {
+      setToggleResolvedDiscussions(!toggleResolvedDiscussions());
     } else if (event.shiftKey && event.key === "O") {
       window.open(task.web_url, "_blank");
-    } else if (event.key === "c") {
-      event.preventDefault();
-
+    } else if (event.key === "r" && !event.ctrlKey) {
       setSelectedDiscussionForModal(
         filteredDiscussions().at(selectedDiscussion()) || null
       );
       setActiveModal(ModalType.Reply);
-    } else if (event.key === "d") {
+    } else if (event.key === "R" && event.shiftKey) {
       resolveThreadAsync(filteredDiscussions().at(selectedDiscussion())!);
-    } else if (event.key === "r") {
-      setToggleResolvedDiscussions(!toggleResolvedDiscussions());
     }
 
     const discussion = document.getElementById(
@@ -75,14 +80,20 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
       task?.discussions
         ?.filter(
           (discussion) =>
-            toggleSystemDiscussions() || !discussion.notes?.at(0)?.system
+            toggleSystemDiscussions() || !discussion.notes?.[0]?.system
         )
         ?.filter(
           (discussion) =>
-            toggleResolvedDiscussions() || !discussion.notes?.at(0)?.resolved
+            toggleResolvedDiscussions() || !discussion.notes?.[0]?.resolved
         ) || [],
-      (discussion) =>
-        orderBy(discussion.notes, "created_at", "desc")[0].created_at,
+      (discussion) => {
+        const latestNote = orderBy(
+          discussion.notes || [],
+          "created_at",
+          "desc"
+        )[0];
+        return latestNote?.created_at || 0;
+      },
       "desc"
     );
   };
@@ -94,7 +105,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
     if (priorityLabel && priorityLabel.includes("/")) {
       return priorityLabel.split("/")[1].toLowerCase();
     }
-    return "default";
+    return null;
   };
 
   return (
@@ -106,38 +117,36 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
         <div class={styles.contentContainer}>
           <div class={styles.mainSection}>
             <div class={styles.card}>
-              {task?.branch && (
-                <div class={styles.branchInfo}>
-                  <i class="fa-solid fa-code-branch"></i>
-                  <span>{task?.branch}</span>
-                </div>
-              )}
-
-              {task?.web_url && (
-                <Badge
-                  onClick={() => window.open(task.web_url, "_blank")}
-                  type="default"
-                >
-                  <div class={styles.externalLink}>
-                    <i class="fa-brands fa-gitlab"></i>
-                    <span>View in GitLab</span>
+              <div class={styles.topRow}>
+                {task?.branch && (
+                  <div class={styles.branchInfo}>
+                    <i class="fa-solid fa-code-branch"></i>
+                    <span>{task?.branch}</span>
                   </div>
-                </Badge>
-              )}
-            </div>
+                )}
+                {task?.web_url && (
+                  <Badge
+                    onClick={() => window.open(task.web_url, "_blank")}
+                    type="default"
+                  >
+                    <div class={styles.externalLink}>
+                      <i class="fa-brands fa-gitlab"></i>
+                      <span>View in GitLab</span>
+                    </div>
+                  </Badge>
+                )}
+              </div>
 
-            <Show when={task?.description}>
-              <div class={styles.card}>
+              <Show when={task?.description}>
                 <p
                   class={styles.descriptionText}
                   innerHTML={parseMarkdown(task?.description || "")}
                 />
-              </div>
-            </Show>
+              </Show>
+            </div>
 
             <div class={styles.card}>
               <div class={styles.badgeContainer}>
-                <Badge type="default">{task?.status}</Badge>
                 {task?.type && <Badge type="default">{task?.type}</Badge>}
                 {task?.milestoneName && (
                   <Badge type="default">{task?.milestoneName}</Badge>
@@ -148,7 +157,9 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
             {task?.labels && task.labels.length > 0 && (
               <div class={styles.card}>
                 <div class={styles.labelsContainer}>
-                  <Badge type={getPriority()}>{getPriority()}</Badge>
+                  {getPriority() && (
+                    <Badge type={getPriority()!}>{getPriority()}</Badge>
+                  )}
                   {task?.labels
                     .filter((task) => !task.includes("priority"))
                     .map((label) => (
@@ -167,6 +178,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
               <For each={filteredDiscussions()}>
                 {(discussion, index) => (
                   <DiscussionCard
+                    focusThread={setIsThreadFocused}
                     discussion={discussion}
                     selected={() => index() === selectedDiscussion()}
                     id={`discussion-${index()}`}
