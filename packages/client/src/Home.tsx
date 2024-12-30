@@ -43,6 +43,17 @@ const Home = () => {
               Press <kbd>Shift+2</kbd> to open the Time-Tracking tool.
             </p>
           </div>
+
+          <div
+            onClick={() => handleClick("/todo")}
+            class={`${styles.featureCard} ${styles.todo}`}
+          >
+            <h2>Todo Tool</h2>
+            <p>Manage your todos.</p>
+            <p>
+              Press <kbd>Shift+3</kbd> to open the Todo tool.
+            </p>
+          </div>
         </div>
       </div>
     </div>

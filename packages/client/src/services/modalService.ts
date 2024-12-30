@@ -2,6 +2,7 @@ import { STATES } from "../constants";
 import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
 import {
   ModalType,
+  openModal,
   setActiveModal,
   setSelectedAppointmentForModal,
   setSelectedTaskForModal,
@@ -10,22 +11,22 @@ import { getColumnTasks } from "../stores/taskStore";
 import { timeTrackStore } from "../stores/timeTrackStore";
 
 export const openHelpModal = () => {
-  setActiveModal(ModalType.Help);
+  openModal(ModalType.Help);
 };
 
 export const openFeedbackModal = () => {
-  setActiveModal(ModalType.Feedback);
+  openModal(ModalType.Feedback);
 };
 
 export const openDeleteModal = () => {
-  setActiveModal(ModalType.DeleteTask);
+  openModal(ModalType.DeleteTask);
   setSelectedTaskForModal(
     getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]
   );
 };
 
 export const openCreateModal = () => {
-  setActiveModal(ModalType.CreateTask);
+  openModal(ModalType.CreateTask);
   setSelectedTaskForModal({
     title: "",
     description: "",
@@ -34,14 +35,14 @@ export const openCreateModal = () => {
 };
 
 export const openEditTaskModal = () => {
-  setActiveModal(ModalType.CreateTask);
+  openModal(ModalType.CreateTask);
   setSelectedTaskForModal(
     getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]
   );
 };
 
 export const openEditAppointmentModal = () => {
-  setActiveModal(ModalType.EditAppointment);
+  openModal(ModalType.EditAppointment);
   setSelectedAppointmentForModal(
     timeTrackStore.entries[keyboardNavigationStore.selectedAppointmentIndex]
   );
@@ -51,12 +52,14 @@ export const openDetailsModal = () => {
   setSelectedTaskForModal(
     getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]
   );
-  setActiveModal(ModalType.TaskDetails);
+
+  openModal(ModalType.TaskDetails);
 };
 
 export const openPipelineModal = () => {
   setSelectedTaskForModal(
     getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]
   );
-  setActiveModal(ModalType.Pipeline);
+
+  openModal(ModalType.Pipeline);
 };

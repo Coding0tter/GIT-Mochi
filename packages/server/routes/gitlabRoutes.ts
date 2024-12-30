@@ -13,5 +13,6 @@ router.get("/user", gitlabController.getUserAsync);
 router.get("/users", gitlabController.getUsersAsync);
 router.get("/projects", gitlabController.getProjectsAsync);
 router.get("/discussions", gitlabController.getDiscussionsAsync);
+router.get("/todos", gitlabController.getTodosAsync);
 
 export default router;

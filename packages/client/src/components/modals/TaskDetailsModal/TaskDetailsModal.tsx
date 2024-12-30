@@ -3,6 +3,7 @@ import BaseModal, { type BaseModalProps } from "../BaseModal/BaseModal";
 import {
   modalStore,
   ModalType,
+  openModal,
   setActiveModal,
   setSelectedDiscussionForModal,
 } from "../../../stores/modalStore";
@@ -64,7 +65,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
       setSelectedDiscussionForModal(
         filteredDiscussions().at(selectedDiscussion()) || null
       );
-      setActiveModal(ModalType.Reply);
+      openModal(ModalType.Reply);
     } else if (event.key === "R" && event.shiftKey) {
       resolveThreadAsync(filteredDiscussions().at(selectedDiscussion())!);
     }

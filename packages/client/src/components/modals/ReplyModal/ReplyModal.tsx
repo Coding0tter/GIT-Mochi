@@ -4,6 +4,7 @@ import styles from "./ReplyModal.module.css";
 import {
   modalStore,
   ModalType,
+  openModal,
   setActiveModal,
 } from "../../../stores/modalStore";
 import DiscussionCard from "@client/components/shared/DiscussionCard/DiscussionCard";
@@ -24,7 +25,7 @@ const ReplyModal = (props: ReplyModalProps) => {
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "Enter" && event.ctrlKey) {
         replyToDiscussionAsync(discussion!, reply());
-        setActiveModal(ModalType.TaskDetails);
+        openModal(ModalType.TaskDetails);
       }
     };
 
@@ -51,6 +52,7 @@ const ReplyModal = (props: ReplyModalProps) => {
       <div class={styles.container}>
         <h1 class={styles.title}>Reply</h1>
         <DiscussionCard
+          focusThread={() => false}
           discussion={discussion!}
           selected={() => false}
           id="reply"

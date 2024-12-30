@@ -17,6 +17,7 @@ export enum ModalType {
 }
 
 export const [modalStore, setModalStore] = createStore({
+  activeModals: [] as ModalType[],
   activeModal: ModalType.None,
   selectedTask: null as ITask | null,
   selectedAppointment: null as TimeTrackEntry | null,
@@ -24,6 +25,17 @@ export const [modalStore, setModalStore] = createStore({
   selectedDiscussion: null as IDiscussion | null,
   closing: false,
 });
+
+export const openModal = (type: ModalType) => {
+  setModalStore("activeModals", [...modalStore.activeModals, type]);
+};
+
+export const closeModal = (type: ModalType) => {
+  setModalStore(
+    "activeModals",
+    modalStore.activeModals.filter((modal) => modal !== type)
+  );
+};
 
 export const setActiveModal = (type: ModalType) => {
   setModalStore("activeModal", type);
@@ -77,15 +89,19 @@ export const setSelectedAppointmentValue = (
     [key]: dayjs(modalStore.selectedAppointment[key])
       .set("hour", hour)
       .set("minute", minute)
-      .toISOString(), // Converts the date to a consistent string format
+      .toISOString(),
   });
 };
 
 export const handleCloseModal = () => {
+  // meh
   setModalStore("closing", true);
+  setModalStore("closing", false);
+
   setTimeout(() => {
-    setModalStore("activeModal", ModalType.None);
+    const activeModals = [...modalStore.activeModals];
+    activeModals.pop();
+    setModalStore("activeModals", activeModals);
     setModalStore("selectedTask", null);
-    setModalStore("closing", false);
   }, 300);
 };

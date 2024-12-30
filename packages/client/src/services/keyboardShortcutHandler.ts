@@ -35,7 +35,7 @@ export const handleKeyDown = async (
     document.activeElement?.tagName === "INPUT" ||
     document.activeElement?.tagName === "TEXTAREA" ||
     document.activeElement?.tagName === "SELECT" ||
-    modalStore.activeModal !== ModalType.None
+    modalStore.activeModals.length > 0
   ) {
     return;
   }

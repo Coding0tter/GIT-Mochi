@@ -1,4 +1,4 @@
-import { onMount, Show } from "solid-js";
+import { createSignal, onMount, Show } from "solid-js";
 import { EditOrCreateTaskModal, DeleteModal } from "../../components/modals";
 import TaskDetailsModal from "../../components/modals/TaskDetailsModal/TaskDetailsModal";
 import { STATES } from "../../constants";
@@ -12,8 +12,8 @@ import {
   modalStore,
   ModalType,
   handleCloseModal,
-  setActiveModal,
   setSelectedTaskForModal,
+  closeModal,
 } from "../../stores/modalStore";
 import { fetchTasksAsync, filteredTasks } from "../../stores/taskStore";
 import styles from "./KanbanBoard.module.css";
@@ -24,8 +24,12 @@ import ReplyModal from "../../components/modals/ReplyModal/ReplyModal";
 import { uiStore } from "@client/stores/uiStore";
 
 const KanbanBoard = () => {
+  const [loading, setLoading] = createSignal<boolean>(true);
+
   onMount(async () => {
+    setLoading(true);
     await fetchTasksAsync();
+    // setLoading(false);
   });
 
   const handleCreateOrUpdateTask = async () => {
@@ -68,7 +72,7 @@ const KanbanBoard = () => {
     try {
       await fetchTasksAsync();
       setSelectedTaskForModal(null);
-      setActiveModal(ModalType.None);
+      closeModal(ModalType.CreateTask);
     } catch (error) {
       addNotification({
         title: "Error",
@@ -81,7 +85,7 @@ const KanbanBoard = () => {
   const handleDeleteTask = async () => {
     try {
       await deleteTasksAsync(keyboardNavigationStore.selectedTaskIndexes);
-      setActiveModal(ModalType.None);
+      closeModal(ModalType.DeleteTask);
 
       addNotification({
         title: "Success",
@@ -99,31 +103,41 @@ const KanbanBoard = () => {
 
   return (
     <>
-      {modalStore.activeModal === ModalType.CreateTask && (
+      {modalStore.activeModals.includes(ModalType.CreateTask) && (
         <EditOrCreateTaskModal
           onSubmit={handleCreateOrUpdateTask}
           onClose={handleCloseModal}
         />
       )}
-      {modalStore.activeModal === ModalType.DeleteTask && (
+      {modalStore.activeModals.includes(ModalType.DeleteTask) && (
         <DeleteModal onSubmit={handleDeleteTask} onClose={handleCloseModal} />
       )}
-      {modalStore.activeModal === ModalType.TaskDetails && (
+      {modalStore.activeModals.includes(ModalType.TaskDetails) && (
         <TaskDetailsModal onClose={handleCloseModal} />
       )}
-      {modalStore.activeModal === ModalType.Pipeline && (
+      {modalStore.activeModals.includes(ModalType.Pipeline) && (
         <PipelineModal onClose={handleCloseModal} />
       )}
-      {modalStore.activeModal === ModalType.Reply && (
+      {modalStore.activeModals.includes(ModalType.Reply) && (
         <ReplyModal onClose={handleCloseModal} />
       )}
       <div class={styles.kanban}>
         <Show
           when={uiStore.currentProject}
           fallback={
-            <div class={styles.noProject}>
-              No project selected. Please select one via the commandline.
-            </div>
+            loading() ? (
+              <div class={styles.loading}>
+                <div class={styles.dots}>
+                  <div class={styles.dot}></div>
+                  <div class={styles.dot}></div>
+                  <div class={styles.dot}></div>
+                </div>
+              </div>
+            ) : (
+              <div class={styles.noProject}>
+                No project selected. Please select one via the commandline.
+              </div>
+            )
           }
         >
           {STATES.map((status, columnIndex) => (

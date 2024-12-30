@@ -1,4 +1,10 @@
-import type { JSXElement, ParentComponent } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  onMount,
+  type JSXElement,
+  type ParentComponent,
+} from "solid-js";
 import { modalStore } from "../../../stores/modalStore";
 import styles from "./BaseModal.module.css";
 import Button from "../../shared/Button/Button";
@@ -11,12 +17,21 @@ export interface BaseModalProps {
 }
 
 const BaseModal: ParentComponent<BaseModalProps> = (props): JSXElement => {
+  const [index, setIndex] = createSignal<number>(0);
+  const [fadeOut, setFadeOut] = createSignal<boolean>(false);
+
+  onMount(() => {
+    setIndex(modalStore.activeModals.length - 1);
+  });
+
+  createEffect(() => {
+    if (modalStore.closing && index() === modalStore.activeModals.length - 1) {
+      setFadeOut(true);
+    }
+  }, [modalStore.closing]);
+
   return (
-    <div
-      class={
-        modalStore.closing ? `${styles.modal} ${styles.hidden}` : styles.modal
-      }
-    >
+    <div class={fadeOut() ? `${styles.modal} ${styles.hidden}` : styles.modal}>
       <div class={styles.modalWrapper}>
         <div class={styles.modalContent}>{props.children}</div>
         <div class={styles.modalButtons}>

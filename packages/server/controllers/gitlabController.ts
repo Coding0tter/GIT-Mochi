@@ -115,6 +115,15 @@ export class GitlabController {
     }
   };
 
+  getTodosAsync = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const todos = await this.gitlabService.getTodosAsync();
+      res.status(200).json(todos);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
   getUsersAsync = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const users = await this.gitlabService.getUsersAsync();

@@ -43,7 +43,7 @@ const TaskCard = (props: TaskCardProps) => {
       case "skipped":
         return <i class="fa-solid fa-forward"></i>;
       default:
-        return <i class="fa-solid fa-question-circle"></i>;
+        break;
     }
   };
 
@@ -84,7 +84,12 @@ const TaskCard = (props: TaskCardProps) => {
         <div class={styles.commentCount}>{props.commentsCount}</div>
       )}
 
-      <Show when={props.task.pipelineStatus !== undefined}>
+      <Show
+        when={
+          props.task.pipelineStatus !== undefined &&
+          getIcon(props.task.pipelineStatus)
+        }
+      >
         <div
           class={`${styles.pipelineStatus} ${
             styles[props.task.pipelineStatus!]

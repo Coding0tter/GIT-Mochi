@@ -87,7 +87,6 @@
   gap: var(--spacing-sm);
   max-height: 50vh;
   overflow-y: auto;
-  align-items: flex-start;
 }
 
 .mainSection {

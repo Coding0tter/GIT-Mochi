@@ -85,3 +85,7 @@
 .time-tracking h2 {
   color: var(--color-peach);
 }
+
+.todo h2 {
+  color: var(--color-green);
+}

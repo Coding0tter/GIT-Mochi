@@ -14,6 +14,7 @@ import TimeTrack from "./modules/TimeTrack/TimeTrack";
 import Home from "./Home";
 import ShortcutRegistry from "./shortcutMaps/shortcutRegistry";
 import { BACKEND_URL, SOCKET_URL } from "./constants";
+import Todos from "@client/modules/Todos/Todos";
 
 const root = document.getElementById("root");
 
@@ -34,6 +35,7 @@ render(
       <Route path="/" component={Home} />
       <Route path="/kanban" component={KanbanBoard} />
       <Route path="/timetrack" component={TimeTrack} />
+      <Route path="/todo" component={Todos} />
     </Router>
   ),
   root!

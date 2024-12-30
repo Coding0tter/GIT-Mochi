@@ -4,6 +4,7 @@ import {
   setSelectedTaskForModal,
   setActiveModal,
   ModalType,
+  openModal,
 } from "@client/stores/modalStore";
 import { orderBy } from "lodash";
 import { createEffect, For } from "solid-js";
@@ -63,12 +64,12 @@ const TaskColumn = (props: TaskColumnProps) => {
                   props.columnIndex &&
                 (keyboardNavigationStore.selectedTaskIndex === taskIndex() ||
                   keyboardNavigationStore.selectedTaskIndexes.includes(
-                    taskIndex(),
+                    taskIndex()
                   ))
               }
               onClick={() => {
                 setSelectedTaskForModal(task);
-                setActiveModal(ModalType.TaskDetails);
+                openModal(ModalType.TaskDetails);
               }}
               taskIndex={taskIndex()}
               setTaskRef={(el) => (taskRefs[taskIndex()] = el)}
@@ -78,8 +79,8 @@ const TaskColumn = (props: TaskColumnProps) => {
                     !item.notes?.some((note) => note.system) &&
                     !item.notes?.some((note) => note.resolved) &&
                     item.notes?.some((note) =>
-                      note.body.includes(`@${uiStore.user?.username}`),
-                    ),
+                      note.body.includes(`@${uiStore.user?.username}`)
+                    )
                 ).length || 0
               }
             />
