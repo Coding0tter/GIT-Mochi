@@ -1,14 +1,9 @@
-import { createSignal, onCleanup, onMount } from "solid-js";
-import BaseModal, { type BaseModalProps } from "../BaseModal/BaseModal";
-import styles from "./ReplyModal.module.css";
-import {
-  modalStore,
-  ModalType,
-  openModal,
-  setActiveModal,
-} from "../../../stores/modalStore";
 import DiscussionCard from "@client/components/shared/DiscussionCard/DiscussionCard";
 import { replyToDiscussionAsync } from "@client/services/gitlabService";
+import { createSignal, onCleanup, onMount } from "solid-js";
+import { closeModal, modalStore, ModalType } from "../../../stores/modalStore";
+import BaseModal, { type BaseModalProps } from "../BaseModal/BaseModal";
+import styles from "./ReplyModal.module.css";
 
 interface ReplyModalProps extends BaseModalProps {}
 
@@ -25,7 +20,7 @@ const ReplyModal = (props: ReplyModalProps) => {
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "Enter" && event.ctrlKey) {
         replyToDiscussionAsync(discussion!, reply());
-        openModal(ModalType.TaskDetails);
+        closeModal(ModalType.Reply);
       }
     };
 

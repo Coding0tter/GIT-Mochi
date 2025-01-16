@@ -1,5 +1,5 @@
-import type { ITask } from "@shared/types/task";
 import { Schema, model } from "mongoose";
+import type { ITask } from "shared/types/task";
 
 const TaskSchema = new Schema<ITask>({
   gitlabIid: { type: Number, unique: false },
@@ -9,6 +9,12 @@ const TaskSchema = new Schema<ITask>({
   description: String,
   milestoneId: Number,
   milestoneName: String,
+  assignee: {
+    authorId: Number,
+    name: String,
+    username: String,
+    avatar_url: String,
+  },
   labels: [String],
   branch: String,
   status: String,

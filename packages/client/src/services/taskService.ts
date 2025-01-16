@@ -99,20 +99,24 @@ export const deleteTasksAsync = async (taskIndexes: number[]) => {
   const tasks = getColumnTasks();
   const ids = taskIndexes.map((index) => tasks[index]._id);
 
+  setTasks(
+    taskStore.tasks.filter((task) => !ids.includes(task._id)) as ITask[],
+  );
+
   await axios.delete(`/tasks/${ids.join(",")}`);
 };
 
 export const moveSelectedTasksAsync = async (direction: Direction) => {
   const { selectedColumnIndex, selectedTaskIndexes } = keyboardNavigationStore;
   const tasksToMove = getColumnTasks().filter((_task, index) =>
-    selectedTaskIndexes.includes(index)
+    selectedTaskIndexes.includes(index),
   ) as ITask[];
 
   if (direction === Direction.Left || direction === Direction.Right) {
     await moveSelectedTasksToColumn(
       tasksToMove,
       selectedColumnIndex,
-      direction
+      direction,
     );
   } else if (direction === Direction.Up || direction === Direction.Down) {
     await moveSelectedTasksInColumn(tasksToMove, direction);
@@ -123,12 +127,12 @@ export const moveSelectedTasksToEndAsync = async (direction: Direction) => {
   const { selectedTaskIndexes } = keyboardNavigationStore;
   const tasks = getColumnTasks();
   const selectedTasks = tasks.filter((_task, index) =>
-    selectedTaskIndexes.includes(index)
+    selectedTaskIndexes.includes(index),
   );
 
   // Remove selected tasks from the original array
   const remainingTasks = tasks.filter(
-    (_task, index) => !selectedTaskIndexes.includes(index)
+    (_task, index) => !selectedTaskIndexes.includes(index),
   );
 
   // Rebuild the task array based on the direction
@@ -154,19 +158,19 @@ export const moveSelectedTasksToEndAsync = async (direction: Direction) => {
     direction === Direction.Up
       ? selectedTasks.map((_task, index) => index)
       : selectedTasks.map(
-          (_task, index) => newTaskOrder.length - selectedTasks.length + index
+          (_task, index) => newTaskOrder.length - selectedTasks.length + index,
         );
 
   setSelectedTaskIndexes(newSelectedIndexes);
   setSelectedTaskIndex(
-    direction === Direction.Up ? 0 : newTaskOrder.length - 1
+    direction === Direction.Up ? 0 : newTaskOrder.length - 1,
   );
 };
 
 const moveSelectedTasksToColumn = async (
   tasksToMove: ITask[],
   selectedColumnIndex: number,
-  direction: Direction
+  direction: Direction,
 ) => {
   const newStatusIndex =
     direction === Direction.Right
@@ -175,8 +179,10 @@ const moveSelectedTasksToColumn = async (
 
   const results = await Promise.all(
     tasksToMove.map((task) =>
-      updateTaskAsync(task._id as string, { status: STATES[newStatusIndex].id })
-    )
+      updateTaskAsync(task._id as string, {
+        status: STATES[newStatusIndex].id,
+      }),
+    ),
   );
 
   if (results.every((res) => res?.status === 200)) {
@@ -191,11 +197,11 @@ const moveSelectedTasksToColumn = async (
       setTasks(newTasks as ITask[]);
 
       const newColumnTasks = filteredTasks().filter(
-        (task) => task.status === STATES[newStatusIndex].id
+        (task) => task.status === STATES[newStatusIndex].id,
       );
 
       const movedTaskIndexes = tasksToMove.map((task) =>
-        newColumnTasks.findIndex((t) => t._id === task._id)
+        newColumnTasks.findIndex((t) => t._id === task._id),
       );
 
       setSelectedColumnIndex(newStatusIndex);
@@ -207,7 +213,7 @@ const moveSelectedTasksToColumn = async (
 
 const moveSelectedTasksInColumn = async (
   tasksToMove: ITask[],
-  direction: Direction
+  direction: Direction,
 ) => {
   const columnTasks = getColumnTasks();
   const sortedTasks = [...tasksToMove].sort((a, b) => a.order! - b.order!);
@@ -252,14 +258,14 @@ const moveSelectedTasksInColumn = async (
   });
 
   const updatedTaskOrder = orderBy(newTaskOrder, "order").map(
-    (task) => task._id
+    (task) => task._id,
   );
 
   await updateTaskOrderAsync(updatedTaskOrder as string[]);
   await fetchTasksAsync();
 
   const movedTaskIndexes = sortedTasks.map(
-    (task) => newTaskOrder.findIndex((t) => t._id === task._id) + shift
+    (task) => newTaskOrder.findIndex((t) => t._id === task._id) + shift,
   );
 
   setSelectedTaskIndexes(movedTaskIndexes);

@@ -63,26 +63,32 @@ const TaskCard = (props: TaskCardProps) => {
       <p>{props.task.title}</p>
       {props.task.description && <div class="divider" />}
       <p class={styles.description}>{props.task.description}</p>
-      {props.task.custom && <Badge>Custom</Badge>}
-      {getPriorityLabel(props.task) && (
-        <Badge type={getPriorityLabel(props.task)}>
-          {getPriorityLabel(props.task)}
-        </Badge>
-      )}
-      {!props.task.custom && props.task.type === "merge_request" && (
-        <Badge clipBoardText={props.task.branch} hasTooltip cutOffText>
-          Branch: {props.task.branch}
-        </Badge>
-      )}
-      {!props.task.custom &&
-        props.task.type === "issue" &&
-        props.task.milestoneName && <Badge>{props.task.milestoneName}</Badge>}
-      {!props.task.custom && props.task.type === "issue" && (
-        <Badge>Issue: {props.task.gitlabIid ?? ""}</Badge>
-      )}
-      {props.commentsCount > 0 && (
-        <div class={styles.commentCount}>{props.commentsCount}</div>
-      )}
+
+      <div class={styles.information}>
+        <Show when={props.task.assignee}>
+          <img src={props.task.assignee?.avatar_url} class={styles.avatar} />
+        </Show>
+        {props.task.custom && <Badge>Custom</Badge>}
+        {getPriorityLabel(props.task) && (
+          <Badge type={getPriorityLabel(props.task)}>
+            {getPriorityLabel(props.task)}
+          </Badge>
+        )}
+        {!props.task.custom && props.task.type === "merge_request" && (
+          <Badge clipBoardText={props.task.branch} hasTooltip cutOffText>
+            Branch: {props.task.branch}
+          </Badge>
+        )}
+        {!props.task.custom &&
+          props.task.type === "issue" &&
+          props.task.milestoneName && <Badge>{props.task.milestoneName}</Badge>}
+        {!props.task.custom && props.task.type === "issue" && (
+          <Badge>Issue: {props.task.gitlabIid ?? ""}</Badge>
+        )}
+        {props.commentsCount > 0 && (
+          <div class={styles.commentCount}>{props.commentsCount}</div>
+        )}
+      </div>
 
       <Show
         when={

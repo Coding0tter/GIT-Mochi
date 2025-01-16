@@ -2,10 +2,17 @@ import type { NextFunction } from "express";
 
 export class MochiError extends Error {
   public statusCode: number;
+  public data: any;
 
-  constructor(message: string, statusCode: number = 500, error?: Error) {
+  constructor(
+    message: string,
+    statusCode: number = 500,
+    error?: Error,
+    data?: any,
+  ) {
     super(message + (error ? `: ${error.message}` : ""));
     this.statusCode = statusCode;
+    this.data = data;
     Error.captureStackTrace(this, this.constructor);
   }
 }

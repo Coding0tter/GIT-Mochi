@@ -2,7 +2,7 @@ import type { ITask } from "shared/types/task";
 
 export function createTaskData(
   entity: any,
-  entityType: "merge_request" | "issue"
+  entityType: "merge_request" | "issue",
 ): Partial<ITask> {
   return {
     labels: entity.labels,
@@ -17,12 +17,13 @@ export function createTaskData(
     description: entity.description,
     status: entity.state || "opened",
     custom: false,
+    assignee: { authorId: entity?.assignee?.id ?? "-1", ...entity.assignee },
   };
 }
 
 export function detectChanges(
   existingTask: ITask,
-  taskData: Partial<ITask>
+  taskData: Partial<ITask>,
 ): boolean {
   for (const key of Object.keys(taskData)) {
     const newValue = taskData[key as keyof ITask];

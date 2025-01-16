@@ -77,24 +77,27 @@ app.use("/api/rules", ruleRoutes);
 app.use("/api/timetrack", timeTrackRoutes);
 
 // Sync comments every minute
-setInterval(async () => {
-  const projectService = new ProjectService();
-  if ((await projectService.getCurrentProjectAsync()) === null) {
-    logInfo("No project selected. Skipping sync jobs.");
-    return;
-  }
+setInterval(
+  async () => {
+    const projectService = new ProjectService();
+    if ((await projectService.getCurrentProjectAsync()) === null) {
+      logInfo("No project selected. Skipping sync jobs.");
+      return;
+    }
 
-  try {
-    console.log("============Background jobs============");
-    console.time("Background Jobs");
-    syncGitlabJob();
+    try {
+      console.log("============Background jobs============");
+      console.time("Background Jobs");
+      syncGitlabJob();
 
-    closeMergedMRJob();
-    console.timeEnd("Background Jobs");
-  } catch (error) {
-    logError(new MochiError("Failed to sync jobs", 500, error as Error));
-  }
-}, 60000);
+      closeMergedMRJob();
+      console.timeEnd("Background Jobs");
+    } catch (error) {
+      logError(new MochiError("Failed to sync jobs", 500, error as Error));
+    }
+  },
+  60 * 1000 * 5,
+);
 
 const PORT = 5000;
 server.listen(PORT, () =>

@@ -11,6 +11,7 @@ export interface ITask extends Document<string> {
   labels?: string[];
   branch?: string;
   status?: string;
+  assignee?: IAuthor;
   type?: string;
   custom?: boolean;
   deleted?: boolean;

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { MochiError } from "../errors/mochiError";
 
 export class GitlabApiClient {
@@ -9,14 +9,14 @@ export class GitlabApiClient {
     if (!process.env.GIT_URL) {
       throw new MochiError(
         "GitLab API URL not found in environment variables",
-        500
+        500,
       );
     }
 
     if (!process.env.PRIVATE_TOKEN) {
       throw new MochiError(
         "GitLab Private Token not found in environment variables",
-        500
+        500,
       );
     }
 
@@ -27,7 +27,7 @@ export class GitlabApiClient {
   async request(
     endpoint: string,
     method: "GET" | "POST" | "PUT" = "GET",
-    data?: any
+    data?: any,
   ) {
     try {
       const response = await axios({
@@ -46,8 +46,8 @@ export class GitlabApiClient {
         `GitLab API request failed for ${endpoint} with method ${method} and ${
           data ? data : "no data"
         }`,
-        500,
-        error
+        error instanceof AxiosError ? error?.response?.status : 500,
+        error,
       );
     }
   }
@@ -55,7 +55,7 @@ export class GitlabApiClient {
   async paginatedRequest(
     endpoint: string,
     method: "GET" | "POST" | "PUT" = "GET",
-    data?: any
+    data?: any,
   ) {
     try {
       const response = await axios({
@@ -82,7 +82,7 @@ export class GitlabApiClient {
           data ? data : "no data"
         }`,
         500,
-        error
+        error,
       );
     }
   }

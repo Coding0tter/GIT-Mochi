@@ -147,3 +147,14 @@
 
   filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
 }
+
+.information {
+  display: flex;
+  gap: var(--spacing-xxs);
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}

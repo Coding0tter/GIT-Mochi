@@ -6,6 +6,7 @@ import Badge from "../Badge/Badge";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
 import dayjs from "dayjs";
 import type { IDiscussion } from "shared/types/task";
+import { modalStore, ModalType } from "@client/stores/modalStore";
 
 interface DiscussionCardProps {
   discussion: IDiscussion;
@@ -22,7 +23,11 @@ const DiscussionCard = (props: DiscussionCardProps) => {
 
   onMount(() => {
     const handleKeydown = (event: KeyboardEvent) => {
-      if (!props.selected()) return;
+      if (
+        !props.selected() ||
+        modalStore.activeModals.includes(ModalType.Reply)
+      )
+        return;
 
       if (event.code === "Space") {
         event.preventDefault();
@@ -46,7 +51,9 @@ const DiscussionCard = (props: DiscussionCardProps) => {
         setThreadIndex(Math.max(threadIndex() - 1, 0));
       }
 
-      const thread = document.getElementById(`thread-${props.id}-${threadIndex()}`);
+      const thread = document.getElementById(
+        `thread-${props.id}-${threadIndex()}`,
+      );
       thread?.scrollIntoView({ behavior: "smooth", block: "center" });
     };
 

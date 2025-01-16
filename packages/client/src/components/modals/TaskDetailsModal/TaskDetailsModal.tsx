@@ -35,7 +35,12 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
   });
 
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (!task?.discussions || task?.discussions.length === 0) return;
+    if (
+      !task?.discussions ||
+      task?.discussions.length === 0 ||
+      modalStore.activeModals.includes(ModalType.Reply)
+    )
+      return;
 
     if (
       (event.key === "j" || event.key === "ArrowDown") &&
@@ -63,7 +68,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
       window.open(task.web_url, "_blank");
     } else if (event.key === "r" && !event.ctrlKey) {
       setSelectedDiscussionForModal(
-        filteredDiscussions().at(selectedDiscussion()) || null
+        filteredDiscussions().at(selectedDiscussion()) || null,
       );
       openModal(ModalType.Reply);
     } else if (event.key === "R" && event.shiftKey) {
@@ -71,7 +76,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
     }
 
     const discussion = document.getElementById(
-      `discussion-${selectedDiscussion()}`
+      `discussion-${selectedDiscussion()}`,
     );
     discussion?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -81,27 +86,27 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
       task?.discussions
         ?.filter(
           (discussion) =>
-            toggleSystemDiscussions() || !discussion.notes?.[0]?.system
+            toggleSystemDiscussions() || !discussion.notes?.[0]?.system,
         )
         ?.filter(
           (discussion) =>
-            toggleResolvedDiscussions() || !discussion.notes?.[0]?.resolved
+            toggleResolvedDiscussions() || !discussion.notes?.[0]?.resolved,
         ) || [],
       (discussion) => {
         const latestNote = orderBy(
           discussion.notes || [],
           "created_at",
-          "desc"
+          "desc",
         )[0];
         return latestNote?.created_at || 0;
       },
-      "desc"
+      "desc",
     );
   };
 
   const getPriority = () => {
     const priorityLabel = task?.labels?.find((label) =>
-      label.includes("priority")
+      label.includes("priority"),
     );
     if (priorityLabel && priorityLabel.includes("/")) {
       return priorityLabel.split("/")[1].toLowerCase();
@@ -163,9 +168,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
                   )}
                   {task?.labels
                     .filter((task) => !task.includes("priority"))
-                    .map((label) => (
-                      <Badge>{label}</Badge>
-                    ))}
+                    .map((label) => <Badge>{label}</Badge>)}
                 </div>
               </div>
             )}
