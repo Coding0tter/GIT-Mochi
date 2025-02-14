@@ -54,14 +54,14 @@ do {
   } catch (error) {
     retries--;
     console.error(
-      `Failed to retrieve user from Gitlab. Retries left: ${retries}`,
+      `Failed to retrieve user from Gitlab. Retries left: ${retries}`
     );
 
     console.error(error);
 
     if (retries === 0) {
       console.error(
-        "Failed to retrieve user from Gitlab after 5 retries. Maybe the Gitlab server is down?",
+        "Failed to retrieve user from Gitlab after 5 retries. Maybe the Gitlab server is down?"
       );
       retries = 5;
     }
@@ -77,29 +77,30 @@ app.use("/api/rules", ruleRoutes);
 app.use("/api/timetrack", timeTrackRoutes);
 
 // Sync comments every minute
-setInterval(
-  async () => {
-    const projectService = new ProjectService();
-    if ((await projectService.getCurrentProjectAsync()) === null) {
-      logInfo("No project selected. Skipping sync jobs.");
-      return;
-    }
-
-    try {
-      console.log("============Background jobs============");
-      console.time("Background Jobs");
-      syncGitlabJob();
-
-      closeMergedMRJob();
-      console.timeEnd("Background Jobs");
-    } catch (error) {
-      logError(new MochiError("Failed to sync jobs", 500, error as Error));
-    }
-  },
-  60 * 1000 * 5,
-);
+setInterval(async () => {
+  await jobs();
+}, 60 * 1000 * 5);
 
 const PORT = 5000;
 server.listen(PORT, () =>
-  logInfo(`Gitlab-Mochi backend running on port ${PORT}`),
+  logInfo(`Gitlab-Mochi backend running on port ${PORT}`)
 );
+
+const jobs = async () => {
+  const projectService = new ProjectService();
+  if ((await projectService.getCurrentProjectAsync()) === null) {
+    logInfo("No project selected. Skipping sync jobs.");
+    return;
+  }
+
+  try {
+    console.log("============Background jobs============");
+    console.time("Background Jobs");
+    syncGitlabJob();
+
+    closeMergedMRJob();
+    console.timeEnd("Background Jobs");
+  } catch (error) {
+    logError(new MochiError("Failed to sync jobs", 500, error as Error));
+  }
+};

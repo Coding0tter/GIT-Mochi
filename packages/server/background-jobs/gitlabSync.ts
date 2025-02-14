@@ -9,9 +9,7 @@ const syncGitlabJob = async () => {
 
     const gitlabService = new GitlabService();
 
-    const changes = await gitlabService.syncGitLabDataAsync();
-
-    SocketHandler.getInstance().getIO().emit("updateTasks", changes);
+    await gitlabService.syncGitLabDataAsync();
 
     logInfo("Gitlab Issues and MergeRequests synced!");
   } catch (error) {
@@ -19,8 +17,8 @@ const syncGitlabJob = async () => {
       new MochiError(
         "Failed to sync Gitlab Issues and MergeRequests",
         500,
-        error as Error
-      )
+        error as Error,
+      ),
     );
   }
 };

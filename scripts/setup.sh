@@ -44,11 +44,11 @@ echo -en "${BOLD}Please enter your PRIVATE_TOKEN:${RESET} "
 read -r PRIVATE_TOKEN
 
 # Prompt for GIT_URL
-echo -en "${BOLD}Please enter your GIT_URL (e.g. https://git.latido.at):${RESET} "
+echo -en "${BOLD}Please enter your GIT_URL (e.g. https://www.gitlab.at):${RESET} "
 read -r GIT_URL
 
 # Write the .env file
-cat > .env <<EOF
+cat > ../.env <<EOF
 PRIVATE_TOKEN=$PRIVATE_TOKEN
 GIT_URL=$GIT_URL
 EOF

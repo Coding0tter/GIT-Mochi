@@ -27,6 +27,9 @@
 }
 
 .descriptionText {
+  max-height: 400px;
+  overflow: scroll;
+
   font-size: var(--font-size-sm);
   color: var(--color-subtext1);
 

@@ -8,10 +8,9 @@ Mochi is a **keyboard-friendly, GitLab-integrated Kanban board** that makes task
 
 ## Features
 
-- **Kanban Columns**: Sort tasks by state and track progress visually.
-- **GitLab Integration**: Sync tasks, issues, and merge requests directly.
+- **Kanban**: Sort tasks by state and track progress visually.
+- **GitLab Integration**: Sync tasks, issues, merge requests, comments and more.
 - **Keyboard-Driven**: Navigate, move tasks, and open details without a mouse.
-- **GitLab Issue Linking**: Jump to specific issues or merge requests in GitLab.
 - **Pipeline Status at a Glance**: Keep up with CI/CD progress easily.
 
 ## Prerequisites
@@ -24,7 +23,7 @@ Mochi is a **keyboard-friendly, GitLab-integrated Kanban board** that makes task
 1. **Clone the repository**:
 
    ```bash
-   git clone https://your-repository-url.git
+   git clone https://github.com/Coding0tter/GIT-Mochi.git
    cd mochi
    ```
 
@@ -35,20 +34,27 @@ Mochi is a **keyboard-friendly, GitLab-integrated Kanban board** that makes task
    ```
 
 3. **Start Mochi**:
+
    ```bash
    docker-compose up -d
    ```
+
+4. **Select your first project**
+
+- Mochi will start at http://localhost:3005
+- open the kanban view with `Ctrl + 1`
+- open the commandline with `:` or `Ctrl + p`
+- choose `listProjects` and select your project
 
 ## Keyboard Shortcuts
 
 <img src="./docs/help.png" alt="Mochi Help" width="1000" style="border-radius:10px;">
 
-- **Sync Merge Requests**: `Shift + S`
-- **Open Task in GitLab**: `Shift + O`
+Open the help modal with `?`
 
 ## GitLab Syncing
 
-Make sure your **[GitLab Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)** is set in the `.env` file before syncing. Use `Shift + S` and `Shift + O` for syncing tasks and opening them directly in GitLab.
+Make sure your **[GitLab Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)** is set in the `.env` file before syncing. Use `Shift + S` for syncing manually. Git-Mochi syncs data every 5 minutes automatically
 
 ## Support the Project
 
