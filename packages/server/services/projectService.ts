@@ -13,10 +13,10 @@ export class ProjectService extends BaseService<IProject> {
   }
 
   async getCurrentProjectAsync() {
+    console.trace("getcurrentproject");
     try {
-      const currentProject = await this.settingRepo.getByKeyAsync(
-        "currentProject"
-      );
+      const currentProject =
+        await this.settingRepo.getByKeyAsync("currentProject");
 
       if (currentProject === null) {
         throw new MochiError("No project selected", 404);
@@ -24,7 +24,7 @@ export class ProjectService extends BaseService<IProject> {
 
       if (currentProject?.value.includes("custom_project")) {
         const project = await Project.findById(
-          currentProject.value.split("/")[1]
+          currentProject.value.split("/")[1],
         );
         return project;
       } else {
@@ -35,7 +35,7 @@ export class ProjectService extends BaseService<IProject> {
       throw new MochiError(
         `Failed to get current project`,
         500,
-        error as Error
+        error as Error,
       );
     }
   }
@@ -46,7 +46,7 @@ export class ProjectService extends BaseService<IProject> {
         `${process.env.GIT_URL}/api/v4/projects/${projectId}`,
         {
           headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
-        }
+        },
       );
 
       return projectResponse.data;
@@ -54,7 +54,7 @@ export class ProjectService extends BaseService<IProject> {
       throw new MochiError(
         "Failed to get project from gitlab",
         500,
-        error as Error
+        error as Error,
       );
     }
   };
@@ -108,7 +108,7 @@ export class ProjectService extends BaseService<IProject> {
       throw new MochiError(
         "Failed to set current project",
         500,
-        error as Error
+        error as Error,
       );
     }
   }

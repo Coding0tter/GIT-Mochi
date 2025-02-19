@@ -8,19 +8,19 @@ import TaskEventEmitter from "@server/services/emitters/taskEventEmitter";
 import TaskService from "@server/services/taskService";
 import { UserService } from "@server/services/userService";
 import SocketHandler from "@server/sockets";
-import { getContext, ContextKeys } from "@server/utils/asyncContext";
-import type { MochiResult } from "@server/utils/mochiResult";
-import { createTaskData, detectChanges } from "@server/utils/taskUtils";
-import type { ITask, IDiscussion } from "shared/types/task";
+import { ContextKeys, getContext } from "@server/utils/asyncContext";
 import type { IPagination } from "shared/types/pagination";
-import { logError } from "@server/utils/logger";
+import type { IDiscussion, ITask } from "shared/types/task";
+import { GitlabSyncService } from "./gitlabSyncService";
 
 export class GitlabService {
+  // ─── DEPENDENCIES ──────────────────────────────────────────────
   private gitlabApiClient: GitlabApiClient;
   private taskService: TaskService;
   private taskEmitter: TaskEventEmitter;
   private userService: UserService;
   private settingRepo: SettingRepo;
+  private gitlabSyncService: GitlabSyncService;
 
   constructor() {
     this.gitlabApiClient = new GitlabApiClient();
@@ -28,37 +28,34 @@ export class GitlabService {
     this.taskEmitter = new TaskEventEmitter();
     this.userService = new UserService();
     this.settingRepo = new SettingRepo();
+    this.gitlabSyncService = new GitlabSyncService(
+      this.gitlabApiClient,
+      this.taskService,
+      this.taskEmitter,
+    );
   }
 
-  async syncGitLabDataAsync(): Promise<ITask[]> {
+  // ─── SYNCING FUNCTIONS ─────────────────────────────────────────
+  /**
+   * Sync merge requests and issues from GitLab for the current user and project.
+   */
+  async syncGitLabDataAsync(): Promise<void> {
     const user = await this.userService.getUser();
     const project = await this.settingRepo.getByKeyAsync("currentProject");
 
     if (!user) throw new GitlabError("No user found", 404);
     if (!project) throw new GitlabError("No project selected", 404);
+    if (project.value.includes("custom_project")) return;
 
-    if (project.value.includes("custom_project")) {
-      return [];
-    }
-
-    const [updatedMergeRequests, updatedIssues] = await Promise.all([
-      this.syncEntities(
-        "merge_requests",
-        "merge_request",
-        project.value,
-        user.gitlabId.toString(),
-      ),
-      this.syncEntities(
-        "issues",
-        "issue",
-        project.value,
-        user.gitlabId.toString(),
-      ),
-    ]);
-
-    return [...updatedMergeRequests, ...updatedIssues];
+    const changes = this.gitlabSyncService.syncGitlabDataAsync(user, project);
+    SocketHandler.getInstance().getIO().emit("updateTasks", changes);
   }
 
+  // ─── MERGE REQUEST OPERATIONS ──────────────────────────────────
+
+  /**
+   * Create a merge request in GitLab based on an existing issue.
+   */
   async createGitlabMergeRequestAsync(issueId: string) {
     const currentProject = getContext(ContextKeys.Project);
     if (!currentProject) throw new GitlabError("No project selected", 404);
@@ -100,403 +97,11 @@ export class GitlabService {
     }
 
     const newMergeRequestTask = newMergeRequestTaskResult.data;
-
-    await this.taskEmitter.updateTaskAsync(issue._id as string, {
-      status: "closed",
-    });
-
     SocketHandler.getInstance()
       .getIO()
-      .emit("updateTasks", [
-        newMergeRequestTask,
-        { _id: issue._id, status: "closed" },
-      ]);
+      .emit("updateTasks", [newMergeRequestTask]);
 
-    return {
-      mergeRequest: mergeRequestData,
-    };
-  }
-
-  async resolveThreadAsync(task: ITask, discussion: IDiscussion) {
-    const payload = {
-      resolved: true,
-    };
-
-    const response = await this.gitlabApiClient.request(
-      `/projects/${task.projectId}/merge_requests/${task.gitlabIid}/discussions/${discussion.discussionId}`,
-      "PUT",
-      payload,
-    );
-
-    const updateTask = await this.taskService.findOneAsync({ _id: task._id });
-
-    updateTask.discussions = updateTask.discussions?.map((d) => {
-      if (d.discussionId === discussion.discussionId) {
-        d.notes = d.notes?.map((n) => {
-          if (n.noteId === discussion.notes?.at(0)?.noteId) {
-            n.resolved = true;
-          }
-          return n;
-        });
-      }
-      return d;
-    });
-
-    SocketHandler.getInstance().getIO().emit("updateTasks", [updateTask]);
-
-    return response;
-  }
-
-  async commentOnTaskAsync(
-    task: ITask,
-    discussion: IDiscussion,
-    reply: string,
-  ) {
-    const payload = {
-      body: reply,
-      type: "DiscussionNote",
-      note_id: discussion.notes?.at(0)?.noteId,
-    };
-
-    const response = await this.gitlabApiClient.request(
-      `/projects/${task.projectId}/${
-        task.type === "issue" ? "issues" : "merge_requests"
-      }/${task.gitlabIid}/discussions/${discussion.discussionId}/notes`,
-      "POST",
-      payload,
-    );
-
-    const updateTask = await this.taskService.findOneAsync({ _id: task._id });
-
-    updateTask.discussions = updateTask.discussions?.map((d) => {
-      if (d.discussionId === discussion.discussionId) {
-        const note = response;
-
-        note.noteId = note.id.toString();
-        delete note.id;
-        note.author.authorId = note.author.id.toString();
-        note.resolved = note.resolved || false;
-        if (note.resolved) {
-          note.resolved_by.authorId = note.resolved_by.id.toString();
-        }
-
-        d.notes?.push(note);
-      }
-      return d;
-    });
-
-    SocketHandler.getInstance().getIO().emit("updateTasks", [updateTask]);
-
-    return response;
-  }
-
-  async assignToUserAsync(taskId: string, userId: string) {
-    const task = await this.taskService.findOneAsync({ _id: taskId });
-    if (!task) throw new MochiError("Task not found", 404);
-
-    await this.gitlabApiClient.request(
-      `/projects/${task.projectId}/merge_requests/${task.gitlabIid}`,
-      "PUT",
-      { assignee_id: userId },
-    );
-  }
-
-  async getUserByAccessTokenAsync() {
-    const response = await this.gitlabApiClient.request("/user");
-    let user = await this.userService.getUser();
-
-    if (!user) {
-      user = await this.userService.createUser({
-        gitlabId: response.id,
-        username: response.username,
-        email: response.email,
-        name: response.name,
-        avatar_url: response.avatar_url,
-      });
-    }
-
-    return user;
-  }
-
-  async getProjectsAsync() {
-    return this.gitlabApiClient.request("/projects?per_page=100");
-  }
-
-  async getTodosAsync() {
-    let pagination: Partial<IPagination> = {
-      currentPage: 1,
-      limit: 100,
-      totalPages: 1,
-    };
-    let totalTodos: any[] = [];
-
-    do {
-      const { data, pagination: nextPagination } =
-        await this.gitlabApiClient.paginatedRequest(
-          `/todos?page=${pagination.currentPage}&per_page=${pagination.limit}`,
-        );
-
-      totalTodos = totalTodos.concat(data);
-
-      pagination.currentPage = nextPagination.nextPage;
-    } while (pagination.currentPage < (pagination.totalPages ?? 1));
-
-    return totalTodos;
-  }
-
-  async getUsersAsync() {
-    return this.gitlabApiClient.request("/users?per_page=100");
-  }
-
-  async getDiscussionsAsync(
-    projectId: string,
-    gitlabIid: string,
-    type: string,
-  ) {
-    let pagination: Partial<IPagination> = {
-      currentPage: 1,
-      limit: 100,
-      totalPages: 1,
-    };
-    let totalDiscussions: any[] = [];
-
-    do {
-      const { data, pagination: nextPagination } =
-        await this.gitlabApiClient.paginatedRequest(
-          `/projects/${projectId}/${type}/${gitlabIid}/discussions?page${pagination.currentPage}&per_page=${pagination.limit}`,
-        );
-
-      totalDiscussions = totalDiscussions.concat(data);
-
-      pagination.currentPage = nextPagination.nextPage;
-    } while (pagination.currentPage < (pagination.totalPages ?? 1));
-
-    totalDiscussions.forEach((discussion: any) => {
-      discussion.discussionId = discussion.id.toString();
-      delete discussion.id;
-      discussion.notes.forEach((note: any) => {
-        note.noteId = note.id.toString();
-        delete note.id;
-        note.author.authorId = note.author.id.toString();
-        note.resolved = note.resolved || false;
-        if (note.resolved) {
-          note.resolved_by.authorId = note.resolved_by.id.toString();
-        }
-      });
-    });
-
-    return totalDiscussions;
-  }
-
-  async getDiscussionsPaginatedAsync(
-    taskId: string,
-    pagination: Pick<IPagination, "currentPage" | "limit">,
-  ) {
-    const task = await this.taskService.findOneAsync({ _id: taskId });
-
-    const { data: discussions, pagination: resultPagination } =
-      await this.gitlabApiClient.paginatedRequest(
-        `/projects/${task.projectId}/${
-          task.type === "issue" ? "issues" : "merge_requests"
-        }/${task.gitlabIid}/discussions?per_page=${pagination.limit}&page=${
-          pagination.currentPage
-        }&order_by=created_at&sort=asc`,
-      );
-
-    discussions.forEach((discussion: any) => {
-      discussion.discussionId = discussion.id.toString();
-      delete discussion.id;
-      discussion.notes.forEach((note: any) => {
-        note.noteId = note.id.toString();
-        delete note.id;
-        note.author.authorId = note.author.id.toString();
-        if (note.resolved) {
-          note.resolved_by.authorId = note.resolved_by.id.toString();
-        }
-      });
-    });
-
-    return { data: discussions, pagination: resultPagination };
-  }
-
-  async getLatestPipelineAsync(projectId: string, mergeRequestIid: string) {
-    const pipelines = await this.gitlabApiClient.request(
-      `/projects/${projectId}/merge_requests/${mergeRequestIid}/pipelines`,
-    );
-
-    if (pipelines.length === 0) {
-      return null;
-    }
-
-    return pipelines[0];
-  }
-
-  async getFaultyTestCasesAsync(projectId: string, pipelineId: number) {
-    const report = await this.gitlabApiClient.request(
-      `/projects/${projectId}/pipelines/${pipelineId}/test_report?per_page=100`,
-    );
-
-    const cases = report.test_suites.flatMap((suite: any) => {
-      return suite.test_cases.filter((test: any) => test.status === "failed");
-    });
-
-    return cases;
-  }
-
-  async closeMergedMergeRequestsAsync(): Promise<Partial<ITask>[]> {
-    const changes: Partial<ITask>[] = [];
-
-    const openMergeRequests = await this.taskService.getAllAsync({
-      type: "merge_request",
-      $or: [{ status: "inprogress" }, { status: "review" }],
-    });
-
-    for (const mr of openMergeRequests) {
-      const mergeRequest = await this.gitlabApiClient.request(
-        `/projects/${mr.projectId}/merge_requests/${mr.gitlabIid}`,
-      );
-
-      if (mergeRequest.state === "merged") {
-        await this.taskEmitter.updateTaskAsync(mr._id as string, {
-          status: "closed",
-        });
-        changes.push({ ...mr, status: "closed" });
-      }
-    }
-
-    return changes;
-  }
-
-  private async syncEntities(
-    endpoint: string,
-    entityType: "merge_request" | "issue",
-    projectId: string,
-    userId: string,
-  ): Promise<ITask[]> {
-    const existingTasks = await this.taskService.getAllAsync();
-
-    const entities = await this.fetchMyEntitiesFromGitlabAsync(
-      endpoint,
-      projectId,
-      userId,
-    );
-
-    const updatePromises = existingTasks.map(async (task) => {
-      try {
-        if (!task.custom && !task.deleted && task.gitlabIid) {
-          const updatedEntity = await this.fetchExistingEntityFromGitlabAsync(
-            entityType,
-            projectId,
-            task.gitlabIid,
-          );
-
-          entities.push(updatedEntity);
-        }
-      } catch (e: any) {
-        if (e instanceof MochiError) {
-          if (e.statusCode === 404) {
-            await this.taskService.setDeletedAsync(task._id as string);
-            return;
-          }
-        }
-
-        throw e;
-      }
-    });
-
-    await Promise.all(updatePromises);
-
-    const updatedTasks: ITask[] = [];
-
-    const entitiesToProcess = entities.map(async (entity) => {
-      const task = await this.processEntity(entity, entityType, projectId);
-      if (task && !task.deleted) {
-        updatedTasks.push(task);
-      }
-    });
-
-    await Promise.all(entitiesToProcess);
-
-    return updatedTasks;
-  }
-
-  private async fetchExistingEntityFromGitlabAsync(
-    endpoint: string,
-    projectId: string,
-    gitlabIid: number,
-  ): Promise<any> {
-    return this.gitlabApiClient.request(
-      `/projects/${projectId}/${endpoint}s/${gitlabIid}`,
-    );
-  }
-
-  private async fetchMyEntitiesFromGitlabAsync(
-    endpoint: string,
-    projectId: string,
-    userId: string,
-  ): Promise<any[]> {
-    return this.gitlabApiClient.request(
-      `/projects/${projectId}/${endpoint}?assignee_id=${userId}&per_page=100`,
-    );
-  }
-
-  private async processEntity(
-    entity: any,
-    entityType: "merge_request" | "issue",
-    projectId: string,
-  ): Promise<ITask | null> {
-    const existingTask = await this.taskService.findOneAsync({
-      gitlabId: entity.id,
-    });
-
-    if (existingTask.deleted) {
-      return null;
-    }
-
-    const taskData = createTaskData(entity, entityType);
-
-    let taskResult: MochiResult | null = null;
-
-    const discussions = await this.getDiscussionsAsync(
-      projectId,
-      entity.iid,
-      entityType === "issue" ? "issues" : "merge_requests",
-    );
-
-    taskData.discussions = discussions;
-
-    if (taskData.type === "merge_request") {
-      const pipelineState = await this.getPipelineState(taskData);
-      taskData.pipelineStatus = pipelineState.pipelineStatus;
-      taskData.latestPipelineId = pipelineState.latestPipelineId;
-      taskData.pipelineReports = pipelineState.pipelineReports;
-    }
-
-    if (existingTask) {
-      const hasChanges = detectChanges(existingTask, taskData);
-      if (hasChanges) {
-        taskResult = await this.taskService.updateTaskAsync(
-          existingTask._id as string,
-          {
-            labels: taskData.labels,
-            branch: taskData.branch,
-            pipelineStatus: taskData.pipelineStatus,
-            latestPipelineId: taskData.latestPipelineId,
-            pipelineReports: taskData.pipelineReports,
-            discussions: taskData.discussions,
-            assignee: taskData.assignee,
-          },
-        );
-      }
-    } else {
-      taskResult = await this.taskEmitter.createTaskAsync(projectId, taskData);
-    }
-
-    if (taskResult?.error) {
-      throw taskResult.error;
-    }
-
-    return taskResult?.data;
+    return { mergeRequest: mergeRequestData };
   }
 
   @ruleEvent(EventNamespaces.GitLab, EventTypes.CreateBranch)
@@ -522,47 +127,10 @@ export class GitlabService {
             ref: "develop",
           },
         );
+      } else {
+        throw e;
       }
     }
-  }
-
-  private async getPipelineState(task: Partial<ITask>) {
-    const result = {
-      pipelineStatus: "",
-      latestPipelineId: 0,
-      pipelineReports: [],
-    };
-
-    const pipeline = await this.getLatestPipelineAsync(
-      task.projectId!,
-      task.gitlabIid?.toString()!,
-    );
-
-    if (pipeline) {
-      result.pipelineStatus = pipeline.status;
-      result.latestPipelineId = pipeline.id;
-
-      if (pipeline.status === "failed") {
-        try {
-          const failedTests = await this.getFaultyTestCasesAsync(
-            task.projectId!,
-            pipeline.id,
-          );
-
-          result.pipelineReports = failedTests.map((test: any) => {
-            return {
-              name: test.name ?? "Unknown",
-              classname: test.classname ?? "Unknown",
-              attachment_url: test.attachment_url ?? "",
-            };
-          });
-        } catch (e: any) {
-          logError(new MochiError(e.message, e.status));
-        }
-      }
-    }
-
-    return result;
   }
 
   private async createMergeRequest(
@@ -585,4 +153,253 @@ export class GitlabService {
       },
     );
   }
+
+  /**
+   * Close merged merge requests (and delete closed issues) in the task service.
+   */
+  async closeMergedMergeRequestsAsync(): Promise<Partial<ITask>[]> {
+    const changes: Partial<ITask>[] = [];
+
+    const openMergeRequests = await this.taskService.getAllAsync({
+      type: "merge_request",
+      $or: [{ status: "inprogress" }, { status: "review" }],
+    });
+
+    const closedTasks = await this.taskService.getAllAsync({
+      $or: [{ type: "merge_request" }, { type: "issue" }],
+      status: "closed",
+    });
+
+    // Mark tasks that are closed in GitLab as deleted.
+    for (const task of closedTasks) {
+      if (task.type === "merge_request") {
+        const mergeRequest = await this.gitlabApiClient.request(
+          `/projects/${task.projectId}/merge_requests/${task.gitlabIid}`,
+        );
+        if (mergeRequest.state === "closed") {
+          await this.taskService.setDeletedAsync(task._id as string);
+        }
+      } else {
+        await this.taskService.setDeletedAsync(task._id as string);
+      }
+    }
+
+    // For open merge requests, if they are now merged, update their status.
+    for (const mr of openMergeRequests) {
+      const mergeRequest = await this.gitlabApiClient.request(
+        `/projects/${mr.projectId}/merge_requests/${mr.gitlabIid}`,
+      );
+      if (mergeRequest.state === "merged") {
+        await this.taskEmitter.updateTaskAsync(mr._id as string, {
+          status: "closed",
+        });
+        changes.push({ ...mr, status: "closed" });
+      }
+    }
+
+    return changes;
+  }
+
+  // ─── DISCUSSIONS & COMMENTS ─────────────────────────────────────
+  async resolveThreadAsync(task: ITask, discussion: IDiscussion) {
+    const payload = { resolved: true };
+    const response = await this.gitlabApiClient.request(
+      `/projects/${task.projectId}/merge_requests/${task.gitlabIid}/discussions/${discussion.discussionId}`,
+      "PUT",
+      payload,
+    );
+
+    const updatedTask = await this.taskService.findOneAsync({ _id: task._id });
+    if (updatedTask.discussions) {
+      updatedTask.discussions = updatedTask.discussions.map((d) => {
+        if (d.discussionId === discussion.discussionId) {
+          d.notes = d.notes?.map((n) => {
+            if (n.noteId === discussion.notes?.[0]?.noteId) {
+              n.resolved = true;
+            }
+            return n;
+          });
+        }
+        return d;
+      });
+    }
+    SocketHandler.getInstance().getIO().emit("updateTasks", [updatedTask]);
+    return response;
+  }
+
+  async commentOnTaskAsync(
+    task: ITask,
+    discussion: IDiscussion,
+    reply: string,
+  ) {
+    const payload = {
+      body: reply,
+      type: "DiscussionNote",
+      note_id: discussion.notes?.[0]?.noteId,
+    };
+
+    const response = await this.gitlabApiClient.request(
+      `/projects/${task.projectId}/${
+        task.type === "issue" ? "issues" : "merge_requests"
+      }/${task.gitlabIid}/discussions/${discussion.discussionId}/notes`,
+      "POST",
+      payload,
+    );
+
+    const updatedTask = await this.taskService.findOneAsync({ _id: task._id });
+    if (updatedTask.discussions) {
+      updatedTask.discussions = updatedTask.discussions.map((d) => {
+        if (d.discussionId === discussion.discussionId) {
+          const note = this.transformNote(response);
+          d.notes?.push(note);
+        }
+        return d;
+      });
+    }
+    SocketHandler.getInstance().getIO().emit("updateTasks", [updatedTask]);
+    return response;
+  }
+
+  // ─── PIPELINE & TEST REPORTS ─────────────────────────────────────
+  async getLatestPipelineAsync(projectId: string, mergeRequestIid: string) {
+    const pipelines = await this.gitlabApiClient.request(
+      `/projects/${projectId}/merge_requests/${mergeRequestIid}/pipelines`,
+    );
+    return pipelines.length ? pipelines[0] : null;
+  }
+
+  async getFaultyTestCasesAsync(projectId: string, pipelineId: number) {
+    const report = await this.gitlabApiClient.request(
+      `/projects/${projectId}/pipelines/${pipelineId}/test_report?per_page=100`,
+    );
+    return report.test_suites.flatMap((suite: any) =>
+      suite.test_cases.filter((test: any) => test.status === "failed"),
+    );
+  }
+
+  // ─── USER & PROJECT OPERATIONS ──────────────────────────────────
+  async getUserByAccessTokenAsync() {
+    const response = await this.gitlabApiClient.request("/user");
+    let user = await this.userService.getUser();
+
+    if (!user) {
+      user = await this.userService.createUser({
+        gitlabId: response.id,
+        username: response.username,
+        email: response.email,
+        name: response.name,
+        avatar_url: response.avatar_url,
+      });
+    }
+    return user;
+  }
+
+  async getProjectsAsync() {
+    return this.gitlabApiClient.request("/projects?per_page=100");
+  }
+
+  async getTodosAsync() {
+    let pagination: Partial<IPagination> = {
+      currentPage: 1,
+      limit: 100,
+      totalPages: 1,
+    };
+    let totalTodos: any[] = [];
+
+    do {
+      const { data, pagination: nextPagination } =
+        await this.gitlabApiClient.paginatedRequest(
+          `/todos?page=${pagination.currentPage}&per_page=${pagination.limit}`,
+        );
+      totalTodos = totalTodos.concat(data);
+      pagination.currentPage = nextPagination.nextPage;
+    } while (pagination.currentPage < (pagination.totalPages ?? 1));
+
+    return totalTodos;
+  }
+
+  async getUsersAsync() {
+    return this.gitlabApiClient.request("/users?per_page=100");
+  }
+
+  async assignToUserAsync(taskId: string, userId: string) {
+    const task = await this.taskService.findOneAsync({ _id: taskId });
+    if (!task) throw new MochiError("Task not found", 404);
+    await this.gitlabApiClient.request(
+      `/projects/${task.projectId}/merge_requests/${task.gitlabIid}`,
+      "PUT",
+      { assignee_id: userId },
+    );
+  }
+
+  // ─── DISCUSSIONS HELPERS ─────────────────────────────────────────
+  async getDiscussionsAsync(
+    projectId: string,
+    gitlabIid: string,
+    type: string,
+  ) {
+    let pagination: Partial<IPagination> = {
+      currentPage: 1,
+      limit: 100,
+      totalPages: 1,
+    };
+    let totalDiscussions: any[] = [];
+
+    do {
+      const { data, pagination: nextPagination } =
+        await this.gitlabApiClient.paginatedRequest(
+          `/projects/${projectId}/${type}/${gitlabIid}/discussions?page=${pagination.currentPage}&per_page=${pagination.limit}`,
+        );
+      totalDiscussions = totalDiscussions.concat(data);
+      pagination.currentPage = nextPagination.nextPage;
+    } while (pagination.currentPage < (pagination.totalPages ?? 1));
+
+    return totalDiscussions.map(this.transformDiscussion);
+  }
+
+  async getDiscussionsPaginatedAsync(
+    taskId: string,
+    pagination: Pick<IPagination, "currentPage" | "limit">,
+  ) {
+    const task = await this.taskService.findOneAsync({ _id: taskId });
+    const { data: discussions, pagination: resultPagination } =
+      await this.gitlabApiClient.paginatedRequest(
+        `/projects/${task.projectId}/${
+          task.type === "issue" ? "issues" : "merge_requests"
+        }/${task.gitlabIid}/discussions?per_page=${pagination.limit}&page=${
+          pagination.currentPage
+        }&order_by=created_at&sort=asc`,
+      );
+
+    const transformedDiscussions = discussions.map(this.transformDiscussion);
+    return { data: transformedDiscussions, pagination: resultPagination };
+  }
+
+  /**
+   * Normalize a discussion object.
+   */
+  private transformDiscussion = (discussion: any): IDiscussion => {
+    discussion.discussionId = discussion.id.toString();
+    delete discussion.id;
+    if (Array.isArray(discussion.notes)) {
+      discussion.notes = discussion.notes.map((note: any) =>
+        this.transformNote(note),
+      );
+    }
+    return discussion;
+  };
+
+  /**
+   * Normalize a discussion note.
+   */
+  private transformNote = (note: any): any => {
+    note.noteId = note.id.toString();
+    delete note.id;
+    note.author.authorId = note.author.id.toString();
+    note.resolved = note.resolved || false;
+    if (note.resolved && note.resolved_by) {
+      note.resolved_by.authorId = note.resolved_by.id.toString();
+    }
+    return note;
+  };
 }
