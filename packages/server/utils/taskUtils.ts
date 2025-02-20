@@ -21,44 +21,51 @@ export function createTaskData(
   };
 }
 
-export function detectChanges(
-  existingTask: ITask,
-  taskData: Partial<ITask>,
-): boolean {
-  for (const key in taskData) {
-    const newValue = taskData[key as keyof ITask];
-    const existingValue = existingTask[key as keyof ITask];
-
-    if (!deepEqual(existingValue, newValue)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function deepEqual(a: any, b: any): boolean {
+export function deepEqual(a: any, b: any, excludedKeys: string[] = []) {
+  // If values are strictly equal, they're equal.
   if (a === b) return true;
 
-  // Handle cases where one is null/undefined
-  if (a == null || b == null) return a === b;
+  // If either is null/undefined (and they are not strictly equal), they're not equal.
+  if (a == null || b == null) return false;
 
-  // Check that types match
-  if (typeof a !== typeof b) return false;
-
-  // For arrays, check lengths and each item.
-  if (Array.isArray(a)) {
-    if (!Array.isArray(b) || a.length !== b.length) return false;
-    return a.every((item, index) => deepEqual(item, b[index]));
+  // If both are primitives (non-objects), check for number-string equivalence.
+  if (typeof a !== "object" && typeof b !== "object") {
+    // Check if one is a number and the other is a string.
+    if (typeof a === "number" && typeof b === "string") {
+      if (!isNaN(Number(b)) && a === Number(b)) return true;
+    }
+    if (typeof a === "string" && typeof b === "number") {
+      if (!isNaN(Number(a)) && Number(a) === b) return true;
+    }
+    return false;
   }
 
-  // For objects, compare keys and values recursively.
-  if (typeof a === "object") {
-    const aKeys = Object.keys(a);
-    const bKeys = Object.keys(b);
-    if (aKeys.length !== bKeys.length) return false;
-    return aKeys.every((key) => deepEqual(a[key], b[key]));
+  // Handle arrays.
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqual(a[i], b[i], excludedKeys)) return false;
+    }
+    return true;
   }
 
-  // Fallback for primitives.
-  return false;
+  // If one is an array and the other isn't, they're not equal.
+  if (Array.isArray(a) || Array.isArray(b)) return false;
+
+  // Both a and b are objects here.
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+
+  // Determine the keys that are common to both objects.
+  let commonKeys = keysA.filter((key) => keysB.includes(key));
+
+  // Exclude keys specified in the excludedKeys parameter.
+  commonKeys = commonKeys.filter((key) => !excludedKeys.includes(key));
+
+  // Recursively compare values for each common key.
+  for (let key of commonKeys) {
+    if (!deepEqual(a[key], b[key], excludedKeys)) return false;
+  }
+
+  return true;
 }

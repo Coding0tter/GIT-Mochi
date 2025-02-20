@@ -30,8 +30,14 @@ Mochi is a **keyboard-friendly, GitLab-integrated Kanban board** that makes task
 2. **Configure environment variables** with the interactive setup:
 
    ```bash
-   ./setup.sh
+   ./scripts/setup.sh
    ```
+
+Permissions for Personal Access Token:
+
+- api
+- read_api
+- read_user
 
 3. **Start Mochi**:
 

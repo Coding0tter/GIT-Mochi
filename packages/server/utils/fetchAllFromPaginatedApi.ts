@@ -1,7 +1,7 @@
 import type { IPagination } from "shared/types/pagination";
 
 export const fetchAllFromPaginatedApiAsync = async (
-  requestFn: (pagination: Partial<IPagination>) => any
+  requestFn: (pagination: Partial<IPagination>) => any,
 ) => {
   let pagination: Partial<IPagination> = {
     currentPage: 1,

@@ -77,12 +77,9 @@ app.use("/api/rules", ruleRoutes);
 app.use("/api/timetrack", timeTrackRoutes);
 
 // Sync comments every minute
-setInterval(
-  async () => {
-    await jobs();
-  },
-  60 * 1000 * 5,
-);
+setInterval(async () => {
+  await jobs();
+}, 60 * 1000);
 
 const PORT = 5000;
 server.listen(PORT, () =>
@@ -100,7 +97,6 @@ const jobs = async () => {
     console.log("============Background jobs============");
     console.time("Background Jobs");
     syncGitlabJob();
-
     closeMergedMRJob();
     console.timeEnd("Background Jobs");
   } catch (error) {

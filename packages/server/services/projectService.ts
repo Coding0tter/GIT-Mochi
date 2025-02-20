@@ -13,7 +13,6 @@ export class ProjectService extends BaseService<IProject> {
   }
 
   async getCurrentProjectAsync() {
-    console.trace("getcurrentproject");
     try {
       const currentProject =
         await this.settingRepo.getByKeyAsync("currentProject");

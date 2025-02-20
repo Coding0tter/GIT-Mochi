@@ -12,9 +12,12 @@ import { ContextKeys, getContext } from "@server/utils/asyncContext";
 import type { IPagination } from "shared/types/pagination";
 import type { IDiscussion, ITask } from "shared/types/task";
 import { GitlabSyncService } from "./gitlabSyncService";
+import {
+  transformDiscussion,
+  transformNote,
+} from "@server/utils/transformHelpers";
 
 export class GitlabService {
-  // ─── DEPENDENCIES ──────────────────────────────────────────────
   private gitlabApiClient: GitlabApiClient;
   private taskService: TaskService;
   private taskEmitter: TaskEventEmitter;
@@ -35,10 +38,6 @@ export class GitlabService {
     );
   }
 
-  // ─── SYNCING FUNCTIONS ─────────────────────────────────────────
-  /**
-   * Sync merge requests and issues from GitLab for the current user and project.
-   */
   async syncGitLabDataAsync(): Promise<void> {
     const user = await this.userService.getUser();
     const project = await this.settingRepo.getByKeyAsync("currentProject");
@@ -47,15 +46,13 @@ export class GitlabService {
     if (!project) throw new GitlabError("No project selected", 404);
     if (project.value.includes("custom_project")) return;
 
-    const changes = this.gitlabSyncService.syncGitlabDataAsync(user, project);
+    const changes = await this.gitlabSyncService.syncGitlabDataAsync(
+      user,
+      project,
+    );
     SocketHandler.getInstance().getIO().emit("updateTasks", changes);
   }
 
-  // ─── MERGE REQUEST OPERATIONS ──────────────────────────────────
-
-  /**
-   * Create a merge request in GitLab based on an existing issue.
-   */
   async createGitlabMergeRequestAsync(issueId: string) {
     const currentProject = getContext(ContextKeys.Project);
     if (!currentProject) throw new GitlabError("No project selected", 404);
@@ -154,9 +151,6 @@ export class GitlabService {
     );
   }
 
-  /**
-   * Close merged merge requests (and delete closed issues) in the task service.
-   */
   async closeMergedMergeRequestsAsync(): Promise<Partial<ITask>[]> {
     const changes: Partial<ITask>[] = [];
 
@@ -170,7 +164,6 @@ export class GitlabService {
       status: "closed",
     });
 
-    // Mark tasks that are closed in GitLab as deleted.
     for (const task of closedTasks) {
       if (task.type === "merge_request") {
         const mergeRequest = await this.gitlabApiClient.request(
@@ -184,7 +177,6 @@ export class GitlabService {
       }
     }
 
-    // For open merge requests, if they are now merged, update their status.
     for (const mr of openMergeRequests) {
       const mergeRequest = await this.gitlabApiClient.request(
         `/projects/${mr.projectId}/merge_requests/${mr.gitlabIid}`,
@@ -200,7 +192,6 @@ export class GitlabService {
     return changes;
   }
 
-  // ─── DISCUSSIONS & COMMENTS ─────────────────────────────────────
   async resolveThreadAsync(task: ITask, discussion: IDiscussion) {
     const payload = { resolved: true };
     const response = await this.gitlabApiClient.request(
@@ -250,7 +241,7 @@ export class GitlabService {
     if (updatedTask.discussions) {
       updatedTask.discussions = updatedTask.discussions.map((d) => {
         if (d.discussionId === discussion.discussionId) {
-          const note = this.transformNote(response);
+          const note = transformNote(response);
           d.notes?.push(note);
         }
         return d;
@@ -260,7 +251,6 @@ export class GitlabService {
     return response;
   }
 
-  // ─── PIPELINE & TEST REPORTS ─────────────────────────────────────
   async getLatestPipelineAsync(projectId: string, mergeRequestIid: string) {
     const pipelines = await this.gitlabApiClient.request(
       `/projects/${projectId}/merge_requests/${mergeRequestIid}/pipelines`,
@@ -277,7 +267,6 @@ export class GitlabService {
     );
   }
 
-  // ─── USER & PROJECT OPERATIONS ──────────────────────────────────
   async getUserByAccessTokenAsync() {
     const response = await this.gitlabApiClient.request("/user");
     let user = await this.userService.getUser();
@@ -332,7 +321,6 @@ export class GitlabService {
     );
   }
 
-  // ─── DISCUSSIONS HELPERS ─────────────────────────────────────────
   async getDiscussionsAsync(
     projectId: string,
     gitlabIid: string,
@@ -354,7 +342,7 @@ export class GitlabService {
       pagination.currentPage = nextPagination.nextPage;
     } while (pagination.currentPage < (pagination.totalPages ?? 1));
 
-    return totalDiscussions.map(this.transformDiscussion);
+    return totalDiscussions.map(transformDiscussion);
   }
 
   async getDiscussionsPaginatedAsync(
@@ -371,35 +359,7 @@ export class GitlabService {
         }&order_by=created_at&sort=asc`,
       );
 
-    const transformedDiscussions = discussions.map(this.transformDiscussion);
+    const transformedDiscussions = discussions.map(transformDiscussion);
     return { data: transformedDiscussions, pagination: resultPagination };
   }
-
-  /**
-   * Normalize a discussion object.
-   */
-  private transformDiscussion = (discussion: any): IDiscussion => {
-    discussion.discussionId = discussion.id.toString();
-    delete discussion.id;
-    if (Array.isArray(discussion.notes)) {
-      discussion.notes = discussion.notes.map((note: any) =>
-        this.transformNote(note),
-      );
-    }
-    return discussion;
-  };
-
-  /**
-   * Normalize a discussion note.
-   */
-  private transformNote = (note: any): any => {
-    note.noteId = note.id.toString();
-    delete note.id;
-    note.author.authorId = note.author.id.toString();
-    note.resolved = note.resolved || false;
-    if (note.resolved && note.resolved_by) {
-      note.resolved_by.authorId = note.resolved_by.id.toString();
-    }
-    return note;
-  };
 }

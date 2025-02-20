@@ -5,7 +5,8 @@ import type { ITask } from "shared/types/task";
 import { chunkArray } from "@server/utils/chunkArray";
 import { MochiError } from "@server/errors/mochiError";
 import { fetchAllFromPaginatedApiAsync } from "@server/utils/fetchAllFromPaginatedApi";
-import { createTaskData, detectChanges } from "@server/utils/taskUtils";
+import { createTaskData, deepEqual } from "@server/utils/taskUtils";
+import { transformDiscussion } from "@server/utils/transformHelpers";
 
 export class GitlabSyncService {
   constructor(
@@ -142,7 +143,9 @@ export class GitlabSyncService {
 
     let taskResult: any = null;
     if (existingTask) {
-      if (detectChanges(existingTask, taskData)) {
+      if (
+        !deepEqual(existingTask, taskData, ["description", "title", "status"])
+      ) {
         taskResult = await this.taskService.updateTaskAsync(
           existingTask._id as string,
           {
@@ -153,8 +156,11 @@ export class GitlabSyncService {
             pipelineReports: taskData.pipelineReports,
             discussions: taskData.discussions,
             assignee: taskData.assignee,
+            milestoneId: taskData.milestoneId,
           },
         );
+      } else {
+        return null;
       }
     } else {
       taskResult = await this.taskEmitter.createTaskAsync(projectId, taskData);
@@ -186,30 +192,8 @@ export class GitlabSyncService {
       pagination.totalPages = nextPagination.totalPages;
     } while (pagination.currentPage < (pagination.totalPages ?? 1));
 
-    return totalDiscussions.map(this.transformDiscussion);
+    return totalDiscussions.map(transformDiscussion);
   }
-
-  transformDiscussion = (discussion: any): any => {
-    discussion.discussionId = discussion.id.toString();
-    delete discussion.id;
-    if (Array.isArray(discussion.notes)) {
-      discussion.notes = discussion.notes.map((note: any) =>
-        this.transformNote(note),
-      );
-    }
-    return discussion;
-  };
-
-  transformNote = (note: any): any => {
-    note.noteId = note.id.toString();
-    delete note.id;
-    note.author.authorId = note.author.id.toString();
-    note.resolved = note.resolved || false;
-    if (note.resolved && note.resolved_by) {
-      note.resolved_by.authorId = note.resolved_by.id.toString();
-    }
-    return note;
-  };
 
   async getPipelineState(task: Partial<ITask>) {
     const result = {
