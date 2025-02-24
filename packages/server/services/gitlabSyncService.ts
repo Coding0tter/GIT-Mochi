@@ -5,7 +5,7 @@ import type { ITask } from "shared/types/task";
 import { chunkArray } from "@server/utils/chunkArray";
 import { MochiError } from "@server/errors/mochiError";
 import { fetchAllFromPaginatedApiAsync } from "@server/utils/fetchAllFromPaginatedApi";
-import { createTaskData, deepEqual } from "@server/utils/taskUtils";
+import { createTaskData } from "@server/utils/taskUtils";
 import { transformDiscussion } from "@server/utils/transformHelpers";
 
 export class GitlabSyncService {
@@ -143,25 +143,19 @@ export class GitlabSyncService {
 
     let taskResult: any = null;
     if (existingTask) {
-      if (
-        !deepEqual(existingTask, taskData, ["description", "title", "status"])
-      ) {
-        taskResult = await this.taskService.updateTaskAsync(
-          existingTask._id as string,
-          {
-            labels: taskData.labels,
-            branch: taskData.branch,
-            pipelineStatus: taskData.pipelineStatus,
-            latestPipelineId: taskData.latestPipelineId,
-            pipelineReports: taskData.pipelineReports,
-            discussions: taskData.discussions,
-            assignee: taskData.assignee,
-            milestoneId: taskData.milestoneId,
-          },
-        );
-      } else {
-        return null;
-      }
+      taskResult = await this.taskService.updateTaskAsync(
+        existingTask._id as string,
+        {
+          labels: taskData.labels,
+          branch: taskData.branch,
+          pipelineStatus: taskData.pipelineStatus,
+          latestPipelineId: taskData.latestPipelineId,
+          pipelineReports: taskData.pipelineReports,
+          discussions: taskData.discussions,
+          assignee: taskData.assignee,
+          milestoneId: taskData.milestoneId,
+        },
+      );
     } else {
       taskResult = await this.taskEmitter.createTaskAsync(projectId, taskData);
     }

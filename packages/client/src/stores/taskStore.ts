@@ -22,7 +22,7 @@ export const [taskStore, setTaskStore] = createStore<TaskStore>({
 export const getColumnTasks = () => {
   const tasks = filteredTasks().filter(
     (task) =>
-      task.status === STATES[keyboardNavigationStore.selectedColumnIndex].id
+      task.status === STATES[keyboardNavigationStore.selectedColumnIndex].id,
   );
   if (keyboardNavigationStore.selectedColumnIndex === 0) {
     return orderBy(tasks, (task) => {
@@ -40,19 +40,19 @@ export const getColumnTasks = () => {
 };
 
 export const updateComments = (
-  values: { taskId: string; comments: IComment[] }[]
+  values: { taskId: string; comments: IComment[] }[],
 ) => {
   setTaskStore("tasks", (tasks: Partial<ITask>[]) =>
     tasks.map((task: Partial<ITask>) => {
       const updatedValue = values.find((value) => value.taskId === task._id);
 
       return updatedValue ? { ...task, comments: updatedValue.comments } : task;
-    })
+    }),
   );
 };
 
 export const updateDiscussions = (
-  values: { taskId: string; discussions: any[] }[]
+  values: { taskId: string; discussions: any[] }[],
 ) => {
   setTaskStore("tasks", (tasks: Partial<ITask>[]) =>
     tasks.map((task: Partial<ITask>) => {
@@ -60,7 +60,7 @@ export const updateDiscussions = (
       return updatedValue
         ? { ...task, discussions: updatedValue.discussions }
         : task;
-    })
+    }),
   );
 };
 
@@ -75,7 +75,7 @@ export const updateTasks = (values: ITask[]) => {
   });
 
   const newTasks = values.filter(
-    (value) => !taskStore.tasks.some((task) => task._id === value._id)
+    (value) => !taskStore.tasks.some((task) => task._id === value._id),
   );
 
   setTaskStore("tasks", reconcile([...updatedTasks, ...newTasks]));
@@ -122,14 +122,35 @@ export const filteredTasks = () => {
     return orderBy(taskStore.tasks, "order");
   }
 
-  const exactMatchTasks = taskStore.tasks.filter(
-    (task) => task.branch?.toLowerCase() === searchQuery
+  // First, check for exact matches in several fields.
+  const exactBranchMatches = taskStore.tasks.filter((task) =>
+    task.branch?.toLowerCase().includes(searchQuery),
   );
 
-  if (exactMatchTasks.length > 0) {
-    return orderBy(exactMatchTasks, "order");
+  const exactTitleMatches = taskStore.tasks.filter((task) =>
+    task.title?.toLowerCase().includes(searchQuery),
+  );
+
+  const exactGitlabIidMatches = taskStore.tasks.filter(
+    (task) =>
+      task.type === "issue" &&
+      task.gitlabIid?.toString().toLowerCase() === searchQuery,
+  );
+
+  // Combine the exact match arrays without duplicates.
+  const exactMatches = Array.from(
+    new Set([
+      ...exactBranchMatches,
+      ...exactTitleMatches,
+      ...exactGitlabIidMatches,
+    ]),
+  );
+
+  if (exactMatches.length > 0) {
+    return orderBy(exactMatches, "order");
   }
 
+  // Fallback to fuzzy search if no exact match is found.
   const options: IFuseOptions<Partial<ITask>> = {
     includeScore: true,
     keys: [
@@ -139,8 +160,10 @@ export const filteredTasks = () => {
         getFn: (task: any) =>
           task.type === "issue" ? task.gitlabIid?.toString() : "",
       },
+      "branch", // You may include branch for fuzzy search as well.
     ],
-    threshold: 0.6,
+    // Use a stricter threshold so that only slight typos trigger fuzzy matching.
+    threshold: 0.4,
   };
 
   const fuse = new Fuse(taskStore.tasks, options);
