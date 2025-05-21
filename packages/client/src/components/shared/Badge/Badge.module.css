@@ -44,10 +44,14 @@
   background-color: var(--color-green);
 }
 
-.badge.high {
+.badge.high,
+.badge.staging,
+.badge.intermediate {
   background-color: var(--color-red);
   color: var(--color-crust);
-  animation: pulsate 1.5s infinite, borderGlow 1.5s linear infinite;
+  animation:
+    pulsate 1.5s infinite,
+    borderGlow 1.5s linear infinite;
   padding: calc(var(--spacing-xxs) - 2px) calc(var(--spacing-xs) - 2px);
   border: 2px solid transparent;
   position: relative;

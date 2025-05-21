@@ -8,6 +8,8 @@ type BadgeProps = {
     | "issue"
     | "merge_request"
     | "custom"
+    | "intermediate"
+    | "staging"
     | "high"
     | "medium"
     | "low"

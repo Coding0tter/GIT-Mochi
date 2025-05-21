@@ -159,20 +159,17 @@ export class GitlabService {
       $or: [{ status: "inprogress" }, { status: "review" }],
     });
 
-    const closedTasks = await this.taskService.getAllAsync({
-      $or: [{ type: "merge_request" }, { type: "issue" }],
-      status: "closed",
+    const staleIssues = await this.taskService.getAllAsync({
+      type: "issue",
+      $or: [{ status: "opened" }, { status: "closed" }],
     });
 
-    for (const task of closedTasks) {
-      if (task.type === "merge_request") {
-        const mergeRequest = await this.gitlabApiClient.request(
-          `/projects/${task.projectId}/merge_requests/${task.gitlabIid}`,
-        );
-        if (mergeRequest.state === "closed") {
-          await this.taskService.setDeletedAsync(task._id as string);
-        }
-      } else {
+    for (const task of staleIssues) {
+      const taskRequest = await this.gitlabApiClient.request(
+        `/projects/${task.projectId}/issues/${task.gitlabIid}`,
+      );
+
+      if (taskRequest.state === "closed") {
         await this.taskService.setDeletedAsync(task._id as string);
       }
     }

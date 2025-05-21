@@ -1,16 +1,15 @@
 import TaskCard from "@client/components/Kanban/TaskCard/TaskCard";
 import { keyboardNavigationStore } from "@client/stores/keyboardNavigationStore";
 import {
-  setSelectedTaskForModal,
-  setActiveModal,
   ModalType,
   openModal,
+  setSelectedTaskForModal,
 } from "@client/stores/modalStore";
-import { orderBy } from "lodash";
-import { createEffect, For } from "solid-js";
-import type { ITask } from "shared/types/task";
-import styles from "./TaskColumn.module.css";
 import { uiStore } from "@client/stores/uiStore";
+import { orderBy } from "lodash";
+import type { ITask } from "shared/types/task";
+import { createEffect, For } from "solid-js";
+import styles from "./TaskColumn.module.css";
 
 interface TaskColumnProps {
   status: { display_name: string; id: string };
@@ -38,21 +37,30 @@ const TaskColumn = (props: TaskColumnProps) => {
   return (
     <div class={styles.column} data-status={props.status.id}>
       <h2>
-        {props.status.display_name} ({props.tasks.length})
+        {props.status.display_name} (
+        {props.status.id === "opened"
+          ? props.tasks.filter((item) => item.assignee?.authorId === 75).length
+          : props.tasks.length}
+        )
       </h2>
       <section>
         <For
           each={
             props.status.id === "opened"
-              ? orderBy(props.tasks, (task) => {
-                  const priorityLabel = task.labels
-                    ?.find((label: string) => label.includes("priority"))
-                    ?.toLowerCase();
-                  if (priorityLabel?.includes("high")) return 1;
-                  if (priorityLabel?.includes("medium")) return 2;
-                  if (priorityLabel?.includes("low")) return 3;
-                  return 4;
-                })
+              ? orderBy(
+                  props.tasks.filter((item) => item.assignee?.authorId === 75),
+                  (task) => {
+                    const priorityLabel = task.labels
+                      ?.find((label: string) => label.includes("priority"))
+                      ?.toLowerCase();
+                    if (priorityLabel?.includes("intermediate")) return 1;
+                    if (priorityLabel?.includes("staging")) return 2;
+                    if (priorityLabel?.includes("high")) return 3;
+                    if (priorityLabel?.includes("medium")) return 4;
+                    if (priorityLabel?.includes("low")) return 5;
+                    return 6;
+                  },
+                )
               : props.tasks
           }
         >
@@ -64,7 +72,7 @@ const TaskColumn = (props: TaskColumnProps) => {
                   props.columnIndex &&
                 (keyboardNavigationStore.selectedTaskIndex === taskIndex() ||
                   keyboardNavigationStore.selectedTaskIndexes.includes(
-                    taskIndex()
+                    taskIndex(),
                   ))
               }
               onClick={() => {
@@ -79,8 +87,8 @@ const TaskColumn = (props: TaskColumnProps) => {
                     !item.notes?.some((note) => note.system) &&
                     !item.notes?.some((note) => note.resolved) &&
                     item.notes?.some((note) =>
-                      note.body.includes(`@${uiStore.user?.username}`)
-                    )
+                      note.body.includes(`@${uiStore.user?.username}`),
+                    ),
                 ).length || 0
               }
             />

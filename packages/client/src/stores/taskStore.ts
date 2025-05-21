@@ -25,15 +25,20 @@ export const getColumnTasks = () => {
       task.status === STATES[keyboardNavigationStore.selectedColumnIndex].id,
   );
   if (keyboardNavigationStore.selectedColumnIndex === 0) {
-    return orderBy(tasks, (task) => {
-      const priorityLabel = task.labels
-        ?.find((label: string) => label.includes("priority"))
-        ?.toLowerCase();
-      if (priorityLabel?.includes("high")) return 1;
-      if (priorityLabel?.includes("medium")) return 2;
-      if (priorityLabel?.includes("low")) return 3;
-      return 4;
-    });
+    return orderBy(
+      tasks.filter((item) => item.assignee?.authorId === 75),
+      (task) => {
+        const priorityLabel = task.labels
+          ?.find((label: string) => label.includes("priority"))
+          ?.toLowerCase();
+        if (priorityLabel?.includes("intermediate")) return 1;
+        if (priorityLabel?.includes("staging")) return 2;
+        if (priorityLabel?.includes("high")) return 3;
+        if (priorityLabel?.includes("medium")) return 4;
+        if (priorityLabel?.includes("low")) return 5;
+        return 6;
+      },
+    );
   }
 
   return tasks;

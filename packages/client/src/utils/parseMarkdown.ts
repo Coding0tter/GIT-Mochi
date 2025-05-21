@@ -11,13 +11,17 @@ export const parseMarkdown = (input: string) => {
   return markdown
     .replaceAll(
       'src="/',
-      `src="${GIT_URL}/-/project/${uiStore.currentProject?.id}/`
+      `src="${GIT_URL}/-/project/${uiStore.currentProject?.id}/`,
     )
     .replaceAll(
       /<img\s+src="([^"]+\.webm)"\s+alt="([^"]*)"\s*\/?>/g,
-      '<video width="700" controls><source src="$1" type="video/webm"></video>'
+      '<video width="700" controls><source src="$1" type="video/webm"></video>',
+    )
+    .replaceAll(
+      /<img\s+src="([^"]+\.MOV)"\s+alt="([^"]*)"\s*\/?>/g,
+      '<video width="700" controls><source src="$1" type="video/mp4"></video>',
     )
     .replaceAll(/@(\w+)/g, (match, mentionedUser) =>
-      mentionedUser === user ? `<div class="mention">${match}</div>` : match
+      mentionedUser === user ? `<div class="mention">${match}</div>` : match,
     );
 };

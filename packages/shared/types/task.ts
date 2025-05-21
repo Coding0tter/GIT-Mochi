@@ -45,7 +45,7 @@ export interface IDiscussion {
 }
 
 export interface IAuthor {
-  authorId: string;
+  authorId: number;
   name: string;
   username: string;
   avatar_url: string;
