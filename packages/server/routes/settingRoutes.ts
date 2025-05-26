@@ -13,7 +13,7 @@ router.get("/lastSync", async (req, res) => {
   );
 });
 
-router.get("/setup-status", controller.getSetupStauts);
+router.get("/setup-status", controller.getSetupStatus);
 router.post("/validate-gitlab", controller.validateGitlabConnection);
 router.post("/gitlab-config", controller.saveGitlabConfig);
 router.post("/complete-setup", controller.completeSetup);

@@ -43,7 +43,7 @@ export class SettingsService extends BaseService<ISetting> {
     }
   }
 
-  async valiateGitlabConnection(config: GitlabConfig) {
+  async validateGitlabConnection(config: GitlabConfig) {
     try {
       const testClient = new GitlabClient();
       const user = await testClient.testRequest(config.url, config.token);
