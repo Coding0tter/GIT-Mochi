@@ -29,7 +29,7 @@ export class SettingsController {
         return;
       }
 
-      const result = await this.service.valiateGitlabConnection({
+      const result = await this.service.validateGitlabConnection({
         url,
         token,
       });
