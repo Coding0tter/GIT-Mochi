@@ -33,9 +33,9 @@ cd mochi
    docker-compose up -d
    ```
 
-3. **Complete the Wizard and your good to go**
-
 - Mochi will start at http://localhost:3005
+
+3. **Complete the Wizard and your good to go**
 
 ## Keyboard Shortcuts
 
