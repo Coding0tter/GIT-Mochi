@@ -5,7 +5,7 @@ import type { NextFunction, Request, Response } from "express";
 export class SettingsController {
   private service = new SettingsService();
 
-  getSetupStauts = async (req: Request, res: Response, next: NextFunction) => {
+  getSetupStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const status = await this.service.getSetupStatus();
       res.status(200).json(status);
