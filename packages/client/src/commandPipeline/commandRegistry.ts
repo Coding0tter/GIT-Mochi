@@ -1,5 +1,5 @@
-import type { CommandPipeline } from "@/commandPipeline/types";
 import { cloneDeep } from "lodash";
+import type { CommandPipeline } from "./types";
 
 const commandRegistry: CommandPipeline[] = [];
 

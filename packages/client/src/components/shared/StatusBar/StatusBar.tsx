@@ -1,20 +1,48 @@
-import { createEffect, createSignal, onCleanup } from "solid-js";
+import {
+  createEffect,
+  createResource,
+  createSignal,
+  onCleanup,
+  onMount,
+} from "solid-js";
 import { timeTrackStore } from "../../../stores/timeTrackStore";
-import { CalendarMode, LoadingTarget, uiStore } from "../../../stores/uiStore";
+import {
+  CalendarMode,
+  fetchLastSync,
+  LoadingTarget,
+  uiStore,
+} from "../../../stores/uiStore";
 import Badge from "../Badge/Badge";
 import styles from "./StatusBar.module.css";
 import { useLocation } from "@solidjs/router";
+import dayjs from "dayjs";
 
 const StatusBar = () => {
   const location = useLocation();
   const [trackedDuration, setTrackedDuration] = createSignal<string | null>(
-    null
+    null,
   );
   const [isCalendar, setIsCalendar] = createSignal(false);
+  const [time, setTime] = createSignal(dayjs());
+
+  onMount(async () => {
+    await fetchLastSync();
+  });
 
   createEffect(() => {
     setIsCalendar(location.pathname === "/timetrack");
   }, [location]);
+
+  createEffect(() => {
+    const interval = setInterval(async () => {
+      setTime(dayjs());
+      await fetchLastSync();
+    }, 60 * 1000);
+
+    onCleanup(() => {
+      clearInterval(interval);
+    });
+  });
 
   createEffect(() => {
     let timer = null;
@@ -79,7 +107,18 @@ const StatusBar = () => {
           </strong>
         </Badge>
         <Badge type="none">
-          <strong>{uiStore.currentProject?.name || "none"}</strong>
+          Project: <strong>{uiStore.currentProject?.name || "none"}</strong>
+        </Badge>
+        <Badge type="none">
+          Last Sync:{" "}
+          <strong>
+            {uiStore.lastSync
+              ? dayjs(uiStore.lastSync).format("HH:mm")
+              : "never"}
+          </strong>
+        </Badge>
+        <Badge type="none">
+          <strong>{time().format("HH:mm")}</strong>
         </Badge>
       </div>
     </div>

@@ -1,33 +1,32 @@
-import { Project, type IProject } from "../models/project";
-import { MochiError } from "../errors/mochiError";
 import axios from "axios";
-import { BaseService } from "./baseService";
+import { SettingKeys } from "shared";
+import { MochiError } from "../errors/mochiError";
+import { Project, type IProject } from "../models/project";
 import { ProjectRepo } from "../repositories/projectRepo";
-import { SettingRepo } from "../repositories/settingRepo";
+import { BaseService } from "./baseService";
+import { SettingsService } from "./settingsService";
+import { logInfo } from "@server/utils/logger";
 
 export class ProjectService extends BaseService<IProject> {
-  private settingRepo = new SettingRepo();
-
+  private settingsService = new SettingsService();
   constructor() {
     super(new ProjectRepo(), "Project");
   }
 
   async getCurrentProjectAsync() {
     try {
-      const currentProject =
-        await this.settingRepo.getByKeyAsync("currentProject");
+      const config = await this.settingsService.getCurrentProject();
 
-      if (currentProject === null) {
-        throw new MochiError("No project selected", 404);
+      if (config === null) {
+        logInfo("No project selected, returning null");
+        return null;
       }
 
-      if (currentProject?.value.includes("custom_project")) {
-        const project = await Project.findById(
-          currentProject.value.split("/")[1],
-        );
+      if (config.project?.includes("custom_project")) {
+        const project = await Project.findById(config.project.split("/")[1]);
         return project;
       } else {
-        const project = await this.getGitlabProjectAsync(currentProject.value);
+        const project = await this.getGitlabProjectAsync(config.project);
         return project;
       }
     } catch (error: any) {
@@ -41,10 +40,13 @@ export class ProjectService extends BaseService<IProject> {
 
   getGitlabProjectAsync = async (projectId: string) => {
     try {
+      const config = await this.settingsService.getGitlabConfig();
+      if (!config) throw new MochiError("GitLab configuration not found", 404);
+
       const projectResponse = await axios.get(
-        `${process.env.GIT_URL}/api/v4/projects/${projectId}`,
+        `${config.url}/api/v4/projects/${projectId}`,
         {
-          headers: { "PRIVATE-TOKEN": process.env.PRIVATE_TOKEN },
+          headers: { "PRIVATE-TOKEN": config.token },
         },
       );
 
@@ -101,7 +103,7 @@ export class ProjectService extends BaseService<IProject> {
 
   async setCurrentProjectAsync(id: string) {
     try {
-      const result = await this.settingRepo.setByKeyAsync("currentProject", id);
+      const result = await this.settingsService.setCurrentProject(id);
       return result;
     } catch (error) {
       throw new MochiError(

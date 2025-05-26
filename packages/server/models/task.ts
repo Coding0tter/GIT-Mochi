@@ -7,6 +7,7 @@ const TaskSchema = new Schema<ITask>({
   web_url: String,
   title: { type: String, required: true },
   description: String,
+  draft: Boolean,
   milestoneId: Number,
   milestoneName: String,
   assignee: {

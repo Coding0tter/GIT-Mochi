@@ -1,13 +1,12 @@
-import { GitlabApiClient } from "../../clients/gitlabApiClient";
+import { GitlabClient } from "@server/gitlab/client";
 import { ruleAction } from "../../decorators/ruleActionDecorator";
-import { EventNamespaces, ActionTypes } from "../../events/eventTypes";
-import { GitlabService } from "../gitlabService";
+import { ActionTypes, EventNamespaces } from "../../events/eventTypes";
 
 class GitlabActionHandler {
-  private gitlabApiClient: GitlabApiClient;
+  private gitlabClient: GitlabClient;
 
   constructor() {
-    this.gitlabApiClient = new GitlabApiClient();
+    this.gitlabClient = new GitlabClient();
   }
 
   @ruleAction({
@@ -20,11 +19,7 @@ class GitlabActionHandler {
       const { id } = eventData;
       const { projectId, gitlabIid } = data.data;
 
-      await this.gitlabApiClient.request(
-        `/projects/${projectId}/merge_requests/${gitlabIid}`,
-        "PUT",
-        { assignee_id: id }
-      );
+      await this.gitlabClient.updateAssignee(projectId, gitlabIid, id);
     } catch (error: any) {
       throw error;
     }

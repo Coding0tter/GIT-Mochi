@@ -1,3 +1,4 @@
+import axios from "axios";
 import { createStore, reconcile } from "solid-js/store";
 
 export enum InputMode {
@@ -19,6 +20,7 @@ export enum LoadingTarget {
   Commandline,
   SyncGitlab,
   LoadTasks,
+  Todos,
   None,
 }
 
@@ -39,6 +41,7 @@ type UiState = {
   calendarHeight: number;
   calendarMode: CalendarMode;
   user: IUser | null;
+  lastSync: Date | null;
 };
 
 interface IUser {
@@ -61,10 +64,19 @@ export const [uiStore, setUiStore] = createStore<UiState>({
   calendarHeight: 0,
   calendarMode: CalendarMode.Time,
   user: null,
+  lastSync: null,
 });
 
 const updateField = <K extends keyof UiState>(field: K, value: UiState[K]) => {
   setUiStore(field, value);
+};
+
+export const fetchLastSync = async () => {
+  const response = await axios.get("/settings/lastSync");
+
+  setLastSync(response.data);
+
+  return response.data;
 };
 
 export const setCalendarMode = (mode: CalendarMode) =>
@@ -85,7 +97,10 @@ export const setInputMode = (mode: InputMode) => updateField("inputMode", mode);
 export const setCommandInputValue = (value: string) =>
   updateField("commandInputValue", value);
 export const setUser = (user: any) => updateField("user", user);
-
 export const setCurrentProject = (project: Project | null) => {
   setUiStore("currentProject", reconcile(project));
+};
+
+export const setLastSync = (lastSync: Date | null) => {
+  setUiStore("lastSync", lastSync);
 };

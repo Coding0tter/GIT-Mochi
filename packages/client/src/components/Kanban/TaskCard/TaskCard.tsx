@@ -113,6 +113,10 @@ const TaskCard = (props: TaskCardProps) => {
       >
         <img src={xMasHat} class={styles.xMasHat} />
       </Show>
+
+      <Show when={props.task.draft}>
+        <div class={styles.ribbon}>Draft</div>
+      </Show>
     </div>
   );
 };

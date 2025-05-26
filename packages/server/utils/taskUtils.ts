@@ -7,6 +7,7 @@ export function createTaskData(
   return {
     labels: entity.labels,
     milestoneId: entity.milestone?.id,
+    draft: entity.draft,
     branch: entity.source_branch,
     projectId: entity.project_id,
     gitlabId: entity.id,

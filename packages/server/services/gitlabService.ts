@@ -1,56 +1,32 @@
-import { GitlabApiClient } from "@server/clients/gitlabApiClient";
 import { ruleEvent } from "@server/decorators/ruleEventDecorator";
 import { GitlabError } from "@server/errors/gitlabError";
 import { MochiError } from "@server/errors/mochiError";
 import { EventNamespaces, EventTypes } from "@server/events/eventTypes";
-import { SettingRepo } from "@server/repositories/settingRepo";
+import { GitlabClient } from "@server/gitlab/client";
 import TaskEventEmitter from "@server/services/emitters/taskEventEmitter";
 import TaskService from "@server/services/taskService";
 import { UserService } from "@server/services/userService";
 import SocketHandler from "@server/sockets";
 import { ContextKeys, getContext } from "@server/utils/asyncContext";
-import type { IPagination } from "shared/types/pagination";
-import type { IDiscussion, ITask } from "shared/types/task";
-import { GitlabSyncService } from "./gitlabSyncService";
+import { fetchAllFromPaginatedApiAsync } from "@server/utils/fetchAllFromPaginatedApi";
 import {
   transformDiscussion,
   transformNote,
 } from "@server/utils/transformHelpers";
+import type { IPagination } from "shared/types/pagination";
+import type { IDiscussion, ITask } from "shared/types/task";
 
 export class GitlabService {
-  private gitlabApiClient: GitlabApiClient;
   private taskService: TaskService;
   private taskEmitter: TaskEventEmitter;
   private userService: UserService;
-  private settingRepo: SettingRepo;
-  private gitlabSyncService: GitlabSyncService;
+  private gitlabClient: GitlabClient;
 
   constructor() {
-    this.gitlabApiClient = new GitlabApiClient();
     this.taskService = new TaskService();
     this.taskEmitter = new TaskEventEmitter();
     this.userService = new UserService();
-    this.settingRepo = new SettingRepo();
-    this.gitlabSyncService = new GitlabSyncService(
-      this.gitlabApiClient,
-      this.taskService,
-      this.taskEmitter,
-    );
-  }
-
-  async syncGitLabDataAsync(): Promise<void> {
-    const user = await this.userService.getUser();
-    const project = await this.settingRepo.getByKeyAsync("currentProject");
-
-    if (!user) throw new GitlabError("No user found", 404);
-    if (!project) throw new GitlabError("No project selected", 404);
-    if (project.value.includes("custom_project")) return;
-
-    const changes = await this.gitlabSyncService.syncGitlabDataAsync(
-      user,
-      project,
-    );
-    SocketHandler.getInstance().getIO().emit("updateTasks", changes);
+    this.gitlabClient = new GitlabClient();
   }
 
   async createGitlabMergeRequestAsync(issueId: string) {
@@ -104,26 +80,26 @@ export class GitlabService {
   @ruleEvent(EventNamespaces.GitLab, EventTypes.CreateBranch)
   private async createBranch(projectId: string, issue: ITask) {
     try {
-      await this.gitlabApiClient.request(
-        `/projects/${projectId}/repository/branches`,
-        "POST",
-        {
+      await this.gitlabClient.request({
+        endpoint: `/projects/${projectId}/repository/branches`,
+        method: "POST",
+        data: {
           id: projectId,
           branch: issue.gitlabIid,
           ref: "develop",
         },
-      );
+      });
     } catch (e) {
       if (e instanceof MochiError) {
-        await this.gitlabApiClient.request(
-          `/projects/${projectId}/repository/branches`,
-          "POST",
-          {
+        await this.gitlabClient.request({
+          endpoint: `/projects/${projectId}/repository/branches`,
+          method: "POST",
+          data: {
             id: projectId,
             branch: "issue-" + issue.gitlabIid,
             ref: "develop",
           },
-        );
+        });
       } else {
         throw e;
       }
@@ -135,10 +111,10 @@ export class GitlabService {
     issue: ITask,
     userId: string,
   ) {
-    return this.gitlabApiClient.request(
-      `/projects/${projectId}/merge_requests`,
-      "POST",
-      {
+    return this.gitlabClient.request({
+      endpoint: `/projects/${projectId}/merge_requests`,
+      method: "POST",
+      data: {
         id: projectId,
         source_branch: issue.gitlabIid,
         target_branch: "develop",
@@ -148,7 +124,7 @@ export class GitlabService {
         labels: issue.labels?.join(","),
         milestone_id: issue.milestoneId,
       },
-    );
+    });
   }
 
   async closeMergedMergeRequestsAsync(): Promise<Partial<ITask>[]> {
@@ -156,18 +132,19 @@ export class GitlabService {
 
     const openMergeRequests = await this.taskService.getAllAsync({
       type: "merge_request",
-      $or: [{ status: "inprogress" }, { status: "review" }],
+      status: { $nin: ["closed"] },
     });
 
     const staleIssues = await this.taskService.getAllAsync({
       type: "issue",
-      $or: [{ status: "opened" }, { status: "closed" }],
+      status: { $nin: ["closed"] },
     });
 
     for (const task of staleIssues) {
-      const taskRequest = await this.gitlabApiClient.request(
-        `/projects/${task.projectId}/issues/${task.gitlabIid}`,
-      );
+      const taskRequest = await this.gitlabClient.request({
+        endpoint: `/projects/${task.projectId}/issues/${task.gitlabIid}`,
+        method: "GET",
+      });
 
       if (taskRequest.state === "closed") {
         await this.taskService.setDeletedAsync(task._id as string);
@@ -175,10 +152,11 @@ export class GitlabService {
     }
 
     for (const mr of openMergeRequests) {
-      const mergeRequest = await this.gitlabApiClient.request(
-        `/projects/${mr.projectId}/merge_requests/${mr.gitlabIid}`,
-      );
-      if (mergeRequest.state === "merged") {
+      const mergeRequest = await this.gitlabClient.request({
+        endpoint: `/projects/${mr.projectId}/merge_requests/${mr.gitlabIid}`,
+        method: "GET",
+      });
+      if (mergeRequest.state === "merged" || mergeRequest.state === "closed") {
         await this.taskEmitter.updateTaskAsync(mr._id as string, {
           status: "closed",
         });
@@ -191,11 +169,11 @@ export class GitlabService {
 
   async resolveThreadAsync(task: ITask, discussion: IDiscussion) {
     const payload = { resolved: true };
-    const response = await this.gitlabApiClient.request(
-      `/projects/${task.projectId}/merge_requests/${task.gitlabIid}/discussions/${discussion.discussionId}`,
-      "PUT",
-      payload,
-    );
+    const response = await this.gitlabClient.request({
+      endpoint: `/projects/${task.projectId}/merge_requests/${task.gitlabIid}/discussions/${discussion.discussionId}`,
+      method: "PUT",
+      data: payload,
+    });
 
     const updatedTask = await this.taskService.findOneAsync({ _id: task._id });
     if (updatedTask.discussions) {
@@ -226,13 +204,13 @@ export class GitlabService {
       note_id: discussion.notes?.[0]?.noteId,
     };
 
-    const response = await this.gitlabApiClient.request(
-      `/projects/${task.projectId}/${
+    const response = await this.gitlabClient.request({
+      endpoint: `/projects/${task.projectId}/${
         task.type === "issue" ? "issues" : "merge_requests"
       }/${task.gitlabIid}/discussions/${discussion.discussionId}/notes`,
-      "POST",
-      payload,
-    );
+      method: "POST",
+      data: payload,
+    });
 
     const updatedTask = await this.taskService.findOneAsync({ _id: task._id });
     if (updatedTask.discussions) {
@@ -249,23 +227,28 @@ export class GitlabService {
   }
 
   async getLatestPipelineAsync(projectId: string, mergeRequestIid: string) {
-    const pipelines = await this.gitlabApiClient.request(
-      `/projects/${projectId}/merge_requests/${mergeRequestIid}/pipelines`,
-    );
+    const pipelines = await this.gitlabClient.request({
+      endpoint: `/projects/${projectId}/merge_requests/${mergeRequestIid}/pipelines`,
+      method: "GET",
+    });
     return pipelines.length ? pipelines[0] : null;
   }
 
   async getFaultyTestCasesAsync(projectId: string, pipelineId: number) {
-    const report = await this.gitlabApiClient.request(
-      `/projects/${projectId}/pipelines/${pipelineId}/test_report?per_page=100`,
-    );
+    const report = await this.gitlabClient.request({
+      endpoint: `/projects/${projectId}/pipelines/${pipelineId}/test_report?per_page=100`,
+      method: "GET",
+    });
     return report.test_suites.flatMap((suite: any) =>
       suite.test_cases.filter((test: any) => test.status === "failed"),
     );
   }
 
   async getUserByAccessTokenAsync() {
-    const response = await this.gitlabApiClient.request("/user");
+    const response = await this.gitlabClient.request({
+      endpoint: "/user",
+      method: "GET",
+    });
     let user = await this.userService.getUser();
 
     if (!user) {
@@ -281,65 +264,47 @@ export class GitlabService {
   }
 
   async getProjectsAsync() {
-    return this.gitlabApiClient.request("/projects?per_page=100");
+    return this.gitlabClient.request({
+      endpoint: "/projects?per_page=100",
+      method: "GET",
+    });
   }
 
   async getTodosAsync() {
-    let pagination: Partial<IPagination> = {
-      currentPage: 1,
-      limit: 100,
-      totalPages: 1,
-    };
-    let totalTodos: any[] = [];
-
-    do {
-      const { data, pagination: nextPagination } =
-        await this.gitlabApiClient.paginatedRequest(
-          `/todos?page=${pagination.currentPage}&per_page=${pagination.limit}`,
-        );
-      totalTodos = totalTodos.concat(data);
-      pagination.currentPage = nextPagination.nextPage;
-    } while (pagination.currentPage < (pagination.totalPages ?? 1));
-
-    return totalTodos;
+    return await fetchAllFromPaginatedApiAsync(
+      async (pagination) =>
+        await this.gitlabClient.paginatedRequest({
+          endpoint: `/todos?page=${pagination.currentPage}&per_page=${pagination.limit}`,
+          method: "GET",
+        }),
+    );
   }
 
   async getUsersAsync() {
-    return this.gitlabApiClient.request("/users?per_page=100");
+    return this.gitlabClient.request({
+      endpoint: "/users?per_page=100",
+      method: "GET",
+    });
   }
 
   async assignToUserAsync(taskId: string, userId: string) {
     const task = await this.taskService.findOneAsync({ _id: taskId });
     if (!task) throw new MochiError("Task not found", 404);
-    await this.gitlabApiClient.request(
-      `/projects/${task.projectId}/merge_requests/${task.gitlabIid}`,
-      "PUT",
-      { assignee_id: userId },
-    );
+    await this.gitlabClient.request({
+      endpoint: `/projects/${task.projectId}/merge_requests/${task.gitlabIid}`,
+      method: "PUT",
+      data: { assignee_id: userId },
+    });
   }
 
-  async getDiscussionsAsync(
-    projectId: string,
-    gitlabIid: string,
-    type: string,
-  ) {
-    let pagination: Partial<IPagination> = {
-      currentPage: 1,
-      limit: 100,
-      totalPages: 1,
-    };
-    let totalDiscussions: any[] = [];
-
-    do {
-      const { data, pagination: nextPagination } =
-        await this.gitlabApiClient.paginatedRequest(
-          `/projects/${projectId}/${type}/${gitlabIid}/discussions?page=${pagination.currentPage}&per_page=${pagination.limit}`,
-        );
-      totalDiscussions = totalDiscussions.concat(data);
-      pagination.currentPage = nextPagination.nextPage;
-    } while (pagination.currentPage < (pagination.totalPages ?? 1));
-
-    return totalDiscussions.map(transformDiscussion);
+  async toggleDraft(taskId: string) {
+    const task = await this.taskService.findOneAsync({ _id: taskId });
+    if (!task) throw new MochiError("Task not found", 404);
+    await this.gitlabClient.request({
+      endpoint: `/projects/${task.projectId}/merge_requests/${task.gitlabIid}`,
+      method: "PUT",
+      data: { draft: !task.draft },
+    });
   }
 
   async getDiscussionsPaginatedAsync(
@@ -348,13 +313,14 @@ export class GitlabService {
   ) {
     const task = await this.taskService.findOneAsync({ _id: taskId });
     const { data: discussions, pagination: resultPagination } =
-      await this.gitlabApiClient.paginatedRequest(
-        `/projects/${task.projectId}/${
+      await this.gitlabClient.paginatedRequest({
+        endpoint: `/projects/${task.projectId}/${
           task.type === "issue" ? "issues" : "merge_requests"
         }/${task.gitlabIid}/discussions?per_page=${pagination.limit}&page=${
           pagination.currentPage
         }&order_by=created_at&sort=asc`,
-      );
+        method: "GET",
+      });
 
     const transformedDiscussions = discussions.map(transformDiscussion);
     return { data: transformedDiscussions, pagination: resultPagination };

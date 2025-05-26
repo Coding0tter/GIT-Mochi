@@ -3,23 +3,19 @@ import type { IPagination } from "shared/types/pagination";
 export const fetchAllFromPaginatedApiAsync = async (
   requestFn: (pagination: Partial<IPagination>) => any,
 ) => {
-  let pagination: Partial<IPagination> = {
-    currentPage: 1,
-    limit: 100,
-    totalPages: 1,
-  };
+  let nextPage: number | null = 1;
+  const limit = 100;
+  const allEntries: any[] = [];
 
-  let allEntries: any[] = [];
+  while (nextPage != null) {
+    const { data, pagination } = await requestFn({
+      currentPage: nextPage,
+      limit,
+    });
 
-  do {
-    const { data, pagination: nextPagination } = await requestFn(pagination);
-
-    allEntries = allEntries.concat(data);
-
-    pagination.currentPage = nextPagination.nextPage;
-  } while (
-    (pagination?.currentPage ?? Number.MAX_VALUE) < (pagination.totalPages ?? 1)
-  );
+    allEntries.push(...data);
+    nextPage = !isNaN(pagination.nextPage!) ? pagination.nextPage : null;
+  }
 
   return allEntries;
 };
