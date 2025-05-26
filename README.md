@@ -20,37 +20,22 @@ Mochi is a **keyboard-friendly, GitLab-integrated Kanban board** that makes task
 
 ## Installation
 
-1. **Clone the repository**:
+**Clone the repository**:
 
-   ```bash
-   git clone https://github.com/Coding0tter/GIT-Mochi.git
-   cd mochi
-   ```
+```bash
+git clone https://github.com/Coding0tter/GIT-Mochi.git
+cd mochi
+```
 
-2. **Configure environment variables** with the interactive setup:
-
-   ```bash
-   ./scripts/setup.sh
-   ```
-
-Permissions for Personal Access Token:
-
-- api
-- read_api
-- read_user
-
-3. **Start Mochi**:
+2. **Start Mochi**:
 
    ```bash
    docker-compose up -d
    ```
 
-4. **Select your first project**
-
 - Mochi will start at http://localhost:3005
-- open the kanban view with `Ctrl + 1`
-- open the commandline with `:` or `Ctrl + p`
-- choose `listProjects` and select your project
+
+3. **Complete the Wizard and your good to go**
 
 ## Keyboard Shortcuts
 
