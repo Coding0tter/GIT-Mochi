@@ -20,14 +20,6 @@ const shortcuts: KeyboardShortcutMap = {
       description: "Open search",
     },
     {
-      key: "f",
-      altKey: true,
-      action: () => openFeedbackModal(),
-      category: KeyboardShortcutCategory.Commands,
-      description: "Open feedback modal",
-    },
-
-    {
       shiftKey: true,
       key: ":",
       action: () => focusInput(InputMode.Commandline),

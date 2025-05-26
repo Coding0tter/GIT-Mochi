@@ -13,7 +13,7 @@ import { closeModalAndUnfocus } from "./uiService";
 export const handleKeyDown = async (
   event: KeyboardEvent,
   navigator: Navigator,
-  location: Location
+  location: Location,
 ) => {
   const key = location.pathname.split("/")[1];
 
@@ -49,6 +49,9 @@ export const handleKeyDown = async (
         navigator("/timetrack");
         return;
       case "Digit3":
+        navigator("/todo");
+        return;
+      case "Digit0":
         navigator("/");
         return;
     }

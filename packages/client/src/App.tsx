@@ -17,7 +17,7 @@ import {
 } from "@client/stores/timeTrackStore";
 import { useNavigate, useLocation } from "@solidjs/router";
 import dayjs from "dayjs";
-import { onMount, onCleanup } from "solid-js";
+import { onMount, onCleanup, Show } from "solid-js";
 import styles from "./App.module.css";
 
 import weekday from "dayjs/plugin/weekday";
@@ -31,6 +31,9 @@ const App = (props: any) => {
     handleKeyDown(event, navigator, location);
 
   onMount(async () => {
+    if (location.pathname === "/setup") {
+      return;
+    }
     await fetchRecordingStateAsync();
     await fetchTimeTrackEntries();
     await getUserAsync();
@@ -44,14 +47,18 @@ const App = (props: any) => {
 
   return (
     <div class={styles.app}>
-      <div class={styles.container}>
-        <Header />
-        <NotificationManager />
-      </div>
+      <Show when={location.pathname !== "/setup"}>
+        <div class={styles.container}>
+          <Header />
+          <NotificationManager />
+        </div>
+      </Show>
       <div class={styles.content}>{props.children}</div>
-      <div class={styles.container}>
-        <StatusBar />
-      </div>
+      <Show when={location.pathname !== "/setup"}>
+        <div class={styles.container}>
+          <StatusBar />
+        </div>
+      </Show>
 
       {modalStore.activeModals.includes(ModalType.Help) && (
         <HelpModal onClose={handleCloseModal} />

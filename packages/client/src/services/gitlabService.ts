@@ -48,7 +48,7 @@ export const syncGitlabAsync = async () => {
 
 export const fetchDiscussionsPaginatedAsync = async (
   taskId: string,
-  page: number = 1
+  page: number = 1,
 ) => {
   try {
     const res = await axios.get(`/git/discussions`, {
@@ -98,7 +98,7 @@ export const resolveThreadAsync = async (discussion: IDiscussion) => {
 
 export const replyToDiscussionAsync = async (
   discussion: IDiscussion,
-  reply: string
+  reply: string,
 ) => {
   try {
     const task = getColumnTasks().at(keyboardNavigationStore.selectedTaskIndex);
@@ -131,6 +131,19 @@ export const replyToDiscussionAsync = async (
   }
 };
 
+export const toggleDraft = async (taskId: string) => {
+  try {
+    const res = await axios.post(`/git/assign`, { taskId });
+    return res;
+  } catch (error) {
+    addNotification({
+      title: "Error",
+      description: "Failed to toggle draft flag for task",
+      type: "error",
+    });
+  }
+};
+
 export const assignTaskAsync = async (taskId: string, userId: string) => {
   try {
     const res = await axios.post(`/git/assign`, { userId, taskId });
@@ -147,7 +160,7 @@ export const assignTaskAsync = async (taskId: string, userId: string) => {
 export const openSelectedTaskLink = () => {
   window.open(
     getColumnTasks()[keyboardNavigationStore.selectedTaskIndex].web_url,
-    "_blank"
+    "_blank",
   );
 };
 
@@ -157,7 +170,7 @@ export const createMergeRequestAndBranchForSelectedTaskAsync = async () => {
     const { mergeRequest } = await createMergeRequestAndBranchAsync(
       columnTasks[
         keyboardNavigationStore.selectedTaskIndex
-      ].gitlabIid?.toString() || ""
+      ].gitlabIid?.toString() || "",
     );
 
     addNotification({

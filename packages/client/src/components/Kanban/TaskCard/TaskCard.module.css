@@ -158,3 +158,40 @@
   height: 30px;
   border-radius: 50%;
 }
+
+.draft {
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+  z-index: 10;
+}
+
+/* HTML: <div class="ribbon">Your text content</div> */
+.ribbon {
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+}
+.ribbon {
+  --r: 0.4em; /* control the ribbon shape (the radius) */
+  --c: #e3ad40;
+
+  position: absolute;
+  top: 5px;
+  right: calc(-1 * var(--r));
+  line-height: 1.8;
+  padding: 0 0.5em calc(2 * var(--r));
+  border-radius: 0 var(--r) var(--r) 0;
+  background:
+    radial-gradient(100% 50% at right, var(--c) 98%, #0000 101%) 0 0/0.5lh
+      calc(100% - 2 * var(--r)),
+    radial-gradient(100% 50% at left, #0005 98%, #0000 101%) 100% 100% /
+      var(--r) calc(2 * var(--r)),
+    conic-gradient(
+        from 180deg at calc(100% - var(--r)) calc(100% - 2 * var(--r)),
+        #0000 25%,
+        var(--c) 0
+      )
+      100% 0 / calc(101% - 0.5lh) 100%;
+  background-repeat: no-repeat;
+}

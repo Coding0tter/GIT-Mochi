@@ -1,23 +1,25 @@
+import { MochiError } from "@server/errors/mochiError";
 import cors from "cors";
 import express from "express";
 import http from "http";
 import { connect } from "mongoose";
+import { SettingKeys } from "shared";
 import { closeMergedMRJob } from "./background-jobs/closeMergedMergeRequests";
-import { syncGitlabJob } from "./background-jobs/gitlabSync";
+import { GitlabSync } from "./gitlab/sync";
 import { contextMiddleware } from "./middlewares/contextMiddleware";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
+import { SettingRepo } from "./repositories/settingRepo";
 import gitlabRoutes from "./routes/gitlabRoutes";
 import projectRoutes from "./routes/projectRouter";
 import ruleRoutes from "./routes/ruleRoutes";
+import settingRoutes from "./routes/settingRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import timeTrackRoutes from "./routes/timeTrackRoutes";
 import "./services/actions";
 import "./services/emitters";
-import { GitlabService } from "./services/gitlabService";
 import { ProjectService } from "./services/projectService";
 import { SocketHandler } from "./sockets";
 import { logError, logInfo } from "./utils/logger";
-import { MochiError } from "@server/errors/mochiError";
 
 logInfo(`
   Starting Gitlab-Mochi backend...
@@ -43,38 +45,12 @@ connect("mongodb://mongo:27017/kanban", {})
   .then(() => logInfo("MongoDB connected"))
   .catch((err) => logError(err));
 
-let retries = 5;
-
-do {
-  try {
-    const gitlabService = new GitlabService();
-    await gitlabService.getUserByAccessTokenAsync();
-    logInfo("User retrieved successfully");
-    break;
-  } catch (error) {
-    retries--;
-    console.error(
-      `Failed to retrieve user from Gitlab. Retries left: ${retries}`,
-    );
-
-    console.error(error);
-
-    if (retries === 0) {
-      console.error(
-        "Failed to retrieve user from Gitlab after 5 retries. Maybe the Gitlab server is down?",
-      );
-      retries = 5;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 60000));
-  }
-} while (retries > 0);
-
 app.use("/api/tasks", taskRoutes);
 app.use("/api/git", gitlabRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/rules", ruleRoutes);
 app.use("/api/timetrack", timeTrackRoutes);
+app.use("/api/settings", settingRoutes);
 
 // Sync comments every minute
 setInterval(async () => {
@@ -86,7 +62,19 @@ server.listen(PORT, () =>
   logInfo(`Gitlab-Mochi backend running on port ${PORT}`),
 );
 
+const syncs = [new GitlabSync()];
+
 const jobs = async () => {
+  const settingRepo = new SettingRepo();
+  const setupComplete = await settingRepo.getByKeyAsync(
+    SettingKeys.SETUP_COMPLETE,
+  );
+
+  if (setupComplete?.value !== "true") {
+    logInfo("Setup not complete. Skipping sync jobs.");
+    return;
+  }
+
   const projectService = new ProjectService();
   if ((await projectService.getCurrentProjectAsync()) === null) {
     logInfo("No project selected. Skipping sync jobs.");
@@ -96,10 +84,12 @@ const jobs = async () => {
   try {
     console.log("============Background jobs============");
     console.time("Background Jobs");
-    syncGitlabJob();
+    for (const sync of syncs) {
+      await sync.sync();
+    }
     closeMergedMRJob();
     console.timeEnd("Background Jobs");
   } catch (error) {
-    logError(new MochiError("Failed to sync jobs", 500, error as Error));
+    logError(new MochiError("Failed jobs", 500, error as Error));
   }
 };

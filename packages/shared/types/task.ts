@@ -17,6 +17,7 @@ export interface ITask extends Document<string> {
   deleted?: boolean;
   order?: number;
   comments: IComment[];
+  draft: boolean;
   discussions?: IDiscussion[];
   projectId?: string;
   latestPipelineId?: number;

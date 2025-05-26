@@ -1,21 +1,24 @@
 import type { NextFunction, Request, Response } from "express";
 import { GitlabService } from "../services/gitlabService";
 import { handleControllerError } from "../errors/mochiError";
+import { GitlabSync } from "@server/gitlab/sync";
 
 export class GitlabController {
   private gitlabService: GitlabService;
+  private gitlabSync: GitlabSync;
 
   constructor() {
     this.gitlabService = new GitlabService();
+    this.gitlabSync = new GitlabSync();
   }
 
   syncGitLabAsync = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
-      await this.gitlabService.syncGitLabDataAsync();
+      await this.gitlabSync.sync(true);
       res
         .status(200)
         .json({ message: "GitLab data and issues synced successfully" });
@@ -24,10 +27,24 @@ export class GitlabController {
     }
   };
 
+  toggleDraft = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { taskId } = req.body;
+      const result = await this.gitlabService.toggleDraft(taskId);
+      res.status(200).json(result);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
   assignToUserAsync = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { taskId, userId } = req.body;
@@ -41,13 +58,12 @@ export class GitlabController {
   createMergeRequestAsync = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { issueId } = req.body;
-      const result = await this.gitlabService.createGitlabMergeRequestAsync(
-        issueId
-      );
+      const result =
+        await this.gitlabService.createGitlabMergeRequestAsync(issueId);
       res.status(200).json(result);
     } catch (error) {
       handleControllerError(error, next);
@@ -57,13 +73,13 @@ export class GitlabController {
   resolveThreadAsync = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { task, discussion } = req.body;
       const result = await this.gitlabService.resolveThreadAsync(
         task,
-        discussion
+        discussion,
       );
       res.status(200).json(result);
     } catch (error) {
@@ -74,14 +90,14 @@ export class GitlabController {
   commentOnTaskAsync = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { task, discussion, reply } = req.body;
       const result = await this.gitlabService.commentOnTaskAsync(
         task,
         discussion,
-        reply
+        reply,
       );
       res.status(200).json(result);
     } catch (error) {
@@ -92,13 +108,13 @@ export class GitlabController {
   getDiscussionsAsync = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const { taskId, page, limit } = req.query;
       const discussion = await this.gitlabService.getDiscussionsPaginatedAsync(
         taskId as string,
-        { currentPage: Number(page), limit: Number(limit) }
+        { currentPage: Number(page), limit: Number(limit) },
       );
       res.status(200).json(discussion);
     } catch (error) {
@@ -136,7 +152,7 @@ export class GitlabController {
   getProjectsAsync = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const projects = await this.gitlabService.getProjectsAsync();
