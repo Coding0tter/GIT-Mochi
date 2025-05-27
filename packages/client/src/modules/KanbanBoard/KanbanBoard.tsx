@@ -22,6 +22,7 @@ import { keyboardNavigationStore } from "../../stores/keyboardNavigationStore";
 import PipelineModal from "../../components/modals/PipelineModal/PipelineModal";
 import ReplyModal from "../../components/modals/ReplyModal/ReplyModal";
 import { uiStore } from "@client/stores/uiStore";
+import Loading from "@client/components/shared/Loading/Loading";
 
 const KanbanBoard = () => {
   const [loading, setLoading] = createSignal<boolean>(true);
@@ -39,7 +40,7 @@ const KanbanBoard = () => {
       try {
         await updateTaskAsync(
           modalStore.selectedTask!._id,
-          modalStore.selectedTask!
+          modalStore.selectedTask!,
         );
         addNotification({
           title: "Success",
@@ -126,13 +127,7 @@ const KanbanBoard = () => {
           when={uiStore.currentProject}
           fallback={
             loading() ? (
-              <div class={styles.loading}>
-                <div class={styles.dots}>
-                  <div class={styles.dot}></div>
-                  <div class={styles.dot}></div>
-                  <div class={styles.dot}></div>
-                </div>
-              </div>
+              <Loading />
             ) : (
               <div class={styles.noProject}>
                 No project selected. Please select one via the commandline.
@@ -144,7 +139,7 @@ const KanbanBoard = () => {
             <TaskColumn
               status={status}
               tasks={filteredTasks().filter(
-                (task) => task.status === status.id
+                (task) => task.status === status.id,
               )}
               columnIndex={columnIndex}
             />

@@ -81,16 +81,6 @@ const TaskColumn = (props: TaskColumnProps) => {
               }}
               taskIndex={taskIndex()}
               setTaskRef={(el) => (taskRefs[taskIndex()] = el)}
-              commentsCount={
-                task.discussions?.filter(
-                  (item) =>
-                    !item.notes?.some((note) => note.system) &&
-                    !item.notes?.some((note) => note.resolved) &&
-                    item.notes?.some((note) =>
-                      note.body.includes(`@${uiStore.user?.username}`),
-                    ),
-                ).length || 0
-              }
             />
           )}
         </For>

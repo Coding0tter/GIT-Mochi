@@ -15,5 +15,6 @@ export const transformDiscussion = (discussion: any): any => {
   if (Array.isArray(discussion.notes)) {
     discussion.notes = discussion.notes.map((note: any) => transformNote(note));
   }
+
   return discussion;
 };

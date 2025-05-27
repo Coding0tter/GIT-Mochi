@@ -1,23 +1,40 @@
-import { createSignal, onMount, onCleanup, Show, For } from "solid-js";
-import BaseModal, { type BaseModalProps } from "../BaseModal/BaseModal";
+import { resolveThreadAsync } from "@client/services/gitlabService";
+import axios from "axios";
+import { orderBy } from "lodash";
+import {
+  createResource,
+  createSignal,
+  For,
+  onCleanup,
+  onMount,
+  Show,
+  Suspense,
+} from "solid-js";
 import {
   modalStore,
   ModalType,
   openModal,
-  setActiveModal,
   setSelectedDiscussionForModal,
 } from "../../../stores/modalStore";
-import styles from "./TaskDetailsModal.module.css";
-import Badge from "../../shared/Badge/Badge";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
+import Badge from "../../shared/Badge/Badge";
 import DiscussionCard from "../../shared/DiscussionCard/DiscussionCard";
-import { orderBy } from "lodash";
-import { resolveThreadAsync } from "@client/services/gitlabService";
+import BaseModal, { type BaseModalProps } from "../BaseModal/BaseModal";
+import styles from "./TaskDetailsModal.module.css";
+import type { IDiscussion } from "shared/types/task";
+import Loading from "@client/components/shared/Loading/Loading";
 
 interface TaskDetailsModalProps extends BaseModalProps {}
 
 const TaskDetailsModal = (props: TaskDetailsModalProps) => {
   const { selectedTask: task } = modalStore;
+
+  const [discussions] = createResource<IDiscussion[]>(async () => {
+    const res = await axios.get(
+      `/tasks/discussions?id=${task!.gitlabIid}&type=${task!.type}`,
+    );
+    return res.data;
+  });
 
   const [selectedDiscussion, setSelectedDiscussion] = createSignal<number>(0);
   const [toggleSystemDiscussions, setToggleSystemDiscussions] =
@@ -36,8 +53,8 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (
-      !task?.discussions ||
-      task?.discussions.length === 0 ||
+      !discussions() ||
+      discussions()?.length === 0 ||
       modalStore.activeModals.includes(ModalType.Reply)
     )
       return;
@@ -65,7 +82,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
     } else if (event.key === "t") {
       setToggleResolvedDiscussions(!toggleResolvedDiscussions());
     } else if (event.shiftKey && event.key === "O") {
-      window.open(task.web_url, "_blank");
+      window.open(task!.web_url, "_blank");
     } else if (event.key === "r" && !event.ctrlKey) {
       setSelectedDiscussionForModal(
         filteredDiscussions().at(selectedDiscussion()) || null,
@@ -83,7 +100,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
 
   const filteredDiscussions = () => {
     return orderBy(
-      task?.discussions
+      discussions()
         ?.filter(
           (discussion) =>
             toggleSystemDiscussions() || !discussion.notes?.[0]?.system,
@@ -177,22 +194,24 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
           <div class={styles.divider} />
 
           <h3 class={styles.discussionsHeader}>Discussions</h3>
-          {task?.discussions && task.discussions.length > 0 ? (
-            <div class={styles.discussionsContainer}>
-              <For each={filteredDiscussions()}>
-                {(discussion, index) => (
-                  <DiscussionCard
-                    focusThread={setIsThreadFocused}
-                    discussion={discussion}
-                    selected={() => index() === selectedDiscussion()}
-                    id={`discussion-${index()}`}
-                  />
-                )}
-              </For>
-            </div>
-          ) : (
-            <p class={styles.descriptionText}>No discussions yet.</p>
-          )}
+          <Suspense fallback={<Loading />}>
+            {discussions() && discussions()!.length > 0 ? (
+              <div class={styles.discussionsContainer}>
+                <For each={filteredDiscussions()}>
+                  {(discussion, index) => (
+                    <DiscussionCard
+                      focusThread={setIsThreadFocused}
+                      discussion={discussion}
+                      selected={() => index() === selectedDiscussion()}
+                      id={`discussion-${index()}`}
+                    />
+                  )}
+                </For>
+              </div>
+            ) : (
+              <p class={styles.descriptionText}>No discussions yet.</p>
+            )}
+          </Suspense>
         </div>
       </div>
     </BaseModal>

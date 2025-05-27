@@ -1,25 +1,25 @@
-import { MochiError } from "@server/errors/mochiError";
+import { MochiError } from "@server/errors/mochi.error";
 import cors from "cors";
 import express from "express";
 import http from "http";
 import { connect } from "mongoose";
 import { SettingKeys } from "shared";
 import { closeMergedMRJob } from "./background-jobs/closeMergedMergeRequests";
-import { GitlabSync } from "./gitlab/sync";
-import { contextMiddleware } from "./middlewares/contextMiddleware";
-import { globalErrorHandler } from "./middlewares/globalErrorHandler";
-import { SettingRepo } from "./repositories/settingRepo";
-import gitlabRoutes from "./routes/gitlabRoutes";
-import projectRoutes from "./routes/projectRouter";
-import ruleRoutes from "./routes/ruleRoutes";
-import settingRoutes from "./routes/settingRoutes";
-import taskRoutes from "./routes/taskRoutes";
-import timeTrackRoutes from "./routes/timeTrackRoutes";
+import { contextMiddleware } from "./middlewares/context.middleware";
+import { globalErrorHandler } from "./middlewares/globalErrorHandler.middleware";
+import { SettingRepo } from "./repositories/setting.repo";
+import gitlabRoutes from "./routes/gitlab.routes";
+import projectRoutes from "./routes/project.router";
+import ruleRoutes from "./routes/rule.router";
+import settingRoutes from "./routes/setting.router";
+import taskRoutes from "./routes/task.router";
+import timeTrackRoutes from "./routes/timeTrack.router";
 import "./services/actions";
 import "./services/emitters";
-import { ProjectService } from "./services/projectService";
+import { ProjectService } from "./services/project.service";
 import { SocketHandler } from "./sockets";
 import { logError, logInfo } from "./utils/logger";
+import { GitlabSync } from "./syncs/gitlab.sync";
 
 logInfo(`
   Starting Gitlab-Mochi backend...

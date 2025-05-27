@@ -1,4 +1,4 @@
-import type { MochiError } from "../errors/mochiError";
+import type { MochiError } from "../errors/mochi.error";
 
 export enum MessageType {
   INFO = "INFO",
@@ -9,7 +9,7 @@ export const addLog = (message: string, type: MessageType): void => {
   console.log(
     `[BACKEND] [${type}] [${new Date().toLocaleString("de-DE", {
       timeZone: "Europe/Berlin",
-    })}] ${message}`
+    })}] ${message}`,
   );
 };
 

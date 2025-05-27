@@ -13,7 +13,6 @@ interface TaskCardProps {
   onClick: () => void;
   taskIndex: number;
   setTaskRef: (el: HTMLElement) => void;
-  commentsCount: number;
 }
 
 const TaskCard = (props: TaskCardProps) => {
@@ -85,9 +84,12 @@ const TaskCard = (props: TaskCardProps) => {
         {!props.task.custom && props.task.type === "issue" && (
           <Badge>Issue: {props.task.gitlabIid ?? ""}</Badge>
         )}
-        {props.commentsCount > 0 && (
-          <div class={styles.commentCount}>{props.commentsCount}</div>
-        )}
+        {props.task.relevantDiscussionCount &&
+          props.task.relevantDiscussionCount > 0 && (
+            <div class={styles.commentCount}>
+              {props.task.relevantDiscussionCount}
+            </div>
+          )}
       </div>
 
       <Show

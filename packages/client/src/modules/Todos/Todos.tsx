@@ -9,6 +9,7 @@ import { LoadingTarget, uiStore } from "@client/stores/uiStore";
 import Badge from "@client/components/shared/Badge/Badge";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import Loading from "@client/components/shared/Loading/Loading";
 
 dayjs.extend(relativeTime);
 
@@ -133,15 +134,7 @@ const Todos = () => {
   return (
     <Show
       when={uiStore.loadingTarget !== LoadingTarget.Todos}
-      fallback={
-        <div class={styles.loading}>
-          <div class={styles.dots}>
-            <div class={styles.dot}></div>
-            <div class={styles.dot}></div>
-            <div class={styles.dot}></div>
-          </div>
-        </div>
-      }
+      fallback={<Loading />}
     >
       <Show
         when={!todoStore.error}
