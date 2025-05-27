@@ -35,7 +35,7 @@ cd mochi
 
 - Mochi will start at http://localhost:3005
 
-3. **Complete the Wizard and your good to go**
+3. **Complete the Wizard and you're good to go**
 
 ## Keyboard Shortcuts
 
