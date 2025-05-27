@@ -1,13 +1,9 @@
-import { GitlabClient } from "@server/gitlab/client";
-import { ruleAction } from "../../decorators/ruleActionDecorator";
+import { GitlabClient } from "@server/clients/gitlab.client";
+import { ruleAction } from "../../decorators/ruleAction.decorator";
 import { ActionTypes, EventNamespaces } from "../../events/eventTypes";
 
 class GitlabActionHandler {
-  private gitlabClient: GitlabClient;
-
-  constructor() {
-    this.gitlabClient = new GitlabClient();
-  }
+  private gitlabClient = new GitlabClient();
 
   @ruleAction({
     eventNamespace: EventNamespaces.GitLab,

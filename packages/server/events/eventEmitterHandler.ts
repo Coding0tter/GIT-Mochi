@@ -1,8 +1,8 @@
 import EventEmitter2 from "eventemitter2";
-import { RuleService } from "../services/ruleService";
-import type { IAction, ICondition } from "../models/rule";
+import { RuleService } from "../services/rule.service";
+import type { IAction, ICondition } from "../models/rule.model";
 import { logError } from "../utils/logger";
-import { MochiError } from "../errors/mochiError";
+import { MochiError } from "../errors/mochi.error";
 import { EventRegistry } from "./eventRegistry";
 import type { MochiResult } from "../utils/mochiResult";
 import path from "path";
@@ -30,7 +30,7 @@ export class EventEmitterHandler {
 
   private static async handleEventAsync(
     event: string | string[],
-    value: MochiResult
+    value: MochiResult,
   ) {
     try {
       if (value.error) {
@@ -38,8 +38,8 @@ export class EventEmitterHandler {
           new MochiError(
             "Error in passed data while handling event",
             500,
-            value.error
-          )
+            value.error,
+          ),
         );
         return;
       }
@@ -102,13 +102,13 @@ export class EventEmitterHandler {
 
   private static async performActionsAsync(
     data: MochiResult,
-    actions: IAction[]
+    actions: IAction[],
   ) {
     try {
       await Promise.all(
         actions.map(async (action) => {
           const listener = EventRegistry.getInstance().getListenerByEvent(
-            action.targetPath
+            action.targetPath,
           );
 
           if (!listener) {
@@ -120,7 +120,7 @@ export class EventEmitterHandler {
 
           const classPath = findClassFile(
             className,
-            path.resolve(__dirname, "../")
+            path.resolve(__dirname, "../"),
           );
 
           if (!classPath) {
@@ -137,7 +137,7 @@ export class EventEmitterHandler {
           } else {
             method(data);
           }
-        })
+        }),
       );
     } catch (err: any) {
       logError(new MochiError("Error performing actions", 500, err));

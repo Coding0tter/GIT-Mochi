@@ -1,7 +1,7 @@
-import { ruleEvent } from "@server/decorators/ruleEventDecorator";
-import { MochiError } from "@server/errors/mochiError";
+import { ruleEvent } from "@server/decorators/ruleEvent.decorator";
+import { MochiError } from "@server/errors/mochi.error";
 import { EventNamespaces, EventTypes } from "@server/events/eventTypes";
-import TaskService from "@server/services/taskService";
+import TaskService from "@server/services/task.service";
 import { MochiResult } from "@server/utils/mochiResult";
 import type { ITask } from "shared/types/task";
 

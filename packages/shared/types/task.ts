@@ -23,6 +23,7 @@ export interface ITask extends Document<string> {
   latestPipelineId?: number;
   pipelineStatus?: string;
   pipelineReports?: IPipelineReport[];
+  relevantDiscussionCount?: number;
 }
 
 export interface IComment {
@@ -39,7 +40,8 @@ export interface IComment {
   system: boolean;
 }
 
-export interface IDiscussion {
+export interface IDiscussion extends Document<string> {
+  taskId: string;
   discussionId: string;
   individual_note: boolean;
   notes?: INote[];

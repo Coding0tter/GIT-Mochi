@@ -18,6 +18,11 @@ export function createTaskData(
     description: entity.description,
     status: entity.state || "opened",
     custom: false,
-    assignee: { authorId: entity?.assignee?.id ?? "-1", ...entity.assignee },
+    assignee: {
+      authorId: entity.assignee.id,
+      name: entity.assignee.name,
+      username: entity.assignee.username,
+      avatar_url: entity.assignee.avatar_url,
+    },
   };
 }

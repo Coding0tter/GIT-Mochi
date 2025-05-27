@@ -46,25 +46,6 @@ export const syncGitlabAsync = async () => {
   }
 };
 
-export const fetchDiscussionsPaginatedAsync = async (
-  taskId: string,
-  page: number = 1,
-) => {
-  try {
-    const res = await axios.get(`/git/discussions`, {
-      params: { taskId, page, limit: 20 },
-    });
-
-    return res.data;
-  } catch (error) {
-    addNotification({
-      title: "Error",
-      description: "Failed to fetch discussions",
-      type: "error",
-    });
-  }
-};
-
 export const resolveThreadAsync = async (discussion: IDiscussion) => {
   try {
     const task = getColumnTasks().at(keyboardNavigationStore.selectedTaskIndex);
