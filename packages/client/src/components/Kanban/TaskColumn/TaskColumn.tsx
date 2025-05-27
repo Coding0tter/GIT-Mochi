@@ -39,7 +39,9 @@ const TaskColumn = (props: TaskColumnProps) => {
       <h2>
         {props.status.display_name} (
         {props.status.id === "opened"
-          ? props.tasks.filter((item) => item.assignee?.authorId === 75).length
+          ? props.tasks.filter(
+              (item) => item.assignee?.authorId === uiStore.user?.gitlabId,
+            ).length
           : props.tasks.length}
         )
       </h2>
@@ -48,7 +50,10 @@ const TaskColumn = (props: TaskColumnProps) => {
           each={
             props.status.id === "opened"
               ? orderBy(
-                  props.tasks.filter((item) => item.assignee?.authorId === 75),
+                  props.tasks.filter(
+                    (item) =>
+                      item.assignee?.authorId === uiStore.user?.gitlabId,
+                  ),
                   (task) => {
                     const priorityLabel = task.labels
                       ?.find((label: string) => label.includes("priority"))

@@ -26,7 +26,9 @@ export const getColumnTasks = () => {
   );
   if (keyboardNavigationStore.selectedColumnIndex === 0) {
     return orderBy(
-      tasks.filter((item) => item.assignee?.authorId === 75),
+      tasks.filter(
+        (item) => item.assignee?.authorId === uiStore.user?.gitlabId,
+      ),
       (task) => {
         const priorityLabel = task.labels
           ?.find((label: string) => label.includes("priority"))
