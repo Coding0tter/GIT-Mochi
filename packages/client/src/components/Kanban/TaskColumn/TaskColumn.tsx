@@ -6,9 +6,9 @@ import {
   setSelectedTaskForModal,
 } from "@client/stores/modalStore";
 import { uiStore } from "@client/stores/uiStore";
-import { orderBy } from "lodash";
+import { debounce, orderBy } from "lodash";
 import type { ITask } from "shared/types/task";
-import { createEffect, For } from "solid-js";
+import { createEffect, createSignal, For, Index } from "solid-js";
 import styles from "./TaskColumn.module.css";
 
 interface TaskColumnProps {
@@ -18,21 +18,53 @@ interface TaskColumnProps {
 }
 
 const TaskColumn = (props: TaskColumnProps) => {
+  const [tasks, setTasks] = createSignal<Partial<ITask>[]>(props.tasks);
   let taskRefs: HTMLElement[] = [];
+
+  const scrollToTask = debounce((taskIndex: number) => {
+    const el = taskRefs[taskIndex];
+
+    if (el) {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, 100);
+
+  createEffect(() => {
+    setTasks(getTasks());
+  }, [props.tasks]);
 
   createEffect(() => {
     if (
       keyboardNavigationStore.selectedColumnIndex === props.columnIndex &&
       taskRefs[keyboardNavigationStore.selectedTaskIndex]
     ) {
-      setTimeout(() => {
-        taskRefs[keyboardNavigationStore.selectedTaskIndex].scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      });
+      scrollToTask(keyboardNavigationStore.selectedTaskIndex);
     }
   });
+
+  const getTasks = () => {
+    return props.status.id === "opened"
+      ? orderBy(
+          props.tasks.filter(
+            (item) => item.assignee?.authorId === uiStore.user?.gitlabId,
+          ),
+          (task) => {
+            const priorityLabel = task.labels
+              ?.find((label: string) => label.includes("priority"))
+              ?.toLowerCase();
+            if (priorityLabel?.includes("intermediate")) return 1;
+            if (priorityLabel?.includes("staging")) return 2;
+            if (priorityLabel?.includes("high")) return 3;
+            if (priorityLabel?.includes("medium")) return 4;
+            if (priorityLabel?.includes("low")) return 5;
+            return 6;
+          },
+        )
+      : props.tasks;
+  };
 
   return (
     <div class={styles.column} data-status={props.status.id}>
@@ -46,49 +78,29 @@ const TaskColumn = (props: TaskColumnProps) => {
         )
       </h2>
       <section>
-        <For
-          each={
-            props.status.id === "opened"
-              ? orderBy(
-                  props.tasks.filter(
-                    (item) =>
-                      item.assignee?.authorId === uiStore.user?.gitlabId,
-                  ),
-                  (task) => {
-                    const priorityLabel = task.labels
-                      ?.find((label: string) => label.includes("priority"))
-                      ?.toLowerCase();
-                    if (priorityLabel?.includes("intermediate")) return 1;
-                    if (priorityLabel?.includes("staging")) return 2;
-                    if (priorityLabel?.includes("high")) return 3;
-                    if (priorityLabel?.includes("medium")) return 4;
-                    if (priorityLabel?.includes("low")) return 5;
-                    return 6;
-                  },
-                )
-              : props.tasks
-          }
-        >
+        <Index each={tasks()}>
           {(task, taskIndex) => (
             <TaskCard
-              task={task}
+              task={task()}
               isSelected={
                 keyboardNavigationStore.selectedColumnIndex ===
                   props.columnIndex &&
-                (keyboardNavigationStore.selectedTaskIndex === taskIndex() ||
+                (keyboardNavigationStore.selectedTaskIndex === taskIndex ||
                   keyboardNavigationStore.selectedTaskIndexes.includes(
-                    taskIndex(),
+                    taskIndex,
                   ))
               }
               onClick={() => {
-                setSelectedTaskForModal(task);
+                setSelectedTaskForModal(task());
                 openModal(ModalType.TaskDetails);
               }}
-              taskIndex={taskIndex()}
-              setTaskRef={(el) => (taskRefs[taskIndex()] = el)}
+              taskIndex={taskIndex}
+              setTaskRef={(el) => {
+                taskRefs[tasks().indexOf(task())] = el;
+              }}
             />
           )}
-        </For>
+        </Index>
       </section>
     </div>
   );
