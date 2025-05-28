@@ -10,9 +10,6 @@ services:
     volumes:
       - ./packages/client:/app/packages/client
       - ./packages/shared:/app/packages/shared
-    env_file: .env
-    environment:
-      VITE_GIT_URL: ${GIT_URL}
 
   server:
     build:
@@ -26,10 +23,6 @@ services:
       - "6499:6499"
     depends_on:
       - mongo
-    env_file: .env
-    environment:
-      PRIVATE_TOKEN: ${PRIVATE_TOKEN}
-      GIT_URL: ${GIT_URL}
 
   mongo:
     image: mongo:latest

@@ -4,7 +4,12 @@
   gap: var(--spacing-xs);
 }
 
+.discussionAvatar i,
 .discussionAvatar img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-crust);
   width: var(--spacing-xxl);
   height: var(--spacing-xxl);
   border-radius: 50%;

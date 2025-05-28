@@ -14,6 +14,23 @@ export class SettingsController {
     }
   };
 
+  getGitlabUrl = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const config = await this.service.getGitlabConfig();
+
+      if (!config) {
+        res.status(404).json({
+          error: "GitLab configuration not found",
+        });
+        return;
+      }
+
+      res.status(200).json(config.url);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
   validateGitlabConnection = async (
     req: Request,
     res: Response,
