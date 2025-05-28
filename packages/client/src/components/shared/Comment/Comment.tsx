@@ -1,9 +1,9 @@
 import { createSignal } from "solid-js";
-import { GIT_URL } from "../../../constants";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
 import Badge from "../Badge/Badge";
 import styles from "./Comment.module.css";
 import type { IComment } from "shared/types/task";
+import { settingsStore } from "@client/stores/settings.store";
 
 interface CommentProps {
   comment: IComment;
@@ -26,7 +26,7 @@ const CommentCard = ({ comment, selected, id }: CommentProps) => {
           <>
             <div class={styles.commentAvatar}>
               <img
-                src={`${GIT_URL}/uploads/-/system/appearance/header_logo/1/ltdoheader2.png`}
+                src={`${settingsStore.gitlab_url}/uploads/-/system/appearance/header_logo/1/ltdoheader2.png`}
               />
             </div>
             <span class={styles.commentAuthor}>System</span>

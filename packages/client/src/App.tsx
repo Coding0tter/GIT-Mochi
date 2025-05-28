@@ -21,6 +21,7 @@ import { onMount, onCleanup, Show } from "solid-js";
 import styles from "./App.module.css";
 
 import weekday from "dayjs/plugin/weekday";
+import { getGitlabUrl } from "./stores/settings.store";
 
 dayjs.extend(weekday);
 
@@ -34,6 +35,8 @@ const App = (props: any) => {
     if (location.pathname === "/setup") {
       return;
     }
+
+    await getGitlabUrl();
     await fetchRecordingStateAsync();
     await fetchTimeTrackEntries();
     await getUserAsync();

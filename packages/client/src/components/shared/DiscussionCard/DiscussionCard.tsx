@@ -1,12 +1,12 @@
 import { createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import Card from "../Card/Card";
 import styles from "./DiscussionCard.module.css";
-import { GIT_URL } from "../../../constants";
 import Badge from "../Badge/Badge";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
 import dayjs from "dayjs";
 import type { IDiscussion } from "shared/types/task";
 import { modalStore, ModalType } from "@client/stores/modalStore";
+import { settingsStore } from "@client/stores/settings.store";
 
 interface DiscussionCardProps {
   discussion: IDiscussion;
@@ -81,7 +81,7 @@ const DiscussionCard = (props: DiscussionCardProps) => {
               <>
                 <div class={styles.discussionAvatar}>
                   <img
-                    src={`${GIT_URL}/uploads/-/system/appearance/header_logo/1/ltdoheader2.png`}
+                    src={`${settingsStore.gitlab_url}/uploads/-/system/appearance/header_logo/1/ltdoheader2.png`}
                   />
                 </div>
                 <span class={styles.discussionAuthor}>
@@ -132,7 +132,7 @@ const DiscussionCard = (props: DiscussionCardProps) => {
               <>
                 <div class={styles.discussionAvatar}>
                   <img
-                    src={`${GIT_URL}/uploads/-/system/appearance/header_logo/1/ltdoheader2.png`}
+                    src={`${settingsStore.gitlab_url}/uploads/-/system/appearance/header_logo/1/ltdoheader2.png`}
                   />
                 </div>
                 <span class={styles.discussionAuthor}>
@@ -205,7 +205,7 @@ const DiscussionCard = (props: DiscussionCardProps) => {
                           <>
                             <div class={styles.discussionAvatar}>
                               <img
-                                src={`${GIT_URL}/uploads/-/system/appearance/header_logo/1/ltdoheader2.png`}
+                                src={`${settingsStore.gitlab_url}/uploads/-/system/appearance/header_logo/1/ltdoheader2.png`}
                               />
                             </div>
                             <span class={styles.discussionAuthor}>

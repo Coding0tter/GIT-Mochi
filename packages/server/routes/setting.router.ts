@@ -14,6 +14,7 @@ router.get("/lastSync", async (req, res) => {
 });
 
 router.get("/setup-status", controller.getSetupStatus);
+router.get("/gitlab-url", controller.getGitlabUrl);
 router.post("/validate-gitlab", controller.validateGitlabConnection);
 router.post("/gitlab-config", controller.saveGitlabConfig);
 router.post("/complete-setup", controller.completeSetup);

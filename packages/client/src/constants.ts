@@ -8,4 +8,3 @@ export const STATES = [
 
 export const BACKEND_URL = "http://localhost:5000";
 export const SOCKET_URL = "ws://localhost:5000";
-export const GIT_URL = import.meta.env.VITE_GIT_URL;
