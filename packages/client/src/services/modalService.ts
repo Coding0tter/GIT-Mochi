@@ -1,9 +1,10 @@
 import { STATES } from "../constants";
 import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
 import {
+  closeModal,
+  modalStore,
   ModalType,
   openModal,
-  setActiveModal,
   setSelectedAppointmentForModal,
   setSelectedTaskForModal,
 } from "../stores/modalStore";
@@ -14,14 +15,10 @@ export const openHelpModal = () => {
   openModal(ModalType.Help);
 };
 
-export const openFeedbackModal = () => {
-  openModal(ModalType.Feedback);
-};
-
 export const openDeleteModal = () => {
   openModal(ModalType.DeleteTask);
   setSelectedTaskForModal(
-    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]
+    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex],
   );
 };
 
@@ -37,20 +34,20 @@ export const openCreateModal = () => {
 export const openEditTaskModal = () => {
   openModal(ModalType.CreateTask);
   setSelectedTaskForModal(
-    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]
+    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex],
   );
 };
 
 export const openEditAppointmentModal = () => {
   openModal(ModalType.EditAppointment);
   setSelectedAppointmentForModal(
-    timeTrackStore.entries[keyboardNavigationStore.selectedAppointmentIndex]
+    timeTrackStore.entries[keyboardNavigationStore.selectedAppointmentIndex],
   );
 };
 
 export const openDetailsModal = () => {
   setSelectedTaskForModal(
-    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]
+    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex],
   );
 
   openModal(ModalType.TaskDetails);
@@ -58,8 +55,16 @@ export const openDetailsModal = () => {
 
 export const openPipelineModal = () => {
   setSelectedTaskForModal(
-    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex]
+    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex],
   );
 
   openModal(ModalType.Pipeline);
+};
+
+export const getTopModal = () => {
+  return modalStore.activeModals?.at(-1) ?? ModalType.None;
+};
+
+export const closeTopModal = () => {
+  closeModal(getTopModal());
 };

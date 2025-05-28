@@ -4,6 +4,8 @@ export enum KeyboardShortcutCategory {
   GitlabAction = "Gitlab Action",
   CalendarManagement = "Calendar Management",
   Commands = "Commands",
+
+  TaskDetails = "Task Details",
 }
 
 export type KeyboardShortcutMap = {

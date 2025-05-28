@@ -23,6 +23,12 @@ import BaseModal, { type BaseModalProps } from "../BaseModal/BaseModal";
 import styles from "./TaskDetailsModal.module.css";
 import type { IDiscussion } from "shared/types/task";
 import Loading from "@client/components/shared/Loading/Loading";
+import {
+  taskDetailsModalStore,
+  toggleResolvedDiscussions,
+  toggleSystemDiscussions,
+  toggleThreadFocus,
+} from "./task-details-modal.store";
 
 interface TaskDetailsModalProps extends BaseModalProps {}
 
@@ -37,11 +43,6 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
   });
 
   const [selectedDiscussion, setSelectedDiscussion] = createSignal<number>(0);
-  const [toggleSystemDiscussions, setToggleSystemDiscussions] =
-    createSignal(false);
-  const [toggleResolvedDiscussions, setToggleResolvedDiscussions] =
-    createSignal(false);
-  const [isThreadFocused, setIsThreadFocused] = createSignal(false);
 
   onMount(async () => {
     window.addEventListener("keydown", handleKeyDown);
@@ -61,7 +62,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
 
     if (
       (event.key === "j" || event.key === "ArrowDown") &&
-      !isThreadFocused()
+      !taskDetailsModalStore.isThreadFocused
     ) {
       if (selectedDiscussion() < filteredDiscussions().length - 1) {
         setSelectedDiscussion(selectedDiscussion() + 1);
@@ -70,19 +71,13 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
       }
     } else if (
       (event.key === "k" || event.key === "ArrowUp") &&
-      !isThreadFocused()
+      !taskDetailsModalStore.isThreadFocused
     ) {
       if (selectedDiscussion() > 0) {
         setSelectedDiscussion(selectedDiscussion() - 1);
       } else {
         setSelectedDiscussion(filteredDiscussions().length - 1);
       }
-    } else if (event.key === "s") {
-      setToggleSystemDiscussions(!toggleSystemDiscussions());
-    } else if (event.key === "t") {
-      setToggleResolvedDiscussions(!toggleResolvedDiscussions());
-    } else if (event.shiftKey && event.key === "O") {
-      window.open(task!.web_url, "_blank");
     } else if (event.key === "r" && !event.ctrlKey) {
       setSelectedDiscussionForModal(
         filteredDiscussions().at(selectedDiscussion()) || null,
@@ -103,11 +98,12 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
       discussions()
         ?.filter(
           (discussion) =>
-            toggleSystemDiscussions() || !discussion.notes?.[0]?.system,
+            taskDetailsModalStore.showSystem || !discussion.notes?.[0]?.system,
         )
         ?.filter(
           (discussion) =>
-            toggleResolvedDiscussions() || !discussion.notes?.[0]?.resolved,
+            taskDetailsModalStore.showResolved ||
+            !discussion.notes?.[0]?.resolved,
         ) || [],
       (discussion) => {
         const latestNote = orderBy(
@@ -200,7 +196,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
                 <For each={filteredDiscussions()}>
                   {(discussion, index) => (
                     <DiscussionCard
-                      focusThread={setIsThreadFocused}
+                      focusThread={toggleThreadFocus}
                       discussion={discussion}
                       selected={() => index() === selectedDiscussion()}
                       id={`discussion-${index()}`}

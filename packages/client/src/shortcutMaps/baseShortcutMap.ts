@@ -1,4 +1,4 @@
-import { openFeedbackModal, openHelpModal } from "../services/modalService";
+import { openHelpModal } from "../services/modalService";
 import { focusInput } from "../services/uiService";
 import { InputMode } from "../stores/uiStore";
 import ShortcutRegistry from "./shortcutRegistry";

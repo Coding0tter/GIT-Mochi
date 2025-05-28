@@ -1,12 +1,13 @@
-import { useLocation } from "@solidjs/router";
-import styles from "./HelpModal.module.css";
 import BaseModal, {
   type BaseModalProps,
 } from "@client/components/modals/BaseModal/BaseModal";
 import Badge from "@client/components/shared/Badge/Badge";
 import ShortcutRegistry from "@client/shortcutMaps/shortcutRegistry";
 import type { Shortcut } from "@client/shortcutMaps/types";
+import { modalStore } from "@client/stores/modalStore";
+import { useLocation } from "@solidjs/router";
 import { type JSXElement, createSignal, onMount } from "solid-js";
+import styles from "./HelpModal.module.css";
 
 interface HelpModalProps extends BaseModalProps {}
 
@@ -22,7 +23,7 @@ const HelpModal = (props: HelpModalProps): JSXElement => {
         acc[category].push(shortcut);
         return acc;
       },
-      {}
+      {},
     );
   };
 
@@ -31,12 +32,20 @@ const HelpModal = (props: HelpModalProps): JSXElement => {
     const baseMap = ShortcutRegistry.getInstance().getShortcutsByKey("base");
 
     const locationMap = ShortcutRegistry.getInstance().getShortcutsByKey(
-      pathname.split("/")[1]
+      pathname.split("/")[1],
     );
 
     const allShortcuts = baseMap?.shortcuts.concat(
-      locationMap?.shortcuts || []
+      locationMap?.shortcuts || [],
     );
+
+    if (modalStore.activeModals.length >= 2) {
+      const modalMap = ShortcutRegistry.getInstance().getShortcutsByKey(
+        modalStore.activeModals.at(-2)!,
+      );
+
+      allShortcuts?.push(...(modalMap?.shortcuts || []));
+    }
 
     setShortcuts(allShortcuts || []);
   });
