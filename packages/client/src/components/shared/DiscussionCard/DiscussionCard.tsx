@@ -80,9 +80,7 @@ const DiscussionCard = (props: DiscussionCardProps) => {
             {firstNote?.system ? (
               <>
                 <div class={styles.discussionAvatar}>
-                  <img
-                    src={`${settingsStore.gitlab_url}/uploads/-/system/appearance/header_logo/1/ltdoheader2.png`}
-                  />
+                  <i class="fa-solid fa-robot"></i>
                 </div>
                 <span class={styles.discussionAuthor}>
                   System (
@@ -204,9 +202,7 @@ const DiscussionCard = (props: DiscussionCardProps) => {
                         {note.system ? (
                           <>
                             <div class={styles.discussionAvatar}>
-                              <img
-                                src={`${settingsStore.gitlab_url}/uploads/-/system/appearance/header_logo/1/ltdoheader2.png`}
-                              />
+                              <i class="fa-solid fa-robot"></i>
                             </div>
                             <span class={styles.discussionAuthor}>
                               System (

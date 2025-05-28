@@ -6,8 +6,12 @@ export const [settingsStore, setSettingsStore] = createStore({
 });
 
 export const getGitlabUrl = async () => {
-  const res = await axios.get(`/settings/gitlab-url`);
-  const response = res.data;
+  try {
+    const res = await axios.get(`/settings/gitlab-url`);
+    const response = res.data;
 
-  setSettingsStore("gitlab_url", response);
+    setSettingsStore("gitlab_url", response);
+  } catch (error) {
+    console.error("Failed to fetch GitLab URL:", error);
+  }
 };
