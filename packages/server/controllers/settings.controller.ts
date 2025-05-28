@@ -17,7 +17,6 @@ export class SettingsController {
   getGitlabUrl = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const config = await this.service.getGitlabConfig();
-      console.log(config);
 
       if (!config) {
         res.status(404).json({
