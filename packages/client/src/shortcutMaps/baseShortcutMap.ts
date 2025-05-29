@@ -1,4 +1,4 @@
-import { openFeedbackModal, openHelpModal } from "../services/modalService";
+import { closeTopModal, openHelpModal } from "../services/modalService";
 import { focusInput } from "../services/uiService";
 import { InputMode } from "../stores/uiStore";
 import ShortcutRegistry from "./shortcutRegistry";
@@ -7,6 +7,12 @@ import { type KeyboardShortcutMap, KeyboardShortcutCategory } from "./types";
 const shortcuts: KeyboardShortcutMap = {
   key: "base",
   shortcuts: [
+    {
+      key: ["q", "Escape"],
+      action: () => closeTopModal(),
+      category: KeyboardShortcutCategory.Commands,
+      description: "Close modal",
+    },
     {
       key: ":",
       action: () => focusInput(InputMode.Commandline),

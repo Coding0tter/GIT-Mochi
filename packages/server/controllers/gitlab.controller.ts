@@ -22,6 +22,20 @@ export class GitlabController {
     }
   };
 
+  markTodoAsDone = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { id } = req.body;
+      const result = await this.gitlabService.markTodoAsDone(id);
+      res.status(200).json(result);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
   toggleDraft = async (
     req: Request,
     res: Response,

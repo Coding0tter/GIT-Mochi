@@ -5,15 +5,14 @@ import { createStore, reconcile } from "solid-js/store";
 import type { IDiscussion } from "shared/types/task";
 
 export enum ModalType {
-  CreateTask,
-  DeleteTask,
-  TaskDetails,
-  Help,
-  EditAppointment,
-  None,
-  Pipeline,
-  Feedback,
-  Reply,
+  CreateTask = "create-task",
+  DeleteTask = "delete-task",
+  TaskDetails = "task-details",
+  Help = "help",
+  EditAppointment = "edit-appointment",
+  None = "",
+  Pipeline = "pipeline",
+  Reply = "reply",
 }
 
 export const [modalStore, setModalStore] = createStore({
@@ -33,7 +32,7 @@ export const openModal = (type: ModalType) => {
 export const closeModal = (type: ModalType) => {
   setModalStore(
     "activeModals",
-    modalStore.activeModals.filter((modal) => modal !== type)
+    modalStore.activeModals.filter((modal) => modal !== type),
   );
 };
 
@@ -46,7 +45,7 @@ export const setSelectedTaskForModal = (task: Partial<ITask> | null) => {
 };
 
 export const setSelectedAppointmentForModal = (
-  task: Partial<TimeTrackEntry> | null
+  task: Partial<TimeTrackEntry> | null,
 ) => {
   setModalStore("selectedAppointment", reconcile(task as TimeTrackEntry));
 };
@@ -56,7 +55,7 @@ export const setSelectedCommentForModal = (comment: IComment | null) => {
 };
 
 export const setSelectedDiscussionForModal = (
-  discussion: IDiscussion | null
+  discussion: IDiscussion | null,
 ) => {
   setModalStore("selectedDiscussion", reconcile(discussion));
 };
@@ -70,7 +69,7 @@ export const setSelectedTaskValue = (key: string, value: string) => {
 
 export const setSelectedAppointmentValue = (
   key: keyof TimeTrackEntry,
-  value: string
+  value: string,
 ) => {
   if (!modalStore.selectedAppointment) {
     console.error("No selected appointment in modalStore.");

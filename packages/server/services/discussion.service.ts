@@ -10,7 +10,6 @@ export class DiscussionService extends BaseService<IDiscussion> {
 
   async getDiscussionsByTaskId(id: string) {
     try {
-      console.log(id);
       return await super.getAllAsync({ taskId: id });
     } catch (error: any) {
       throw new MochiError("Error fetching discussions", 500, error);

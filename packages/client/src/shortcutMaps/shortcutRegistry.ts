@@ -21,7 +21,10 @@ class ShortcutRegistry {
   }
 
   public async initializeAsync() {
-    const shortcutModules = import.meta.glob("./*ShortcutMap.ts");
+    const shortcutModules = import.meta.glob([
+      "./*ShortcutMap.ts",
+      "./*shortcut-map.ts",
+    ]);
 
     for (const path in shortcutModules) {
       await shortcutModules[path](); // This will load each command file
@@ -42,7 +45,8 @@ class ShortcutRegistry {
     const baseMap = this.getShortcutsByKey("base");
     const map = this.getShortcutsByKey(mapKey);
 
-    const shortCuts = baseMap?.shortcuts.concat(map?.shortcuts || []);
+    const shortCuts = (map?.shortcuts || []).concat(baseMap?.shortcuts || []);
+
     if (shortCuts === undefined || shortCuts?.length === 0) return;
 
     const shortcut = shortCuts.find((sc: Shortcut) => {

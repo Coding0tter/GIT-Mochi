@@ -1,125 +1,51 @@
-import { resolveThreadAsync } from "@client/services/gitlabService";
-import axios from "axios";
-import { orderBy } from "lodash";
+import Loading from "@client/components/shared/Loading/Loading";
 import {
-  createResource,
-  createSignal,
+  discussionStore,
+  fetchDiscussions,
+} from "@client/stores/discussion.store";
+import {
+  getNavIndex,
+  NavigationKeys,
+  setNavIndex,
+} from "@client/stores/keyboardNavigationStore";
+import {
+  createEffect,
   For,
   onCleanup,
   onMount,
   Show,
   Suspense,
 } from "solid-js";
-import {
-  modalStore,
-  ModalType,
-  openModal,
-  setSelectedDiscussionForModal,
-} from "../../../stores/modalStore";
+import { modalStore } from "../../../stores/modalStore";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
 import Badge from "../../shared/Badge/Badge";
 import DiscussionCard from "../../shared/DiscussionCard/DiscussionCard";
 import BaseModal, { type BaseModalProps } from "../BaseModal/BaseModal";
+import { TaskDetailsModalService } from "./task-details-modal.store";
 import styles from "./TaskDetailsModal.module.css";
-import type { IDiscussion } from "shared/types/task";
-import Loading from "@client/components/shared/Loading/Loading";
+import { scrollIntoView } from "@client/utils/scrollIntoView";
+import { LoadingTarget, uiStore } from "@client/stores/uiStore";
 
 interface TaskDetailsModalProps extends BaseModalProps {}
 
 const TaskDetailsModal = (props: TaskDetailsModalProps) => {
   const { selectedTask: task } = modalStore;
 
-  const [discussions] = createResource<IDiscussion[]>(async () => {
-    const res = await axios.get(
-      `/tasks/discussions?id=${task!.gitlabIid}&type=${task!.type}`,
-    );
-    return res.data;
-  });
-
-  const [selectedDiscussion, setSelectedDiscussion] = createSignal<number>(0);
-  const [toggleSystemDiscussions, setToggleSystemDiscussions] =
-    createSignal(false);
-  const [toggleResolvedDiscussions, setToggleResolvedDiscussions] =
-    createSignal(false);
-  const [isThreadFocused, setIsThreadFocused] = createSignal(false);
-
   onMount(async () => {
-    window.addEventListener("keydown", handleKeyDown);
-
-    onCleanup(() => {
-      window.removeEventListener("keydown", handleKeyDown);
-    });
+    if (task) await fetchDiscussions(task.gitlabIid!, task.type!);
   });
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (
-      !discussions() ||
-      discussions()?.length === 0 ||
-      modalStore.activeModals.includes(ModalType.Reply)
-    )
-      return;
+  onCleanup(() => {
+    setNavIndex(NavigationKeys.Discussion, 0);
+  });
 
-    if (
-      (event.key === "j" || event.key === "ArrowDown") &&
-      !isThreadFocused()
-    ) {
-      if (selectedDiscussion() < filteredDiscussions().length - 1) {
-        setSelectedDiscussion(selectedDiscussion() + 1);
-      } else {
-        setSelectedDiscussion(0);
-      }
-    } else if (
-      (event.key === "k" || event.key === "ArrowUp") &&
-      !isThreadFocused()
-    ) {
-      if (selectedDiscussion() > 0) {
-        setSelectedDiscussion(selectedDiscussion() - 1);
-      } else {
-        setSelectedDiscussion(filteredDiscussions().length - 1);
-      }
-    } else if (event.key === "s") {
-      setToggleSystemDiscussions(!toggleSystemDiscussions());
-    } else if (event.key === "t") {
-      setToggleResolvedDiscussions(!toggleResolvedDiscussions());
-    } else if (event.shiftKey && event.key === "O") {
-      window.open(task!.web_url, "_blank");
-    } else if (event.key === "r" && !event.ctrlKey) {
-      setSelectedDiscussionForModal(
-        filteredDiscussions().at(selectedDiscussion()) || null,
-      );
-      openModal(ModalType.Reply);
-    } else if (event.key === "R" && event.shiftKey) {
-      resolveThreadAsync(filteredDiscussions().at(selectedDiscussion())!);
-    }
-
+  createEffect(() => {
     const discussion = document.getElementById(
-      `discussion-${selectedDiscussion()}`,
+      `discussion-${getNavIndex(NavigationKeys.Discussion)}`,
     );
-    discussion?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
-  const filteredDiscussions = () => {
-    return orderBy(
-      discussions()
-        ?.filter(
-          (discussion) =>
-            toggleSystemDiscussions() || !discussion.notes?.[0]?.system,
-        )
-        ?.filter(
-          (discussion) =>
-            toggleResolvedDiscussions() || !discussion.notes?.[0]?.resolved,
-        ) || [],
-      (discussion) => {
-        const latestNote = orderBy(
-          discussion.notes || [],
-          "created_at",
-          "desc",
-        )[0];
-        return latestNote?.created_at || 0;
-      },
-      "desc",
-    );
-  };
+    scrollIntoView(discussion);
+  });
 
   const getPriority = () => {
     const priorityLabel = task?.labels?.find((label) =>
@@ -194,15 +120,21 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
           <div class={styles.divider} />
 
           <h3 class={styles.discussionsHeader}>Discussions</h3>
-          <Suspense fallback={<Loading />}>
-            {discussions() && discussions()!.length > 0 ? (
+          <Show
+            when={uiStore.loadingTarget !== LoadingTarget.LoadDiscussions}
+            fallback={<Loading />}
+          >
+            {discussionStore.discussions &&
+            discussionStore.discussions.length > 0 ? (
               <div class={styles.discussionsContainer}>
-                <For each={filteredDiscussions()}>
+                <For each={TaskDetailsModalService.filteredDiscussions()}>
                   {(discussion, index) => (
                     <DiscussionCard
-                      focusThread={setIsThreadFocused}
+                      focusThread={TaskDetailsModalService.toggleThreadFocus}
                       discussion={discussion}
-                      selected={() => index() === selectedDiscussion()}
+                      selected={() =>
+                        index() === getNavIndex(NavigationKeys.Discussion)
+                      }
                       id={`discussion-${index()}`}
                     />
                   )}
@@ -211,7 +143,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
             ) : (
               <p class={styles.descriptionText}>No discussions yet.</p>
             )}
-          </Suspense>
+          </Show>
         </div>
       </div>
     </BaseModal>

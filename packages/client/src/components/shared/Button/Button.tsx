@@ -5,7 +5,7 @@ type ButtonProps = {
   children: JSXElement | string;
   disabled?: boolean;
   type?: "primary" | "secondary" | "default";
-  onClick: () => void;
+  onClick: (e: MouseEvent) => void;
   style?: any;
 };
 

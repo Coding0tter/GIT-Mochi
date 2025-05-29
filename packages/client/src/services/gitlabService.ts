@@ -112,9 +112,40 @@ export const replyToDiscussionAsync = async (
   }
 };
 
+export const markTodoAsDone = async (id: number) => {
+  try {
+    const res = await axios.post(`/git/mark_as_done`, { id });
+    addNotification({
+      title: "Todo marked as done",
+      description: "The todo has been marked as done",
+      type: "success",
+    });
+    return res;
+  } catch (error) {
+    addNotification({
+      title: "Error",
+      description: "Failed to mark todo as done",
+      type: "error",
+    });
+  }
+};
+
 export const toggleDraft = async (taskId: string) => {
   try {
-    const res = await axios.post(`/git/assign`, { taskId });
+    const res = await axios.post(`/git/toggle-draft`, { taskId });
+    addNotification(
+      res.data.draft
+        ? {
+            title: "Draft enabled",
+            description: "Task is now a draft",
+            type: "success",
+          }
+        : {
+            title: "Draft disabled",
+            description: "Task is no longer a draft",
+            type: "success",
+          },
+    );
     return res;
   } catch (error) {
     addNotification({

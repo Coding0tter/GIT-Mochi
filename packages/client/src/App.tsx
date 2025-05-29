@@ -66,10 +66,6 @@ const App = (props: any) => {
       {modalStore.activeModals.includes(ModalType.Help) && (
         <HelpModal onClose={handleCloseModal} />
       )}
-
-      {modalStore.activeModals.includes(ModalType.Feedback) && (
-        <HelpModal onClose={handleCloseModal} />
-      )}
     </div>
   );
 };

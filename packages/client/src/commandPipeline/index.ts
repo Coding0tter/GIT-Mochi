@@ -1,4 +1,4 @@
-const commandModules = import.meta.glob("./commands/*Command.ts");
+const commandModules = import.meta.glob("./commands/*.command.ts");
 
 for (const path in commandModules) {
   await commandModules[path](); // This will load each command file

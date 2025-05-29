@@ -4,6 +4,7 @@ import { createSignal, onCleanup, onMount } from "solid-js";
 import { closeModal, modalStore, ModalType } from "../../../stores/modalStore";
 import BaseModal, { type BaseModalProps } from "../BaseModal/BaseModal";
 import styles from "./ReplyModal.module.css";
+import { closeTopModal } from "@client/services/modalService";
 
 interface ReplyModalProps extends BaseModalProps {}
 
@@ -18,7 +19,9 @@ const ReplyModal = (props: ReplyModalProps) => {
     }
 
     const handleKeydown = (event: KeyboardEvent) => {
-      if (event.key === "Enter" && event.ctrlKey) {
+      if (event.key === "Escape") {
+        closeTopModal();
+      } else if (event.key === "Enter" && event.ctrlKey) {
         replyToDiscussionAsync(discussion!, reply());
         closeModal(ModalType.Reply);
       }
