@@ -120,6 +120,13 @@ const StatusBar = () => {
         <Badge type="none">
           <strong>{time().format("HH:mm")}</strong>
         </Badge>
+        <Badge
+          onClick={() =>
+            window.open("https://github.com/Coding0tter/GIT-Mochi")
+          }
+        >
+          <i class="fa-brands fa-github" />
+        </Badge>
       </div>
     </div>
   );

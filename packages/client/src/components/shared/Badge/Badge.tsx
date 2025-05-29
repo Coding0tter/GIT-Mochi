@@ -45,7 +45,12 @@ const Badge = ({
   };
 
   return (
-    <span onClick={onClick || copyToClipboard}>
+    <span
+      style={{
+        cursor: onClick || clipBoardText ? "pointer" : "default",
+      }}
+      onClick={onClick || copyToClipboard}
+    >
       {hasTooltip ? (
         <Tooltip text={children}>
           <span
