@@ -35,16 +35,14 @@ const HelpModal = (props: HelpModalProps): JSXElement => {
       pathname.split("/")[1],
     );
 
-    const allShortcuts = baseMap?.shortcuts.concat(
-      locationMap?.shortcuts || [],
-    );
+    let allShortcuts = baseMap?.shortcuts.concat(locationMap?.shortcuts || []);
 
     if (modalStore.activeModals.length >= 2) {
       const modalMap = ShortcutRegistry.getInstance().getShortcutsByKey(
         modalStore.activeModals.at(-2)!,
       );
 
-      allShortcuts?.push(...(modalMap?.shortcuts || []));
+      allShortcuts = baseMap?.shortcuts.concat(modalMap?.shortcuts || []);
     }
 
     setShortcuts(allShortcuts || []);

@@ -173,11 +173,11 @@
   color: var(--color-crust);
 }
 .ribbon {
-  --r: 0.5em; /* control the ribbon shape (the radius) */
+  --r: 0.4em; /* control the ribbon shape (the radius) */
   --c: var(--color-green);
 
   position: absolute;
-  top: 5px;
+  bottom: 35px;
   right: calc(-1 * var(--r));
   line-height: 1.5;
   padding: 0 0.5em calc(2 * var(--r));

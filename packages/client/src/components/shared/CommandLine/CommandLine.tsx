@@ -3,7 +3,7 @@ import { createEffect } from "solid-js";
 import { COMMANDS } from "../../../commandPipeline";
 import { CommandProcessor } from "../../../commandPipeline/commandProcessor";
 import { STATES } from "../../../constants";
-import { closeModalAndUnfocus } from "../../../services/uiService";
+import { unfocusInputs } from "../../../services/uiService";
 import {
   commandStore,
   filteredDropdownValues,
@@ -105,7 +105,7 @@ const CommandLine = () => {
       });
 
       if (event.key === "Enter") {
-        closeModalAndUnfocus();
+        unfocusInputs();
       }
     }
   };

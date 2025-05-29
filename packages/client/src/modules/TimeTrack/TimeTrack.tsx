@@ -1,7 +1,7 @@
 import EditAppointmentModal from "../../components/modals/EditAppointmentModal/EditAppointmentModal";
 import WeekCalendar from "../../components/TimeTrack/WeekCalendar/WeekCalendar";
 import { updateTimeTrackEntryAsync } from "../../services/timeTrackService";
-import { closeModalAndUnfocus } from "../../services/uiService";
+import { unfocusInputs } from "../../services/uiService";
 import {
   handleCloseModal,
   modalStore,
@@ -15,7 +15,7 @@ const TimeTrack = () => {
     if (!timeTrackEntry) return;
 
     await updateTimeTrackEntryAsync(timeTrackEntry);
-    closeModalAndUnfocus();
+    unfocusInputs();
   };
 
   return (

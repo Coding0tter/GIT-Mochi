@@ -10,6 +10,7 @@ import { debounce, orderBy } from "lodash";
 import type { ITask } from "shared/types/task";
 import { createEffect, createSignal, For, Index } from "solid-js";
 import styles from "./TaskColumn.module.css";
+import { scrollIntoView } from "@client/utils/scrollIntoView";
 
 interface TaskColumnProps {
   status: { display_name: string; id: string };
@@ -21,17 +22,6 @@ const TaskColumn = (props: TaskColumnProps) => {
   const [tasks, setTasks] = createSignal<Partial<ITask>[]>(props.tasks);
   let taskRefs: HTMLElement[] = [];
 
-  const scrollToTask = debounce((taskIndex: number) => {
-    const el = taskRefs[taskIndex];
-
-    if (el) {
-      el.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  }, 100);
-
   createEffect(() => {
     setTasks(getTasks());
   }, [props.tasks]);
@@ -41,7 +31,8 @@ const TaskColumn = (props: TaskColumnProps) => {
       keyboardNavigationStore.selectedColumnIndex === props.columnIndex &&
       taskRefs[keyboardNavigationStore.selectedTaskIndex]
     ) {
-      scrollToTask(keyboardNavigationStore.selectedTaskIndex);
+      const el = taskRefs[keyboardNavigationStore.selectedTaskIndex];
+      scrollIntoView(el);
     }
   });
 

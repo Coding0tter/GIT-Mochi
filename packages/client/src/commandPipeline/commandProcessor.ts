@@ -1,5 +1,5 @@
 import type { CommandPipeline } from "@client/commandPipeline/types";
-import { closeModalAndUnfocus } from "@client/services/uiService";
+import { unfocusInputs } from "@client/services/uiService";
 import {
   getActiveDropdownValue,
   setActiveDropdownIndex,
@@ -37,7 +37,7 @@ export class CommandProcessor {
 
   goto = (key: string) => {
     this.currentStepIndex = this.pipeline.steps.findIndex(
-      (step) => step.key === key
+      (step) => step.key === key,
     );
     this.executeCurrentStep();
   };
@@ -48,7 +48,7 @@ export class CommandProcessor {
 
     if (this.currentStepIndex >= this.pipeline.steps.length) {
       resetCommandline();
-      closeModalAndUnfocus();
+      unfocusInputs();
 
       return;
     }
@@ -60,7 +60,7 @@ export class CommandProcessor {
       setDropdownValues(
         typeof step.dropdownValues === "function"
           ? step.dropdownValues()
-          : step.dropdownValues
+          : step.dropdownValues,
       );
     else if (step.cleanDropdown) setDropdownValues([]);
 

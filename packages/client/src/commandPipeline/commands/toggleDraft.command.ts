@@ -1,6 +1,5 @@
 import { toggleDraft } from "../../services/gitlabService";
 import { addNotification } from "../../services/notificationService";
-import { getActiveDropdownValue } from "../../stores/commandStore";
 import { keyboardNavigationStore } from "../../stores/keyboardNavigationStore";
 import { getColumnTasks } from "../../stores/taskStore";
 import { registerCommand } from "../commandRegistry";
@@ -13,7 +12,6 @@ const toggleDraftCommand: CommandPipeline = {
     {
       prompt: "Updating draft flag...",
       executeAsync: async ({ next }) => {
-        const user = getActiveDropdownValue().value;
         const selectedTask =
           getColumnTasks()[keyboardNavigationStore.selectedTaskIndex];
 

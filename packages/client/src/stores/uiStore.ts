@@ -17,6 +17,7 @@ export type Project = {
 };
 
 export enum LoadingTarget {
+  LoadDiscussions,
   Commandline,
   SyncGitlab,
   LoadTasks,

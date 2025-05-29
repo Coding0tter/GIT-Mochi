@@ -9,6 +9,7 @@ import {
   uiStore,
 } from "../stores/uiStore";
 import { closeTopModal, getTopModal, openHelpModal } from "./modalService";
+import { unfocusInputs } from "./uiService";
 
 export const handleKeyDown = async (
   event: KeyboardEvent,
@@ -17,16 +18,11 @@ export const handleKeyDown = async (
 ) => {
   const key = location.pathname.split("/")[1];
 
-  if (event.key === "Escape" || event.key === "q") {
-    if (modalStore.activeModals.length > 0) {
-      const topModal = getTopModal();
-
-      if (topModal) {
-        closeTopModal();
-      }
-    }
-
-    // closeModalAndUnfocus();
+  if (
+    (event.key === "Escape" || event.key === "q") &&
+    !modalStore.activeModals.length
+  ) {
+    unfocusInputs();
     setCalendarMode(CalendarMode.Time);
 
     if (
@@ -73,6 +69,6 @@ export const handleKeyDown = async (
     ShortcutRegistry.getInstance().executeShortcut(key, event);
   } else {
     const topModal = getTopModal();
-    ShortcutRegistry.getInstance().executeShortcut(topModal, event, true);
+    ShortcutRegistry.getInstance().executeShortcut(topModal, event);
   }
 };

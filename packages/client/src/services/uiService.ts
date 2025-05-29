@@ -13,9 +13,7 @@ export const focusInput = (inputMode: InputMode) => {
   }, 0);
 };
 
-export const closeModalAndUnfocus = () => {
-  handleCloseModal();
-
+export const unfocusInputs = () => {
   setTimeout(() => {
     const activeElement = document.activeElement as HTMLElement;
     if (activeElement) {

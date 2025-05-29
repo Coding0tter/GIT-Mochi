@@ -2,6 +2,7 @@ import { STATES } from "../constants";
 import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
 import {
   closeModal,
+  handleCloseModal,
   modalStore,
   ModalType,
   openModal,
@@ -66,5 +67,5 @@ export const getTopModal = () => {
 };
 
 export const closeTopModal = () => {
-  closeModal(getTopModal());
+  handleCloseModal();
 };

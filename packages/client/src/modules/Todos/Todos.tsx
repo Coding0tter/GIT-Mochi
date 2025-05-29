@@ -1,5 +1,6 @@
 import {
   fetchTodosAsync,
+  setTodoStore,
   todoStore,
   type GitlabTodo,
 } from "@client/stores/todoStore";
@@ -10,6 +11,8 @@ import Badge from "@client/components/shared/Badge/Badge";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Loading from "@client/components/shared/Loading/Loading";
+import Button from "@client/components/shared/Button/Button";
+import { markTodoAsDone } from "@client/services/gitlabService";
 
 dayjs.extend(relativeTime);
 
@@ -17,9 +20,9 @@ const Todos = () => {
   const [filter, setFilter] = createSignal<"all" | "pending" | "done">(
     "pending",
   );
-  const [groupBy, setGroupBy] = createSignal<"action" | "type" | "none">(
-    "action",
-  );
+  const [groupBy, setGroupBy] = createSignal<
+    "action" | "type" | "author" | "none"
+  >("action");
   const [collapsedGroups, setCollapsedGroups] = createSignal<Set<string>>(
     new Set(),
   );
@@ -30,7 +33,10 @@ const Todos = () => {
   });
 
   const filteredTodos = () => {
-    const todos = todoStore.todos as GitlabTodo[];
+    const todos = todoStore.todos.filter(
+      (item) => item.state === "pending",
+    ) as GitlabTodo[];
+
     if (filter() === "all") return todos;
 
     return todos.filter((todo) => todo.state === filter());
@@ -104,6 +110,18 @@ const Todos = () => {
       return { "All Todos": todos };
     }
 
+    if (groupBy() === "author") {
+      return todos.reduce(
+        (groups, todo) => {
+          const key = `${todo.author.name}`;
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(todo);
+          return groups;
+        },
+        {} as Record<string, GitlabTodo[]>,
+      );
+    }
+
     if (groupBy() === "action") {
       return todos.reduce(
         (groups, todo) => {
@@ -163,18 +181,6 @@ const Todos = () => {
 
             <div class={styles.todosControls}>
               <div class={styles.filterGroup}>
-                <label>Filter:</label>
-                <select
-                  value={filter()}
-                  onChange={(e) => setFilter(e.currentTarget.value as any)}
-                >
-                  <option value="pending">Pending</option>
-                  <option value="done">Done</option>
-                  <option value="all">All</option>
-                </select>
-              </div>
-
-              <div class={styles.filterGroup}>
                 <label>Group by:</label>
                 <select
                   value={groupBy()}
@@ -182,6 +188,7 @@ const Todos = () => {
                 >
                   <option value="action">Action</option>
                   <option value="type">Type</option>
+                  <option value="author">Author</option>
                   <option value="none">None</option>
                 </select>
               </div>
@@ -295,20 +302,35 @@ const Todos = () => {
                                     />
                                     <span>{todo.author.name}</span>
                                   </div>
-
-                                  <Show when={todo.target.state}>
-                                    <Badge
-                                      type={
-                                        todo.target.state === "opened"
-                                          ? "high"
-                                          : todo.target.state === "closed"
-                                            ? "low"
-                                            : "medium"
-                                      }
+                                  <div>
+                                    <Show when={todo.target.state}>
+                                      <Badge
+                                        type={
+                                          todo.target.state === "opened"
+                                            ? "high"
+                                            : todo.target.state === "closed"
+                                              ? "low"
+                                              : "medium"
+                                        }
+                                      >
+                                        {todo.target.state}
+                                      </Badge>
+                                    </Show>
+                                    <Button
+                                      onClick={async (e) => {
+                                        e.stopPropagation();
+                                        await markTodoAsDone(todo.id);
+                                        setTodoStore("todos", (prev) =>
+                                          prev.filter((t) => t.id !== todo.id),
+                                        );
+                                      }}
+                                      type="default"
                                     >
-                                      {todo.target.state}
-                                    </Badge>
-                                  </Show>
+                                      {todo.state === "pending"
+                                        ? "Mark as Done"
+                                        : "Done"}
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
                             </div>

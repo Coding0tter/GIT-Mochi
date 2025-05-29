@@ -39,19 +39,14 @@ class ShortcutRegistry {
     ShortcutRegistry.shortcutMaps.length = 0;
   }
 
-  public executeShortcut(
-    mapKey: string,
-    event: KeyboardEvent,
-    isModal = false,
-  ) {
+  public executeShortcut(mapKey: string, event: KeyboardEvent) {
     const { key, shiftKey, ctrlKey, altKey } = event;
 
     const baseMap = this.getShortcutsByKey("base");
     const map = this.getShortcutsByKey(mapKey);
 
-    const shortCuts = isModal
-      ? map?.shortcuts
-      : baseMap?.shortcuts.concat(map?.shortcuts || []);
+    const shortCuts = (map?.shortcuts || []).concat(baseMap?.shortcuts || []);
+
     if (shortCuts === undefined || shortCuts?.length === 0) return;
 
     const shortcut = shortCuts.find((sc: Shortcut) => {

@@ -1,5 +1,9 @@
 import { createStore } from "solid-js/store";
 
+export enum NavigationKeys {
+  Discussion,
+}
+
 export const [keyboardNavigationStore, setKeyboardNavigationStore] =
   createStore({
     selectedColumnIndex: 0,
@@ -10,7 +14,7 @@ export const [keyboardNavigationStore, setKeyboardNavigationStore] =
     selectedQuarterHourIndex: 0,
     selectedQuarterHourIndexes: [0] as number[],
     selectedAppointmentIndex: 0,
-    selectedIndices: [] as { key: string; value: number }[],
+    selectedIndices: [] as { key: number; value: number }[],
   });
 
 const updateStoreIndex = <T>(
@@ -27,21 +31,23 @@ const updateStoreIndex = <T>(
   setKeyboardNavigationStore(key, newValue);
 };
 
-export const setIndex = (key: string, index: number) => {
+export const setNavIndex = (key: number, index: number) => {
   setKeyboardNavigationStore("selectedIndices", (prev) => {
     if (prev.some((item) => item.key === key)) {
-      prev.find((item) => item.key === key)!.value = index;
-      return [...prev];
+      return prev.map((item) =>
+        item.key === key ? { key, value: index } : item,
+      );
     }
 
     return [...prev, { key, value: index }];
   });
 };
 
-export const getIndex = (key: string): number | undefined => {
-  return keyboardNavigationStore.selectedIndices.find(
-    (item) => item.key === key,
-  )?.value;
+export const getNavIndex = (key: number): number => {
+  return (
+    keyboardNavigationStore.selectedIndices.find((item) => item.key === key)
+      ?.value ?? 0
+  );
 };
 
 // Individual setter functions using the generic update function

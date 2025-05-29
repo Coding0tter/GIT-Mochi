@@ -269,13 +269,22 @@ export class GitlabService {
     );
   }
 
+  async markTodoAsDone(id: string) {
+    if (!id) throw new MochiError("Todo ID is required", 400);
+
+    await this.gitlabClient.request({
+      endpoint: `/todos/${id}/mark_as_done`,
+      method: "POST",
+    });
+  }
+
   async toggleDraft(taskId: string) {
     const task = await this.taskService.findOneAsync({ _id: taskId });
     if (!task) throw new MochiError("Task not found", 404);
     await this.gitlabClient.request({
       endpoint: `/projects/${task.projectId}/merge_requests/${task.gitlabIid}`,
       method: "PUT",
-      data: { draft: !task.draft },
+      data: { title: task.title.replaceAll("Draft:", ""), draft: !task.draft },
     });
   }
 }

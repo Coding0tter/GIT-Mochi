@@ -191,8 +191,8 @@ export class GitlabClient {
     } catch (error: any) {
       throw new MochiError(
         `GitLab API request failed for ${endpoint} with method ${method} and ${
-          data ? data : "no data"
-        }`,
+          data ? JSON.stringify(data) : "no data"
+        }. ${error.message}`,
         error instanceof AxiosError ? error?.response?.status : 500,
         error,
       );
@@ -237,8 +237,8 @@ export class GitlabClient {
     } catch (error: any) {
       throw new MochiError(
         `GitLab API request failed for ${endpoint} with method ${method} and ${
-          data ? data : "no data"
-        }`,
+          data ? JSON.stringify(data) : "no data"
+        }. ${error.message}`,
         500,
         error,
       );

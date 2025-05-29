@@ -9,6 +9,8 @@ router.post("/create-merge-request", gitlabController.createMergeRequestAsync);
 router.post("/assign", gitlabController.assignToUserAsync);
 router.post("/comment", gitlabController.commentOnTaskAsync);
 router.post("/resolve", gitlabController.resolveThreadAsync);
+router.post("/toggle-draft", gitlabController.toggleDraft);
+router.post("/mark_as_done", gitlabController.markTodoAsDone);
 router.get("/user", gitlabController.getUserAsync);
 router.get("/users", gitlabController.getUsersAsync);
 router.get("/projects", gitlabController.getProjectsAsync);
