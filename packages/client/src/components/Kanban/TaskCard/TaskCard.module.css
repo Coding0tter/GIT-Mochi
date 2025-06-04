@@ -45,6 +45,13 @@
   cursor: pointer;
 }
 
+.dragging {
+  opacity: 0.6;
+  cursor: grabbing;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  user-select: none;
+}
+
 .selectedTask {
   border: 3px solid var(--color-peach) !important;
   background-color: rgba(255, 255, 255, 0.1);

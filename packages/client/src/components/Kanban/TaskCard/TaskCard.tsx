@@ -6,7 +6,7 @@ import styles from "./TaskCard.module.css";
 import xMasHat from "@client/assets/xmas.png";
 import dayjs from "dayjs";
 import { random } from "shared/utils/random";
-import { setDraggedTask } from "@client/stores/dragStore";
+import { dragStore, setDraggedTask } from "@client/stores/dragStore";
 
 interface TaskCardProps {
   task: Partial<ITask>;
@@ -65,9 +65,10 @@ const TaskCard = (props: TaskCardProps) => {
         props.task.custom ? styles.customTask : ""
       } ${props.task.deleted ? styles.deletedTask : ""} ${
         styles[props.task.type as string]
-      }`}
+      } ${dragStore.taskId === props.task._id ? styles.dragging : ""}`}
       style={{
         "view-transition-name": "card-" + props.task._id,
+        "user-select": dragStore.taskId === props.task._id ? "none" : "auto",
       }}
     >
       <p>{props.task.title}</p>
