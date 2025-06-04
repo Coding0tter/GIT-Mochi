@@ -13,6 +13,7 @@ export enum ModalType {
   None = "",
   Pipeline = "pipeline",
   Reply = "reply",
+  BranchName = "branch-name",
 }
 
 export const [modalStore, setModalStore] = createStore({
