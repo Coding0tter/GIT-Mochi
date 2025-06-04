@@ -1,5 +1,9 @@
 import { createSignal, onMount, Show } from "solid-js";
-import { EditOrCreateTaskModal, DeleteModal } from "../../components/modals";
+import {
+  EditOrCreateTaskModal,
+  DeleteModal,
+  BranchNameModal,
+} from "../../components/modals";
 import TaskDetailsModal from "../../components/modals/TaskDetailsModal/TaskDetailsModal";
 import { STATES } from "../../constants";
 import { addNotification } from "../../services/notificationService";
@@ -121,6 +125,9 @@ const KanbanBoard = () => {
       )}
       {modalStore.activeModals.includes(ModalType.Reply) && (
         <ReplyModal onClose={handleCloseModal} />
+      )}
+      {modalStore.activeModals.includes(ModalType.BranchName) && (
+        <BranchNameModal onClose={handleCloseModal} />
       )}
       <div class={styles.kanban}>
         <Show

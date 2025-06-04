@@ -11,6 +11,7 @@ import {
 } from "../stores/modalStore";
 import { getColumnTasks } from "../stores/taskStore";
 import { timeTrackStore } from "../stores/timeTrackStore";
+import type { ITask } from "shared/types/task";
 
 export const openHelpModal = () => {
   openModal(ModalType.Help);
@@ -60,6 +61,11 @@ export const openPipelineModal = () => {
   );
 
   openModal(ModalType.Pipeline);
+};
+
+export const openBranchNameModal = (task: ITask) => {
+  setSelectedTaskForModal(task);
+  openModal(ModalType.BranchName);
 };
 
 export const getTopModal = () => {

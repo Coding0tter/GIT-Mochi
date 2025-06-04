@@ -70,9 +70,9 @@ export class GitlabController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const { issueId } = req.body;
+      const { issueId, branchName } = req.body;
       const result =
-        await this.gitlabService.createGitlabMergeRequestAsync(issueId);
+        await this.gitlabService.createGitlabMergeRequestAsync(issueId, branchName);
       res.status(200).json(result);
     } catch (error) {
       handleControllerError(error, next);
