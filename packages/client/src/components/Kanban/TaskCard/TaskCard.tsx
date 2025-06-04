@@ -6,13 +6,17 @@ import styles from "./TaskCard.module.css";
 import xMasHat from "@client/assets/xmas.png";
 import dayjs from "dayjs";
 import { random } from "shared/utils/random";
+import { setDraggedTask } from "@client/stores/dragStore";
 
 interface TaskCardProps {
   task: Partial<ITask>;
   isSelected: boolean;
   onClick: () => void;
   taskIndex: number;
+  columnIndex: number;
   setTaskRef: (el: HTMLElement) => void;
+  onDragOver?: (e: DragEvent) => void;
+  onDrop?: (e: DragEvent) => void;
 }
 
 const TaskCard = (props: TaskCardProps) => {
@@ -50,6 +54,13 @@ const TaskCard = (props: TaskCardProps) => {
     <div
       onClick={props.onClick}
       ref={props.setTaskRef}
+      draggable
+      onDragOver={props.onDragOver}
+      onDrop={props.onDrop}
+      onDragStart={() => {
+        setDraggedTask(props.task._id as string, props.columnIndex);
+      }}
+      onDragEnd={() => setDraggedTask(null, null)}
       class={`${styles.task} ${props.isSelected ? styles.selectedTask : ""} ${
         props.task.custom ? styles.customTask : ""
       } ${props.task.deleted ? styles.deletedTask : ""} ${

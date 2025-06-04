@@ -11,6 +11,14 @@ import type { ITask } from "shared/types/task";
 import { createEffect, createSignal, For, Index } from "solid-js";
 import styles from "./TaskColumn.module.css";
 import { scrollIntoView } from "@client/utils/scrollIntoView";
+import { dragStore, setDraggedTask } from "@client/stores/dragStore";
+import {
+  updateTaskAsync,
+  updateTaskOrderAsync,
+  fetchTasksAsync,
+} from "@client/services/taskService";
+import { taskStore } from "@client/stores/taskStore";
+import { STATES } from "@client/constants";
 
 interface TaskColumnProps {
   status: { display_name: string; id: string };
@@ -57,6 +65,44 @@ const TaskColumn = (props: TaskColumnProps) => {
       : props.tasks;
   };
 
+  const handleDrop = async (targetIndex: number) => {
+    if (!dragStore.taskId) return;
+
+    const draggedTask = taskStore.tasks.find(
+      (t) => t._id === dragStore.taskId,
+    ) as ITask | undefined;
+    if (!draggedTask) return;
+
+    const fromColumnStatus = STATES[dragStore.fromColumnIndex ?? 0].id;
+    const toStatus = STATES[props.columnIndex].id;
+
+    // Update status if column changed
+    if (fromColumnStatus !== toStatus) {
+      await updateTaskAsync(draggedTask._id as string, { status: toStatus });
+      draggedTask.status = toStatus;
+    }
+
+    // Build new order for tasks in this column
+    const columnTasks = orderBy(
+      taskStore.tasks.filter(
+        (t) => t.status === toStatus && t._id !== draggedTask._id,
+      ),
+      "order",
+    );
+
+    columnTasks.splice(targetIndex, 0, draggedTask);
+
+    const updatedOrderIds = columnTasks.map((t, idx) => {
+      t.order = idx;
+      return t._id as string;
+    });
+
+    await updateTaskOrderAsync(updatedOrderIds);
+    await fetchTasksAsync();
+
+    setDraggedTask(null, null);
+  };
+
   return (
     <div class={styles.column} data-status={props.status.id}>
       <h2>
@@ -68,11 +114,23 @@ const TaskColumn = (props: TaskColumnProps) => {
           : props.tasks.length}
         )
       </h2>
-      <section>
+      <section
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          handleDrop(tasks().length);
+        }}
+      >
         <Index each={tasks()}>
           {(task, taskIndex) => (
             <TaskCard
               task={task()}
+              columnIndex={props.columnIndex}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                handleDrop(taskIndex());
+              }}
               isSelected={
                 keyboardNavigationStore.selectedColumnIndex ===
                   props.columnIndex &&
@@ -85,7 +143,7 @@ const TaskColumn = (props: TaskColumnProps) => {
                 setSelectedTaskForModal(task());
                 openModal(ModalType.TaskDetails);
               }}
-              taskIndex={taskIndex}
+              taskIndex={taskIndex()}
               setTaskRef={(el) => {
                 taskRefs[tasks().indexOf(task())] = el;
               }}
