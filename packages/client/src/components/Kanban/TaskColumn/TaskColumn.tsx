@@ -11,6 +11,7 @@ import type { ITask } from "shared/types/task";
 import { createEffect, createSignal, For, Index } from "solid-js";
 import styles from "./TaskColumn.module.css";
 import { scrollIntoView } from "@client/utils/scrollIntoView";
+import { orderPriorityLabels } from "@client/utils/orderLabels";
 
 interface TaskColumnProps {
   status: { display_name: string; id: string };
@@ -43,9 +44,10 @@ const TaskColumn = (props: TaskColumnProps) => {
             (item) => item.assignee?.authorId === uiStore.user?.gitlabId,
           ),
           (task) => {
-            const priorityLabel = task.labels
-              ?.find((label: string) => label.includes("priority"))
+            const priorityLabel = orderPriorityLabels(task.labels ?? [])
+              .at(0)
               ?.toLowerCase();
+
             if (priorityLabel?.includes("intermediate")) return 1;
             if (priorityLabel?.includes("staging")) return 2;
             if (priorityLabel?.includes("high")) return 3;

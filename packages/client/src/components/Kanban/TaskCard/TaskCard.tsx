@@ -6,6 +6,8 @@ import styles from "./TaskCard.module.css";
 import xMasHat from "@client/assets/xmas.png";
 import dayjs from "dayjs";
 import { random } from "shared/utils/random";
+import { orderBy, sortBy } from "lodash";
+import { orderPriorityLabels } from "@client/utils/orderLabels";
 
 interface TaskCardProps {
   task: Partial<ITask>;
@@ -17,12 +19,10 @@ interface TaskCardProps {
 
 const TaskCard = (props: TaskCardProps) => {
   const getPriorityLabel = (task: Partial<ITask>) => {
-    const label = task.labels?.find((item: string) =>
-      item.toLowerCase().includes("priority"),
-    );
+    const labels = orderPriorityLabels(task.labels ?? []);
 
-    if (label) {
-      return label.split("priority/")[1].toLowerCase();
+    if (labels) {
+      return labels.at(0)?.split("priority/")[1].toLowerCase();
     }
 
     return "";

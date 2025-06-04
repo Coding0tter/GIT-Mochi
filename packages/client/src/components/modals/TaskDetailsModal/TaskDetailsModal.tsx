@@ -25,6 +25,7 @@ import { TaskDetailsModalService } from "./task-details-modal.store";
 import styles from "./TaskDetailsModal.module.css";
 import { scrollIntoView } from "@client/utils/scrollIntoView";
 import { LoadingTarget, uiStore } from "@client/stores/uiStore";
+import { orderPriorityLabels } from "@client/utils/orderLabels";
 
 interface TaskDetailsModalProps extends BaseModalProps {}
 
@@ -48,9 +49,7 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
   });
 
   const getPriority = () => {
-    const priorityLabel = task?.labels?.find((label) =>
-      label.includes("priority"),
-    );
+    const priorityLabel = orderPriorityLabels(task?.labels ?? []).at(0);
     if (priorityLabel && priorityLabel.includes("/")) {
       return priorityLabel.split("/")[1].toLowerCase();
     }

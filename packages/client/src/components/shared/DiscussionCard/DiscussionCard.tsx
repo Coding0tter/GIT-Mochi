@@ -156,6 +156,7 @@ const DiscussionCard = (props: DiscussionCardProps) => {
             )}
             <div class={styles.resolvedBadge}>
               {firstNote?.resolved && <Badge type="low">Resolved</Badge>}
+              {firstNote?.resolvable && <Badge type="medium">Resolvable</Badge>}
             </div>
           </div>
           <div>

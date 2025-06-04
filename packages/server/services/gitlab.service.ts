@@ -9,12 +9,6 @@ import { UserService } from "@server/services/user.service";
 import SocketHandler from "@server/sockets";
 import { ContextKeys, getContext } from "@server/utils/asyncContext";
 import { fetchAllFromPaginatedApiAsync } from "@server/utils/fetchAllFromPaginatedApi";
-    if (!/^[A-Za-z0-9._-]+$/.test(desiredBranch)) {
-      throw new GitlabError("Invalid branch name", 400);
-    }
-    if (!branchName) {
-      throw new GitlabError("Invalid branch name", 400);
-    }
 import { transformNote } from "@server/utils/transformHelpers";
 import type { IDiscussion, ITask } from "shared/types/task";
 
@@ -34,6 +28,9 @@ export class GitlabService {
     if (!issue) throw new GitlabError("Issue not found", 404);
 
     const desiredBranch = branchName ?? issue.gitlabIid!.toString();
+    if (!/^[A-Za-z0-9._-]+$/.test(desiredBranch)) {
+      throw new GitlabError("Invalid branch name", 400);
+    }
     try {
       await this.createBranch(currentProject.id, desiredBranch);
     } catch (e) {
@@ -83,6 +80,10 @@ export class GitlabService {
 
   @ruleEvent(EventNamespaces.GitLab, EventTypes.CreateBranch)
   private async createBranch(projectId: string, branchName: string) {
+    if (!branchName) {
+      throw new GitlabError("Invalid branch name", 400);
+    }
+
     await this.gitlabClient.request({
       endpoint: `/projects/${projectId}/repository/branches`,
       method: "POST",
@@ -122,11 +123,19 @@ export class GitlabService {
     const openMergeRequests = await this.taskService.getAllAsync({
       type: "merge_request",
       status: { $nin: ["closed"] },
+      deleted: false,
     });
 
     const staleIssues = await this.taskService.getAllAsync({
       type: "issue",
       status: { $nin: ["closed"] },
+      deleted: false,
+    });
+
+    const closedTasks = await this.taskService.getAllAsync({
+      custom: false,
+      status: { $in: ["closed"] },
+      deleted: false,
     });
 
     for (const task of staleIssues) {
@@ -136,7 +145,16 @@ export class GitlabService {
       });
 
       if (taskRequest.state === "closed") {
-        await this.taskService.setDeletedAsync(task._id as string);
+        await this.taskEmitter.updateTaskAsync(task._id as string, {
+          status: "closed",
+          deleted: true,
+        });
+
+        changes.push({
+          ...task,
+          status: "closed",
+          deleted: true,
+        });
       }
     }
 
@@ -145,11 +163,27 @@ export class GitlabService {
         endpoint: `/projects/${mr.projectId}/merge_requests/${mr.gitlabIid}`,
         method: "GET",
       });
+
       if (mergeRequest.state === "merged" || mergeRequest.state === "closed") {
         await this.taskEmitter.updateTaskAsync(mr._id as string, {
           status: "closed",
         });
         changes.push({ ...mr, status: "closed" });
+      }
+    }
+
+    for (const task of closedTasks) {
+      const gitlabEntity = await this.gitlabClient.request({
+        endpoint: `/projects/${task.projectId}/${task.type}s/${task.gitlabIid}`,
+        method: "GET",
+      });
+
+      if (gitlabEntity.state === "closed" || gitlabEntity.state === "merged") {
+        await this.taskEmitter.updateTaskAsync(task._id as string, {
+          status: "closed",
+          deleted: true,
+        });
+        changes.push({ ...task, status: "closed", deleted: true });
       }
     }
 
