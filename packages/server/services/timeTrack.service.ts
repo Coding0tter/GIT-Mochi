@@ -61,10 +61,11 @@ class TimeTrackService extends BaseService<ITimeTrackEntry> {
 
   public async getTimetrackEntriesAsync(): Promise<ITimeTrackEntry[]> {
     const startOfWeek = new Date();
+    startOfWeek.setHours(0, 0, 0, 0);
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
 
-    const endOfWeek = new Date();
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(endOfWeek.getDate() + 7);
 
     return this.repository.getAllAsync({
       start: { $gte: startOfWeek, $lt: endOfWeek },

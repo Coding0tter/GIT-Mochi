@@ -39,7 +39,7 @@ export class TimeTrackController {
     }
   };
 
-  getRecoringStateAsync = async (
+  getRecordingStateAsync = async (
     req: Request,
     res: Response,
     next: NextFunction,
