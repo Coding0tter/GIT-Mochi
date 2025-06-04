@@ -6,11 +6,13 @@ import CommandLine from "../CommandLine/CommandLine";
 import styles from "./Header.module.css";
 import { random } from "lodash";
 import { WaveText } from "../WaveText/WaveText";
+import dayjs from "dayjs";
 
 const slogans = ["vim-like", "keyboard-first", "mice-are-for-cats", "h-j-k-l"];
 
 const Header = (): JSXElement => {
   const [slogan, setSlogan] = createSignal<string>("");
+  const isJune = dayjs().month() === 5;
 
   onMount(async () => {
     const randomIndex = random(slogans.length);
@@ -21,7 +23,7 @@ const Header = (): JSXElement => {
 
   return (
     <div
-      class={styles.headerContainer}
+      class={`${styles.headerContainer} ${isJune ? styles.pride : ""}`}
       style={{ "view-transition-name": "header" }}
     >
       <div class={styles.headerRow}>

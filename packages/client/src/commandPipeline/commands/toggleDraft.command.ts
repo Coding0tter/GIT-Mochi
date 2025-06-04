@@ -1,5 +1,4 @@
 import { toggleDraft } from "../../services/gitlabService";
-import { addNotification } from "../../services/notificationService";
 import { keyboardNavigationStore } from "../../stores/keyboardNavigationStore";
 import { getColumnTasks } from "../../stores/taskStore";
 import { registerCommand } from "../commandRegistry";
@@ -16,12 +15,6 @@ const toggleDraftCommand: CommandPipeline = {
           getColumnTasks()[keyboardNavigationStore.selectedTaskIndex];
 
         await toggleDraft(selectedTask._id!);
-
-        addNotification({
-          title: "Draft flag toggled",
-          description: "Draft flag has been toggled",
-          type: "success",
-        });
 
         next();
       },

@@ -6,11 +6,12 @@ import { UserService } from "@server/services/user.service";
 import { createTaskData } from "@server/utils/taskUtils";
 import type { Syncer } from "shared/types/syncer";
 import type { ITask } from "shared/types/task";
-import { logInfo } from "@server/utils/logger";
+import { logError, logInfo } from "@server/utils/logger";
 import { SettingKeys } from "shared";
 import { GitlabClient } from "@server/clients/gitlab.client";
 import PipelineProcessor from "./gitlab/pipeline.processor";
 import NoteCountProcessor from "./gitlab/noteCount.processor";
+import SocketHandler from "@server/sockets";
 
 export class GitlabSync implements Syncer {
   name = "GitLab";
@@ -65,7 +66,10 @@ export class GitlabSync implements Syncer {
     );
 
     logInfo("Finished syncing GitLab data...");
-    return [...mergeRequestUpdates, ...issueUpdates];
+    const changes = [...mergeRequestUpdates, ...issueUpdates];
+
+    SocketHandler.getInstance().getIO().emit("updateTasks", changes);
+    return changes;
   }
 
   private async syncEntities(
@@ -74,40 +78,45 @@ export class GitlabSync implements Syncer {
     userId: number,
     lastSyncDate: Date | null,
   ): Promise<ITask[]> {
-    const myEntities = await this.client.getMyEntities(
-      type,
-      userId,
-      projectId,
-      lastSyncDate,
-    );
+    try {
+      const myEntities = await this.client.getMyEntities(
+        type,
+        userId,
+        projectId,
+        lastSyncDate,
+      );
 
-    const localEntities = await this.taskService.getAllAsync({
-      custom: false,
-      deleted: false,
-      gitlabId: { $ne: null },
-      type: type,
-    });
+      const localEntities = await this.taskService.getAllAsync({
+        custom: false,
+        deleted: false,
+        gitlabId: { $ne: null },
+        type: type,
+      });
 
-    const [otherEntities, deadTasks] = await this.client.getOtherEntities(
-      type,
-      projectId,
-      localEntities.map((t) => t.gitlabIid!),
-      lastSyncDate,
-    );
+      const [otherEntities, deadTasks] = await this.client.getOtherEntities(
+        type,
+        projectId,
+        localEntities.map((t) => t.gitlabIid!),
+        lastSyncDate,
+      );
 
-    await Promise.all(
-      deadTasks.map(
-        async (item) => await this.taskService.setDeletedAsync(item),
-      ),
-    );
+      await Promise.all(
+        deadTasks.map(
+          async (item) => await this.taskService.setDeletedAsync(item),
+        ),
+      );
 
-    const updateTasks = await Promise.all(
-      [...myEntities, ...otherEntities].map(
-        async (entity) => await this.processEntity(entity, type, projectId),
-      ),
-    );
+      const updateTasks = await Promise.all(
+        [...myEntities, ...otherEntities].map(
+          async (entity) => await this.processEntity(entity, type, projectId),
+        ),
+      );
 
-    return updateTasks.filter((t) => t && !t.deleted) as ITask[];
+      return updateTasks.filter((t) => t && !t.deleted) as ITask[];
+    } catch (error: any) {
+      logError(new MochiError(`GitLab sync error: ${error.message}`));
+      return [];
+    }
   }
 
   private async processEntity(
@@ -115,49 +124,58 @@ export class GitlabSync implements Syncer {
     entityType: "merge_request" | "issue",
     projectId: string,
   ) {
-    const existingTask = await this.taskService.findOneAsync({
-      gitlabId: entity.id,
-    });
+    try {
+      const existingTask = await this.taskService.findOneAsync({
+        gitlabId: entity.id,
+      });
 
-    if (existingTask?.deleted) return null;
-    if (!entity.assignee) {
-      return null;
-    }
+      if (existingTask?.deleted) return null;
+      if (!entity.assignee) {
+        return null;
+      }
 
-    const taskData = createTaskData(entity, entityType);
+      const taskData = createTaskData(entity, entityType);
 
-    for (const processor of this.fieldProcessors) {
-      if (processor.shouldProcess(taskData)) {
-        try {
-          await processor.process(entity, taskData, projectId);
-        } catch (e: any) {
-          throw new MochiError(
-            `Error processing ${processor.fieldName} for ${taskData.title}: ${e.message}`,
-          );
+      for (const processor of this.fieldProcessors) {
+        if (processor.shouldProcess(taskData)) {
+          try {
+            await processor.process(entity, taskData, projectId);
+          } catch (e: any) {
+            throw new MochiError(
+              `Error processing ${processor.fieldName} for ${taskData.title}: ${e.message}`,
+            );
+          }
         }
       }
+
+      let result: any;
+
+      if (existingTask) {
+        result = await this.taskService.updateTaskAsync(existingTask._id, {
+          title: taskData.title,
+          labels: taskData.labels,
+          draft: taskData.draft,
+          branch: taskData.branch,
+          relevantDiscussionCount: taskData.relevantDiscussionCount ?? 0,
+          pipelineStatus: taskData.pipelineStatus,
+          latestPipelineId: taskData.latestPipelineId,
+          pipelineReports: taskData.pipelineReports,
+          assignee: taskData.assignee,
+          milestoneId: taskData.milestoneId,
+        });
+      } else {
+        result = await this.taskEmitter.createTaskAsync(projectId, taskData);
+      }
+
+      if (result?.error) throw result.error;
+
+      return result?.data;
+    } catch (error: any) {
+      logError(
+        new MochiError(
+          `Error processing entity ${entity.title}: ${error.message}`,
+        ),
+      );
     }
-
-    let result: any;
-    if (existingTask) {
-      result = await this.taskService.updateTaskAsync(existingTask._id, {
-        title: taskData.title,
-        labels: taskData.labels,
-        draft: taskData.draft,
-        branch: taskData.branch,
-        relevantDiscussionCount: taskData.relevantDiscussionCount ?? 0,
-        pipelineStatus: taskData.pipelineStatus,
-        latestPipelineId: taskData.latestPipelineId,
-        pipelineReports: taskData.pipelineReports,
-        assignee: taskData.assignee,
-        milestoneId: taskData.milestoneId,
-      });
-    } else {
-      result = await this.taskEmitter.createTaskAsync(projectId, taskData);
-    }
-
-    if (result?.error) throw result.error;
-
-    return result?.data;
   }
 }

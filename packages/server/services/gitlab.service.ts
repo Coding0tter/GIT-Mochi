@@ -126,11 +126,19 @@ export class GitlabService {
     const openMergeRequests = await this.taskService.getAllAsync({
       type: "merge_request",
       status: { $nin: ["closed"] },
+      deleted: false,
     });
 
     const staleIssues = await this.taskService.getAllAsync({
       type: "issue",
       status: { $nin: ["closed"] },
+      deleted: false,
+    });
+
+    const closedTasks = await this.taskService.getAllAsync({
+      custom: false,
+      status: { $in: ["closed"] },
+      deleted: false,
     });
 
     for (const task of staleIssues) {
@@ -140,7 +148,16 @@ export class GitlabService {
       });
 
       if (taskRequest.state === "closed") {
-        await this.taskService.setDeletedAsync(task._id as string);
+        await this.taskEmitter.updateTaskAsync(task._id as string, {
+          status: "closed",
+          deleted: true,
+        });
+
+        changes.push({
+          ...task,
+          status: "closed",
+          deleted: true,
+        });
       }
     }
 
@@ -149,11 +166,27 @@ export class GitlabService {
         endpoint: `/projects/${mr.projectId}/merge_requests/${mr.gitlabIid}`,
         method: "GET",
       });
+
       if (mergeRequest.state === "merged" || mergeRequest.state === "closed") {
         await this.taskEmitter.updateTaskAsync(mr._id as string, {
           status: "closed",
         });
         changes.push({ ...mr, status: "closed" });
+      }
+    }
+
+    for (const task of closedTasks) {
+      const gitlabEntity = await this.gitlabClient.request({
+        endpoint: `/projects/${task.projectId}/${task.type}s/${task.gitlabIid}`,
+        method: "GET",
+      });
+
+      if (gitlabEntity.state === "closed" || gitlabEntity.state === "merged") {
+        await this.taskEmitter.updateTaskAsync(task._id as string, {
+          status: "closed",
+          deleted: true,
+        });
+        changes.push({ ...task, status: "closed", deleted: true });
       }
     }
 

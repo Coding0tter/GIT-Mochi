@@ -1,6 +1,14 @@
 .waveText {
   display: flex;
   overflow: hidden;
+
+  --color-start: var(--color-blue);
+  --color-end: var(--color-sapphire);
+
+  &.pride {
+    --color-start: var(--color-crust);
+    --color-end: var(--color-yellow);
+  }
 }
 
 .waveText span {
@@ -23,9 +31,9 @@
 @keyframes waveColor {
   0%,
   100% {
-    color: var(--color-blue);
+    color: var(--color-start);
   }
   50% {
-    color: var(--color-sapphire);
+    color: var(--color-end);
   }
 }
