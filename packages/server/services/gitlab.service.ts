@@ -9,6 +9,12 @@ import { UserService } from "@server/services/user.service";
 import SocketHandler from "@server/sockets";
 import { ContextKeys, getContext } from "@server/utils/asyncContext";
 import { fetchAllFromPaginatedApiAsync } from "@server/utils/fetchAllFromPaginatedApi";
+    if (!/^[A-Za-z0-9._-]+$/.test(desiredBranch)) {
+      throw new GitlabError("Invalid branch name", 400);
+    }
+    if (!branchName) {
+      throw new GitlabError("Invalid branch name", 400);
+    }
 import { transformNote } from "@server/utils/transformHelpers";
 import type { IDiscussion, ITask } from "shared/types/task";
 

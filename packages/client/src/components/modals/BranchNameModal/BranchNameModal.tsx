@@ -1,3 +1,28 @@
+  const validBranchName = (name: string) => {
+    return /^[A-Za-z0-9._-]+$/.test(name) && name.trim().length > 0;
+  };
+
+    if (!issueId) {
+      addNotification({
+        title: "Error",
+        description: "No issue selected",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!validBranchName(branchName())) {
+      addNotification({
+        title: "Error",
+        description: "Invalid branch name",
+        type: "error",
+      });
+      return;
+    }
+
+        <label for="branch-name">Branch name</label>
+          id="branch-name"
+          aria-label="Branch name"
 import { createSignal, onMount, type JSXElement } from "solid-js";
 import BaseModal, { type BaseModalProps } from "../BaseModal/BaseModal";
 import { closeModal, modalStore, ModalType } from "@client/stores/modalStore";

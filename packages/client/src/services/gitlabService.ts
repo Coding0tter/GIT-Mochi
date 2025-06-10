@@ -181,9 +181,17 @@ export const createMergeRequestAndBranchForSelectedTaskAsync = async () => {
   const columnTasks = getColumnTasks();
   const task = columnTasks[keyboardNavigationStore.selectedTaskIndex];
   if (task.type === "issue") {
+    if (!task.gitlabIid) {
+      addNotification({
+        title: "Error",
+        description: "Issue does not have a GitLab IID",
+        type: "error",
+      });
+      return;
+    }
     try {
       const { mergeRequest } = await createMergeRequestAndBranchAsync(
-        task.gitlabIid?.toString() || "",
+        task.gitlabIid.toString(),
       );
       addNotification({
         title: "Branch and Merge request created",
@@ -238,6 +246,9 @@ export const createMergeRequestAndBranchAsync = async (
   issueId: string,
   branchName?: string,
 ) => {
+  if (!issueId) {
+    throw new Error("Missing issue ID");
+  }
   const res = await axios.post(`/git/create-merge-request`, {
     issueId,
     branchName,
