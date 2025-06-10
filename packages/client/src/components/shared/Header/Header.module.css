@@ -10,6 +10,52 @@
   gap: var(--spacing-xs);
   background-color: var(--color-base);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+
+  &.pride {
+    background:
+      conic-gradient(
+        at 14% 50%,
+        #0000 221.25deg,
+        white 222deg 318deg,
+        #0000 318.25deg
+      ),
+      conic-gradient(
+        at 23% 50%,
+        #0000 221.25deg,
+        #ffa6b9 222deg 318deg,
+        #0000 318.25deg
+      ),
+      conic-gradient(
+        at 32% 50%,
+        #0000 221.25deg,
+        #00d2ff 222deg 318deg,
+        #0000 318.25deg
+      ),
+      conic-gradient(
+        at 41% 50%,
+        #0000 221.25deg,
+        #753000 222deg 318deg,
+        #0000 318.25deg
+      ),
+      conic-gradient(
+        at 50% 50%,
+        #0000 221.25deg,
+        black 222deg 318deg,
+        #0000 318.25deg
+      ),
+      linear-gradient(
+        red 0 16.66%,
+        orange 0 33.33%,
+        yellow 0 50%,
+        green 0 66.66%,
+        blue 0 83.33%,
+        indigo 0
+      );
+
+    h1 {
+      color: var(--color-crust);
+    }
+  }
 }
 
 .headerRow {
@@ -51,7 +97,7 @@
       height: 100%;
       border-radius: 50%;
       object-fit: cover;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 5px 5px rgba(0, 0, 0, 0.5);
     }
 
     span {

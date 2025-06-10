@@ -1,5 +1,6 @@
 import { For } from "solid-js";
 import styles from "./WaveText.module.css";
+import dayjs from "dayjs";
 
 interface WaveTextProps {
   text: () => string;
@@ -7,8 +8,12 @@ interface WaveTextProps {
 }
 
 export function WaveText(props: WaveTextProps) {
+  const isJune = dayjs().month() === 5;
+
   return (
-    <div class={`${styles.waveText} ${props.class || ""}`}>
+    <div
+      class={`${styles.waveText} ${isJune ? styles.pride : ""} ${props.class || ""}`}
+    >
       <For each={props.text().split("")}>
         {(char, index) => (
           <span

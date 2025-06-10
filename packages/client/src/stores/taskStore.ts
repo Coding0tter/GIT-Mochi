@@ -8,6 +8,7 @@ import axios from "axios";
 import { orderBy } from "lodash";
 import Fuse, { type IFuseOptions } from "fuse.js";
 import type { ITask, IComment } from "shared/types/task";
+import { orderPriorityLabels } from "@client/utils/orderLabels";
 
 interface TaskStore {
   tasks: Partial<ITask>[];
@@ -30,9 +31,10 @@ export const getColumnTasks = () => {
         (item) => item.assignee?.authorId === uiStore.user?.gitlabId,
       ),
       (task) => {
-        const priorityLabel = task.labels
-          ?.find((label: string) => label.includes("priority"))
+        const priorityLabel = orderPriorityLabels(task.labels ?? [])
+          .at(0)
           ?.toLowerCase();
+
         if (priorityLabel?.includes("intermediate")) return 1;
         if (priorityLabel?.includes("staging")) return 2;
         if (priorityLabel?.includes("high")) return 3;
