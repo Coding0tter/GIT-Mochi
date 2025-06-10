@@ -9,11 +9,13 @@ import { UserService } from "@server/services/user.service";
 import SocketHandler from "@server/sockets";
 import { ContextKeys, getContext } from "@server/utils/asyncContext";
 import { fetchAllFromPaginatedApiAsync } from "@server/utils/fetchAllFromPaginatedApi";
-import {
-  transformDiscussion,
-  transformNote,
-} from "@server/utils/transformHelpers";
-import type { IPagination } from "shared/types/pagination";
+    if (!/^[A-Za-z0-9._-]+$/.test(desiredBranch)) {
+      throw new GitlabError("Invalid branch name", 400);
+    }
+    if (!branchName) {
+      throw new GitlabError("Invalid branch name", 400);
+    }
+import { transformNote } from "@server/utils/transformHelpers";
 import type { IDiscussion, ITask } from "shared/types/task";
 
 export class GitlabService {
@@ -22,7 +24,7 @@ export class GitlabService {
   private userService = new UserService();
   private gitlabClient = new GitlabClient();
 
-  async createGitlabMergeRequestAsync(issueId: string) {
+  async createGitlabMergeRequestAsync(issueId: string, branchName?: string) {
     const currentProject = getContext(ContextKeys.Project);
     if (!currentProject) throw new GitlabError("No project selected", 404);
 
@@ -31,7 +33,15 @@ export class GitlabService {
     });
     if (!issue) throw new GitlabError("Issue not found", 404);
 
-    await this.createBranch(currentProject.id, issue);
+    const desiredBranch = branchName ?? issue.gitlabIid!.toString();
+    try {
+      await this.createBranch(currentProject.id, desiredBranch);
+    } catch (e) {
+      if (!branchName && e instanceof MochiError) {
+        throw new MochiError("Branch creation failed", e.statusCode, e);
+      }
+      throw e;
+    }
 
     const user = await this.getUserByAccessTokenAsync();
     if (!user) throw new GitlabError("No current user found", 404);
@@ -40,6 +50,7 @@ export class GitlabService {
       currentProject.id,
       issue,
       user.gitlabId.toString(),
+      desiredBranch,
     );
 
     const newMergeRequestTaskResult = await this.taskEmitter.createTaskAsync(
@@ -71,45 +82,30 @@ export class GitlabService {
   }
 
   @ruleEvent(EventNamespaces.GitLab, EventTypes.CreateBranch)
-  private async createBranch(projectId: string, issue: ITask) {
-    try {
-      await this.gitlabClient.request({
-        endpoint: `/projects/${projectId}/repository/branches`,
-        method: "POST",
-        data: {
-          id: projectId,
-          branch: issue.gitlabIid,
-          ref: "develop",
-        },
-      });
-    } catch (e) {
-      if (e instanceof MochiError) {
-        await this.gitlabClient.request({
-          endpoint: `/projects/${projectId}/repository/branches`,
-          method: "POST",
-          data: {
-            id: projectId,
-            branch: "issue-" + issue.gitlabIid,
-            ref: "develop",
-          },
-        });
-      } else {
-        throw e;
-      }
-    }
+  private async createBranch(projectId: string, branchName: string) {
+    await this.gitlabClient.request({
+      endpoint: `/projects/${projectId}/repository/branches`,
+      method: "POST",
+      data: {
+        id: projectId,
+        branch: branchName,
+        ref: "develop",
+      },
+    });
   }
 
   private async createMergeRequest(
     projectId: string,
     issue: ITask,
     userId: string,
+    branchName: string,
   ) {
     return this.gitlabClient.request({
       endpoint: `/projects/${projectId}/merge_requests`,
       method: "POST",
       data: {
         id: projectId,
-        source_branch: issue.gitlabIid,
+        source_branch: branchName,
         target_branch: "develop",
         title: `Draft: Resolve "${issue.title}"`,
         description: `Closes #${issue.gitlabIid}`,

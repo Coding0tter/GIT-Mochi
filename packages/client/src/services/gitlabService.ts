@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
 import { fetchTasksAsync, getColumnTasks } from "../stores/taskStore";
 import {
@@ -8,8 +8,9 @@ import {
   uiStore,
 } from "../stores/uiStore";
 import { addNotification } from "./notificationService";
+import { openBranchNameModal } from "./modalService";
 import { has } from "lodash";
-import type { IDiscussion } from "shared/types/task";
+import type { IDiscussion, ITask } from "shared/types/task";
 
 export const syncGitlabAsync = async () => {
   try {
@@ -178,18 +179,39 @@ export const openSelectedTaskLink = () => {
 
 export const createMergeRequestAndBranchForSelectedTaskAsync = async () => {
   const columnTasks = getColumnTasks();
-  if (columnTasks[keyboardNavigationStore.selectedTaskIndex].type === "issue") {
-    const { mergeRequest } = await createMergeRequestAndBranchAsync(
-      columnTasks[
-        keyboardNavigationStore.selectedTaskIndex
-      ].gitlabIid?.toString() || "",
-    );
-
-    addNotification({
-      title: "Branch and Merge request created",
-      description: `Created merge request ${mergeRequest.title}`,
-      type: "success",
-    });
+  const task = columnTasks[keyboardNavigationStore.selectedTaskIndex];
+  if (task.type === "issue") {
+    if (!task.gitlabIid) {
+      addNotification({
+        title: "Error",
+        description: "Issue does not have a GitLab IID",
+        type: "error",
+      });
+      return;
+    }
+    try {
+      const { mergeRequest } = await createMergeRequestAndBranchAsync(
+        task.gitlabIid.toString(),
+      );
+      addNotification({
+        title: "Branch and Merge request created",
+        description: `Created merge request ${mergeRequest.title}`,
+        type: "success",
+      });
+    } catch (error: any) {
+      if (
+        error instanceof AxiosError &&
+        (error.response?.status === 400 || error.response?.status === 409)
+      ) {
+        openBranchNameModal(task as ITask);
+      } else {
+        addNotification({
+          title: "Error",
+          description: "Failed to create merge request",
+          type: "error",
+        });
+      }
+    }
   } else {
     addNotification({
       title: "Warning",
@@ -220,8 +242,17 @@ export const getGitLabUsersAsync = async () => {
   }
 };
 
-export const createMergeRequestAndBranchAsync = async (issueId: string) => {
-  const res = await axios.post(`/git/create-merge-request`, { issueId });
+export const createMergeRequestAndBranchAsync = async (
+  issueId: string,
+  branchName?: string,
+) => {
+  if (!issueId) {
+    throw new Error("Missing issue ID");
+  }
+  const res = await axios.post(`/git/create-merge-request`, {
+    issueId,
+    branchName,
+  });
 
   if (res.status !== 200) {
     throw new Error("Failed to create merge request");
