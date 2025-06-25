@@ -1,13 +1,13 @@
+import xMasHat from "@client/assets/xmas.png";
 import Badge from "@client/components/shared/Badge/Badge";
 import Tooltip from "@client/components/shared/Tooltip/Tooltip";
-import type { ITask } from "shared/types/task";
-import { Show } from "solid-js";
-import styles from "./TaskCard.module.css";
-import xMasHat from "@client/assets/xmas.png";
-import dayjs from "dayjs";
-import { random } from "shared/utils/random";
-import { orderBy, sortBy } from "lodash";
 import { orderPriorityLabels } from "@client/utils/orderLabels";
+import dayjs from "dayjs";
+import type { ITask } from "shared/types/task";
+import { random } from "shared/utils/random";
+import { Show, createSignal } from "solid-js";
+import { createDraggable } from "@thisbeyond/solid-dnd";
+import styles from "./TaskCard.module.css";
 
 interface TaskCardProps {
   task: Partial<ITask>;
@@ -15,9 +15,21 @@ interface TaskCardProps {
   onClick: () => void;
   taskIndex: number;
   setTaskRef: (el: HTMLElement) => void;
+  columnIndex?: number;
 }
 
 const TaskCard = (props: TaskCardProps) => {
+  const [isHovering, setIsHovering] = createSignal(false);
+
+  const draggable = createDraggable(
+    props.task._id || `task-${props.taskIndex}`,
+    {
+      task: props.task,
+      taskIndex: props.taskIndex,
+      columnIndex: props.columnIndex,
+    },
+  );
+
   const getPriorityLabel = (task: Partial<ITask>) => {
     const labels = orderPriorityLabels(task.labels ?? []);
 
@@ -50,15 +62,25 @@ const TaskCard = (props: TaskCardProps) => {
     <div
       onClick={props.onClick}
       ref={props.setTaskRef}
+      //@ts-ignore
+      use:draggable
+      style={{
+        "view-transition-name": "card-" + props.task._id,
+      }}
       class={`${styles.task} ${props.isSelected ? styles.selectedTask : ""} ${
         props.task.custom ? styles.customTask : ""
       } ${props.task.deleted ? styles.deletedTask : ""} ${
         styles[props.task.type as string]
-      }`}
-      style={{
-        "view-transition-name": "card-" + props.task._id,
-      }}
+      } ${draggable.isActiveDraggable ? styles.dragging : ""}`}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
     >
+      <Show when={isHovering()}>
+        <div class={styles.dragHandle}>
+          <i class="fa-solid fa-grip-vertical"></i>
+        </div>
+      </Show>
+
       <p>{props.task.title}</p>
       {props.task.description && <div class="divider" />}
       <p class={styles.description}>{props.task.description}</p>

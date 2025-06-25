@@ -25,7 +25,10 @@ export const getColumnTasks = () => {
     (task) =>
       task.status === STATES[keyboardNavigationStore.selectedColumnIndex].id,
   );
-  if (keyboardNavigationStore.selectedColumnIndex === 0) {
+  if (
+    keyboardNavigationStore.selectedColumnIndex === 0 &&
+    !uiStore.currentProject?.custom
+  ) {
     return orderBy(
       tasks.filter(
         (item) => item.assignee?.authorId === uiStore.user?.gitlabId,

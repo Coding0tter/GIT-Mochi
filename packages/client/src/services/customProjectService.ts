@@ -78,6 +78,7 @@ export const getProjectAsync = async () => {
     return {
       ...response.data,
       name: response.data?.name_with_namespace || response.data?.name,
+      custom: !response.data?.web_url,
     };
   } catch (error) {
     return null;

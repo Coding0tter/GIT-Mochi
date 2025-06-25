@@ -27,6 +27,12 @@ import PipelineModal from "../../components/modals/PipelineModal/PipelineModal";
 import ReplyModal from "../../components/modals/ReplyModal/ReplyModal";
 import { uiStore } from "@client/stores/uiStore";
 import Loading from "@client/components/shared/Loading/Loading";
+import {
+  DragDropProvider,
+  DragDropSensors,
+  useDragDropContext,
+  mostIntersecting,
+} from "@thisbeyond/solid-dnd";
 
 const KanbanBoard = () => {
   const [loading, setLoading] = createSignal<boolean>(true);
@@ -106,6 +112,70 @@ const KanbanBoard = () => {
     }
   };
 
+  const KanbanBoardContent = () => {
+    //@ts-ignore
+    const [, { onDragEnd }] = useDragDropContext();
+
+    //@ts-ignore
+    onDragEnd(async ({ draggable, droppable }) => {
+      if (!draggable || !droppable) return;
+
+      const dragData = draggable.data as {
+        task: { _id?: string };
+        columnIndex: number;
+      };
+
+      const dropData = droppable.data as {
+        columnIndex: number;
+        status: { id: string; display_name: string };
+      };
+
+      if (dragData.columnIndex === dropData.columnIndex) return;
+
+      try {
+        await updateTaskAsync(dragData.task._id!, {
+          status: dropData.status.id,
+        });
+        await fetchTasksAsync();
+
+        addNotification({
+          title: "Success",
+          description: `Task moved to ${dropData.status.display_name}`,
+          type: "success",
+        });
+      } catch (error) {
+        addNotification({
+          title: "Error",
+          description: "Failed to move task",
+          type: "error",
+        });
+      }
+    });
+
+    return (
+      <div class={styles.kanban}>
+        <Show
+          when={uiStore.currentProject}
+          fallback={
+            <div class={styles.noProject}>
+              No project selected. Please select one via the commandline.
+            </div>
+          }
+        >
+          {STATES.map((status, columnIndex) => (
+            <TaskColumn
+              status={status}
+              tasks={filteredTasks().filter(
+                (task) => task.status === status.id,
+              )}
+              columnIndex={columnIndex}
+            />
+          ))}
+        </Show>
+      </div>
+    );
+  };
+
   return (
     <>
       {modalStore.activeModals.includes(ModalType.CreateTask) && (
@@ -129,7 +199,8 @@ const KanbanBoard = () => {
       {modalStore.activeModals.includes(ModalType.BranchName) && (
         <BranchNameModal onClose={handleCloseModal} />
       )}
-      <div class={styles.kanban}>
+      <DragDropProvider collisionDetector={mostIntersecting}>
+        <DragDropSensors />
         <Show
           when={uiStore.currentProject}
           fallback={
@@ -142,17 +213,9 @@ const KanbanBoard = () => {
             )
           }
         >
-          {STATES.map((status, columnIndex) => (
-            <TaskColumn
-              status={status}
-              tasks={filteredTasks().filter(
-                (task) => task.status === status.id,
-              )}
-              columnIndex={columnIndex}
-            />
-          ))}
+          <KanbanBoardContent />
         </Show>
-      </div>
+      </DragDropProvider>
     </>
   );
 };

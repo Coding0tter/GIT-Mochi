@@ -6,10 +6,17 @@
   margin-bottom: var(--spacing-sm);
   border-radius: var(--spacing-xs);
   position: relative;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.3s ease;
   border-left: 5px solid var(--color-blue);
+
+  &.dragging {
+    position: fixed !important;
+    z-index: 1000 !important;
+    pointer-events: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+  }
 
   p {
     margin: 0;
@@ -43,6 +50,31 @@
   background-color: rgba(200, 200, 255, 0.2);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+}
+
+.dragHandle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--color-subtext0);
+  font-size: 14px;
+  cursor: grab;
+  z-index: 5;
+  opacity: 0;
+  animation: fadeIn 0.2s ease forwards;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.7;
+  }
 }
 
 .selectedTask {
