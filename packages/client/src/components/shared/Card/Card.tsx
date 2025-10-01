@@ -4,14 +4,14 @@ interface CardProps {
   children: any;
   class?: string;
   selectedBorderColor?: string;
-  selected: () => boolean;
+  selected?: () => boolean;
 }
 
 const Card = (props: CardProps) => {
   return (
     <div
       class={`${styles.card} ${props.class} ${
-        props.selected() ? styles[props.selectedBorderColor || "blue"] : ""
+        props.selected?.() ? styles[props.selectedBorderColor || "blue"] : ""
       }`}
     >
       {props.children}

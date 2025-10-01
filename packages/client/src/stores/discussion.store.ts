@@ -13,6 +13,9 @@ export const [discussionStore, setDiscussionStore] =
   });
 
 export const fetchDiscussions = async (id: number, type: string) => {
+  if (type === "review") {
+    type = "merge_request";
+  }
   setLoading(LoadingTarget.LoadDiscussions);
   const res = await axios.get(`/tasks/discussions?id=${id}&type=${type}`);
 

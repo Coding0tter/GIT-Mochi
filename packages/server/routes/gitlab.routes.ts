@@ -7,6 +7,7 @@ const gitlabController = new GitlabController();
 router.post("/sync", gitlabController.syncGitLabAsync);
 router.post("/create-merge-request", gitlabController.createMergeRequestAsync);
 router.post("/assign", gitlabController.assignToUserAsync);
+router.post("/assign-for-review", gitlabController.assignReviewToUserAsync);
 router.post("/comment", gitlabController.commentOnTaskAsync);
 router.post("/resolve", gitlabController.resolveThreadAsync);
 router.post("/toggle-draft", gitlabController.toggleDraft);

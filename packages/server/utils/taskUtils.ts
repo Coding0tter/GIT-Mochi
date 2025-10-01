@@ -8,6 +8,12 @@ export function createTaskData(
     labels: entity.labels,
     milestoneId: entity.milestone?.id,
     draft: entity.draft,
+    reviewer_id: entity.reviewer_id,
+    reviewers: entity.reviewers?.map((r: any) => ({
+      id: r.id,
+      username: r.username,
+      avatar_url: r.avatar_url,
+    })),
     branch: entity.source_branch,
     projectId: entity.project_id,
     gitlabId: entity.id,

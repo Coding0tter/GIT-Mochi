@@ -27,6 +27,13 @@ const TaskSchema = new Schema<ITask>({
   order: Number,
   latestPipelineId: Number,
   pipelineStatus: String,
+  reviewer_id: Number,
+  reviewers: [
+    {
+      username: String,
+      avatar_url: String,
+    },
+  ],
   pipelineReports: [
     {
       name: String,

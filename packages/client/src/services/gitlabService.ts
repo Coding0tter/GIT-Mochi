@@ -170,6 +170,11 @@ export const assignTaskAsync = async (taskId: string, userId: string) => {
   }
 };
 
+export const assignTaskForReview = async (taskId: string, userId: string) => {
+  const res = await axios.post(`/git/assign-for-review`, { userId, taskId });
+  return res;
+};
+
 export const openSelectedTaskLink = () => {
   window.open(
     getColumnTasks()[keyboardNavigationStore.selectedTaskIndex].web_url,

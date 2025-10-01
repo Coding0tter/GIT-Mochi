@@ -73,6 +73,38 @@ class SettingsService {
       throw error;
     }
   }
+
+  async getSettingByKey<T>(key: string): Promise<T> {
+    try {
+      const response = await axios.get(`/settings/${key}`);
+      return response.data;
+    } catch (error) {
+      addNotification({
+        title: "Error",
+        description: "Failed to fetch setting for " + key,
+        type: "error",
+      });
+      throw error;
+    }
+  }
+
+  async updateSettingByKey(key: string, value: any): Promise<void> {
+    try {
+      await axios.put(`/settings/${key}`, { value });
+      addNotification({
+        title: "Success",
+        description: "Setting updated successfully",
+        type: "success",
+      });
+    } catch (error) {
+      addNotification({
+        title: "Error",
+        description: "Failed to update setting",
+        type: "error",
+      });
+      throw error;
+    }
+  }
 }
 
 export const settingsService = new SettingsService();

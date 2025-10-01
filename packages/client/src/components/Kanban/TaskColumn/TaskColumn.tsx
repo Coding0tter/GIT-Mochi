@@ -6,12 +6,13 @@ import {
   setSelectedTaskForModal,
 } from "@client/stores/modalStore";
 import { uiStore } from "@client/stores/uiStore";
-import { debounce, orderBy } from "lodash";
-import type { ITask } from "shared/types/task";
-import { createEffect, createSignal, For, Index } from "solid-js";
-import styles from "./TaskColumn.module.css";
-import { scrollIntoView } from "@client/utils/scrollIntoView";
 import { orderPriorityLabels } from "@client/utils/orderLabels";
+import { scrollIntoView } from "@client/utils/scrollIntoView";
+import { orderBy } from "lodash";
+import type { ITask } from "shared/types/task";
+import { createEffect, createSignal, Index } from "solid-js";
+import { createDroppable } from "@thisbeyond/solid-dnd";
+import styles from "./TaskColumn.module.css";
 
 interface TaskColumnProps {
   status: { display_name: string; id: string };
@@ -22,6 +23,11 @@ interface TaskColumnProps {
 const TaskColumn = (props: TaskColumnProps) => {
   const [tasks, setTasks] = createSignal<Partial<ITask>[]>(props.tasks);
   let taskRefs: HTMLElement[] = [];
+
+  const droppable = createDroppable(`column-${props.columnIndex}`, {
+    columnIndex: props.columnIndex,
+    status: props.status,
+  });
 
   createEffect(() => {
     setTasks(getTasks());
@@ -38,7 +44,7 @@ const TaskColumn = (props: TaskColumnProps) => {
   });
 
   const getTasks = () => {
-    return props.status.id === "opened"
+    return props.status.id === "opened" && !uiStore.currentProject?.custom
       ? orderBy(
           props.tasks.filter(
             (item) => item.assignee?.authorId === uiStore.user?.gitlabId,
@@ -60,10 +66,15 @@ const TaskColumn = (props: TaskColumnProps) => {
   };
 
   return (
-    <div class={styles.column} data-status={props.status.id}>
+    <div
+      //@ts-ignore
+      use:droppable
+      class={`${styles.column} ${droppable.isActiveDroppable ? styles.dragOver : ""}`}
+      data-status={props.status.id}
+    >
       <h2>
         {props.status.display_name} (
-        {props.status.id === "opened"
+        {props.status.id === "opened" && !uiStore.currentProject?.custom
           ? props.tasks.filter(
               (item) => item.assignee?.authorId === uiStore.user?.gitlabId,
             ).length
@@ -91,6 +102,7 @@ const TaskColumn = (props: TaskColumnProps) => {
               setTaskRef={(el) => {
                 taskRefs[tasks().indexOf(task())] = el;
               }}
+              columnIndex={props.columnIndex}
             />
           )}
         </Index>

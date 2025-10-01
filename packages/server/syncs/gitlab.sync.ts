@@ -12,6 +12,7 @@ import { GitlabClient } from "@server/clients/gitlab.client";
 import PipelineProcessor from "./gitlab/pipeline.processor";
 import NoteCountProcessor from "./gitlab/noteCount.processor";
 import SocketHandler from "@server/sockets";
+import ReviewProcessor from "./gitlab/review.processor";
 
 export class GitlabSync implements Syncer {
   name = "GitLab";
@@ -25,6 +26,7 @@ export class GitlabSync implements Syncer {
   private fieldProcessors: any[] = [
     new PipelineProcessor(),
     new NoteCountProcessor(),
+    new ReviewProcessor(),
   ];
 
   public async sync(fullSync: boolean = false): Promise<ITask[]> {
@@ -85,6 +87,18 @@ export class GitlabSync implements Syncer {
         projectId,
         lastSyncDate,
       );
+
+      if (type === "merge_request") {
+        const reviews = await this.client.getReviews(
+          userId,
+          projectId,
+          lastSyncDate,
+        );
+
+        reviews.forEach((review: any) => (review.reviewer_id = userId));
+
+        myEntities.push(...reviews);
+      }
 
       const localEntities = await this.taskService.getAllAsync({
         custom: false,
@@ -156,12 +170,15 @@ export class GitlabSync implements Syncer {
           labels: taskData.labels,
           draft: taskData.draft,
           branch: taskData.branch,
+          type: taskData.type,
           relevantDiscussionCount: taskData.relevantDiscussionCount ?? 0,
           pipelineStatus: taskData.pipelineStatus,
           latestPipelineId: taskData.latestPipelineId,
           pipelineReports: taskData.pipelineReports,
           assignee: taskData.assignee,
           milestoneId: taskData.milestoneId,
+          reviewers: taskData.reviewers,
+          reviewer_id: taskData.reviewer_id,
         });
       } else {
         result = await this.taskEmitter.createTaskAsync(projectId, taskData);

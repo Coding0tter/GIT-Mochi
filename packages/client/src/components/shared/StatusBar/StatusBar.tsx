@@ -1,10 +1,6 @@
-import {
-  createEffect,
-  createResource,
-  createSignal,
-  onCleanup,
-  onMount,
-} from "solid-js";
+import { useLocation } from "@solidjs/router";
+import dayjs from "dayjs";
+import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import { timeTrackStore } from "../../../stores/timeTrackStore";
 import {
   CalendarMode,
@@ -14,8 +10,6 @@ import {
 } from "../../../stores/uiStore";
 import Badge from "../Badge/Badge";
 import styles from "./StatusBar.module.css";
-import { useLocation } from "@solidjs/router";
-import dayjs from "dayjs";
 
 const StatusBar = () => {
   const location = useLocation();

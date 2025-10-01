@@ -64,6 +64,23 @@ export class GitlabController {
     }
   };
 
+  assignReviewToUserAsync = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { taskId, userId } = req.body;
+      const result = await this.gitlabService.assignReviewToUserAsync(
+        taskId,
+        userId,
+      );
+      res.status(200).json(result);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
   createMergeRequestAsync = async (
     req: Request,
     res: Response,
@@ -71,8 +88,10 @@ export class GitlabController {
   ): Promise<void> => {
     try {
       const { issueId, branchName } = req.body;
-      const result =
-        await this.gitlabService.createGitlabMergeRequestAsync(issueId, branchName);
+      const result = await this.gitlabService.createGitlabMergeRequestAsync(
+        issueId,
+        branchName,
+      );
       res.status(200).json(result);
     } catch (error) {
       handleControllerError(error, next);

@@ -8,14 +8,10 @@ import {
   NavigationKeys,
   setNavIndex,
 } from "@client/stores/keyboardNavigationStore";
-import {
-  createEffect,
-  For,
-  onCleanup,
-  onMount,
-  Show,
-  Suspense,
-} from "solid-js";
+import { LoadingTarget, uiStore } from "@client/stores/uiStore";
+import { orderPriorityLabels } from "@client/utils/orderLabels";
+import { scrollIntoView } from "@client/utils/scrollIntoView";
+import { createEffect, For, onCleanup, onMount, Show } from "solid-js";
 import { modalStore } from "../../../stores/modalStore";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
 import Badge from "../../shared/Badge/Badge";
@@ -23,9 +19,6 @@ import DiscussionCard from "../../shared/DiscussionCard/DiscussionCard";
 import BaseModal, { type BaseModalProps } from "../BaseModal/BaseModal";
 import { TaskDetailsModalService } from "./task-details-modal.store";
 import styles from "./TaskDetailsModal.module.css";
-import { scrollIntoView } from "@client/utils/scrollIntoView";
-import { LoadingTarget, uiStore } from "@client/stores/uiStore";
-import { orderPriorityLabels } from "@client/utils/orderLabels";
 
 interface TaskDetailsModalProps extends BaseModalProps {}
 
@@ -110,7 +103,9 @@ const TaskDetailsModal = (props: TaskDetailsModalProps) => {
                   )}
                   {task?.labels
                     .filter((task) => !task.includes("priority"))
-                    .map((label) => <Badge>{label}</Badge>)}
+                    .map((label) => (
+                      <Badge>{label}</Badge>
+                    ))}
                 </div>
               </div>
             )}

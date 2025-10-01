@@ -88,6 +88,9 @@ export class WebSocketHandler {
     this.heartbeatTimer = setInterval(() => {
       if (this.socket && this.socket.connected) {
         this.socket.emit("ping");
+      } else {
+        // Stop heartbeat if socket is disconnected
+        this.stopHeartbeat();
       }
     }, this.heartbeatInterval) as NodeJS.Timeout;
   }
@@ -97,6 +100,15 @@ export class WebSocketHandler {
       clearInterval(this.heartbeatTimer);
       this.heartbeatTimer = null;
     }
+  }
+
+  public disconnect() {
+    this.stopHeartbeat();
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+    }
+    this.reconnectAttempts = 0;
   }
 }
 

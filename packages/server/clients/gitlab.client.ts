@@ -40,6 +40,17 @@ export class GitlabClient {
     );
   }
 
+  public async getReviews(
+    userId: number,
+    projectId: string,
+    lastSyncDate: Date | null,
+  ) {
+    return await this.request({
+      endpoint: `/projects/${projectId}/merge_requests?scope=all&state=opened&reviewer_id=${userId}${lastSyncDate ? "&updated_after=" + lastSyncDate.toISOString() : ""}`,
+      method: "GET",
+    });
+  }
+
   public async getOtherEntities(
     type: "merge_request" | "issue",
     projectId: string,
@@ -99,6 +110,18 @@ export class GitlabClient {
       endpoint: `/projects/${projectId}/merge_requests/${gitlabIid}`,
       method: "PUT",
       data: { assignee_id },
+    });
+  }
+
+  public async updateReviewer(
+    projectId: string,
+    gitlabIid: string,
+    reviewer_id: string,
+  ) {
+    await this.request({
+      endpoint: `/projects/${projectId}/merge_requests/${gitlabIid}`,
+      method: "PUT",
+      data: { reviewer_ids: [reviewer_id] },
     });
   }
 
