@@ -1,0 +1,112 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.label {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.input {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-surface1);
+  border-radius: 6px;
+  font-size: var(--font-size-sm);
+  background: var(--color-surface0);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input::placeholder {
+  color: var(--color-overlay0);
+}
+
+.input:focus {
+  border-color: var(--color-blue);
+}
+
+.availableUsers {
+  position: relative;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--color-surface1);
+  border-radius: 6px;
+  background: var(--color-surface0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.userRow {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  cursor: pointer;
+  transition: background-color 0.15s;
+  border-bottom: 1px solid var(--color-surface1);
+  color: var(--color-text);
+}
+
+.userRow:last-child {
+  border-bottom: none;
+}
+
+.userRow:hover {
+  background-color: var(--color-surface1);
+}
+
+.reviewerList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.reviewerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-surface0);
+  border: 1px solid var(--color-surface1);
+  border-radius: 6px;
+  transition: background-color 0.15s;
+  color: var(--color-text);
+}
+
+.reviewerRow:hover {
+  background-color: var(--color-surface1);
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-red);
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: var(--spacing-lg);
+  height: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.15s;
+}
+
+.removeBtn:hover {
+  background-color: rgba(237, 135, 150, 0.2);
+}
+
+.loading,
+.empty,
+.noResults {
+  padding: var(--spacing-sm);
+  text-align: center;
+  color: var(--color-subtext0);
+  font-size: var(--font-size-sm);
+}
+
+.noResults {
+  padding: var(--spacing-xs) var(--spacing-sm);
+}

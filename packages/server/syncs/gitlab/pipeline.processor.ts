@@ -7,7 +7,7 @@ export default class PipelineProcessor implements FieldProcessor {
   private client = new GitlabClient();
 
   async process(
-    entity: any,
+    _entity: any,
     task: Partial<ITask>,
     projectId: string,
   ): Promise<void> {

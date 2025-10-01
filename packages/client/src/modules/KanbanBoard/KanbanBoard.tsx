@@ -40,7 +40,6 @@ const KanbanBoard = () => {
   onMount(async () => {
     setLoading(true);
     await fetchTasksAsync();
-    // setLoading(false);
   });
 
   const handleCreateOrUpdateTask = async () => {
@@ -136,6 +135,7 @@ const KanbanBoard = () => {
         await updateTaskAsync(dragData.task._id!, {
           status: dropData.status.id,
         });
+
         await fetchTasksAsync();
 
         addNotification({

@@ -5,7 +5,7 @@ import { orderPriorityLabels } from "@client/utils/orderLabels";
 import dayjs from "dayjs";
 import type { ITask } from "shared/types/task";
 import { random } from "shared/utils/random";
-import { Show, createSignal } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
 import { createDraggable } from "@thisbeyond/solid-dnd";
 import styles from "./TaskCard.module.css";
 
@@ -88,6 +88,13 @@ const TaskCard = (props: TaskCardProps) => {
       <div class={styles.information}>
         <Show when={props.task.assignee}>
           <img src={props.task.assignee?.avatar_url} class={styles.avatar} />
+        </Show>
+        <Show when={props.task.reviewers && props.task.reviewers.length > 0}>
+          <For each={props.task.reviewers}>
+            {(reviewer) => (
+              <img src={reviewer.avatar_url} class={styles.avatar_reviewer} />
+            )}
+          </For>
         </Show>
         {props.task.custom && <Badge>Custom</Badge>}
         {getPriorityLabel(props.task) && (

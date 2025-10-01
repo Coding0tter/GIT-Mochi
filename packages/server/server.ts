@@ -53,19 +53,56 @@ app.use("/api/timetrack", timeTrackRoutes);
 app.use("/api/settings", settingRoutes);
 
 // Sync comments every minute
-setInterval(async () => {
-  await jobs();
-}, 60 * 1000);
+let backgroundJobInterval: NodeJS.Timeout;
+
+const startBackgroundJobs = () => {
+  backgroundJobInterval = setInterval(async () => {
+    await jobs();
+  }, 60 * 5000);
+  logInfo("Background jobs started");
+};
+
+const stopBackgroundJobs = () => {
+  if (backgroundJobInterval) {
+    clearInterval(backgroundJobInterval);
+    logInfo("Background jobs stopped");
+  }
+};
 
 const PORT = 5000;
-server.listen(PORT, () =>
-  logInfo(`Gitlab-Mochi backend running on port ${PORT}`),
-);
+server.listen(PORT, () => {
+  logInfo(`Gitlab-Mochi backend running on port ${PORT}`);
+  startBackgroundJobs();
+});
+
+// Graceful shutdown handling
+const gracefulShutdown = (signal: string) => {
+  logInfo(`Received ${signal}, shutting down gracefully...`);
+
+  stopBackgroundJobs();
+
+  server.close(() => {
+    logInfo("HTTP server closed.");
+    process.exit(0);
+  });
+
+  // Force exit after 10 seconds
+  setTimeout(() => {
+    logError("Forced shutdown after timeout");
+    process.exit(1);
+  }, 10000);
+};
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
 const syncs = [new GitlabSync()];
 
+// Reuse service instances to prevent memory leaks
+const settingRepo = new SettingRepo();
+const projectService = new ProjectService();
+
 const jobs = async () => {
-  const settingRepo = new SettingRepo();
   const setupComplete = await settingRepo.getByKeyAsync(
     SettingKeys.SETUP_COMPLETE,
   );
@@ -75,7 +112,6 @@ const jobs = async () => {
     return;
   }
 
-  const projectService = new ProjectService();
   if ((await projectService.getCurrentProjectAsync()) === null) {
     logInfo("No project selected. Skipping sync jobs.");
     return;

@@ -136,4 +136,35 @@ export class SettingsService extends BaseService<ISetting> {
       );
     }
   }
+
+  async getSettingByKey(key: string) {
+    try {
+      const data = await this.settingRepo.getByKeyAsync(key);
+
+      if (Array.isArray(JSON.parse(data?.value ?? ""))) {
+        return JSON.parse(data?.value ?? "");
+      }
+
+      return data ? data.value : null;
+    } catch (error) {
+      throw new MochiError("Failed to get setting by key", 500, error as Error);
+    }
+  }
+
+  async updateSettingByKey(key: string, value: any) {
+    try {
+      if (Array.isArray(value)) {
+        await this.settingRepo.setByKeyAsync(key, JSON.stringify(value));
+        return;
+      }
+
+      await this.settingRepo.setByKeyAsync(key, value);
+    } catch (error) {
+      throw new MochiError(
+        "Failed to update setting by key",
+        500,
+        error as Error,
+      );
+    }
+  }
 }

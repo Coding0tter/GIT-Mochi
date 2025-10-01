@@ -18,5 +18,7 @@ router.get("/gitlab-url", controller.getGitlabUrl);
 router.post("/validate-gitlab", controller.validateGitlabConnection);
 router.post("/gitlab-config", controller.saveGitlabConfig);
 router.post("/complete-setup", controller.completeSetup);
+router.get("/:key", controller.getSettingByKey);
+router.put("/:key", controller.updateSettingByKey);
 
 export default router;

@@ -24,6 +24,12 @@ export interface ITask extends Document<string> {
   pipelineStatus?: string;
   pipelineReports?: IPipelineReport[];
   relevantDiscussionCount?: number;
+  reviewer_id: number;
+  reviewers?: {
+    id: string;
+    username: string;
+    avatar_url: string;
+  }[];
 }
 
 export interface IComment {

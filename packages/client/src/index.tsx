@@ -17,6 +17,7 @@ import { BACKEND_URL, SOCKET_URL } from "./constants";
 import Todos from "@client/modules/Todos/Todos";
 import { settingsService } from "./services/settingsService";
 import SetupWizard from "./components/SetupWizard/setupWizard";
+import Settings from "./modules/Settings/Settings";
 
 const root = document.getElementById("root");
 
@@ -44,6 +45,7 @@ render(
       <Route path="/timetrack" component={TimeTrack} />
       <Route path="/todo" component={Todos} />
       <Route path="/setup" component={SetupWizard} />
+      <Route path="/settings" component={Settings} />
     </Router>
   ),
   root!,

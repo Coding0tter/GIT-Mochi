@@ -299,6 +299,16 @@ export class GitlabService {
     );
   }
 
+  async assignReviewToUserAsync(taskId: string, userId: string) {
+    const task = await this.taskService.findOneAsync({ _id: taskId });
+    if (!task) throw new MochiError("Task not found", 404);
+    await this.gitlabClient.updateReviewer(
+      task.projectId!,
+      task.gitlabIid!.toString(),
+      userId,
+    );
+  }
+
   async markTodoAsDone(id: string) {
     if (!id) throw new MochiError("Todo ID is required", 400);
 

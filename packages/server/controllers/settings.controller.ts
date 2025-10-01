@@ -89,4 +89,34 @@ export class SettingsController {
       handleControllerError(error, next);
     }
   };
+
+  getSettingByKey = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await this.service.getSettingByKey(req.params.key);
+
+      res.status(200).json(data);
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
+
+  updateSettingByKey = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { value } = req.body;
+
+      if (value === undefined) {
+        res.status(400).json({ error: "Value is required to update setting" });
+        return;
+      }
+
+      await this.service.updateSettingByKey(req.params.key, value);
+      res.status(200).json({ message: "Setting updated successfully" });
+    } catch (error) {
+      handleControllerError(error, next);
+    }
+  };
 }
