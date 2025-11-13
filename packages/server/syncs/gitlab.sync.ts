@@ -43,9 +43,7 @@ export class GitlabSync implements Syncer {
       return [];
     }
 
-    const lastSyncDate = lastSync
-      ? new Date(new Date(lastSync.value).setHours(0))
-      : null;
+    const lastSyncDate = lastSync ? lastSync.value : null;
 
     const [mergeRequestUpdates, issueUpdates] = await Promise.all([
       this.syncEntities(
@@ -62,11 +60,6 @@ export class GitlabSync implements Syncer {
       ),
     ]);
 
-    this.settingsRepo.setByKeyAsync(
-      SettingKeys.LAST_SYNC,
-      new Date().toISOString(),
-    );
-
     logInfo("Finished syncing GitLab data...");
     const changes = [...mergeRequestUpdates, ...issueUpdates];
 
@@ -78,7 +71,7 @@ export class GitlabSync implements Syncer {
     type: "merge_request" | "issue",
     projectId: string,
     userId: number,
-    lastSyncDate: Date | null,
+    lastSyncDate: string | null,
   ): Promise<ITask[]> {
     try {
       const myEntities = await this.client.getMyEntities(

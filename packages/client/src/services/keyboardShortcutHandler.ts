@@ -1,22 +1,27 @@
 import type { Location, Navigator } from "@solidjs/router";
 import ShortcutRegistry from "../shortcutMaps/shortcutRegistry";
 import { resetCommandline } from "../stores/commandStore";
-import { modalStore } from "../stores/modalStore";
 import {
   CalendarMode,
   InputMode,
   setCalendarMode,
   uiStore,
 } from "../stores/uiStore";
-import { closeTopModal, getTopModal, openHelpModal } from "./modalService";
 import { unfocusInputs } from "./uiService";
+import {
+  getTopModal,
+  modalStore,
+  ModalType,
+  openModal,
+} from "@client/shared/stores/modal.store.ts";
+import { setInput } from "@client/shared/stores/commandline.store.ts";
 
 export const handleKeyDown = async (
   event: KeyboardEvent,
   navigator: Navigator,
   location: Location,
 ) => {
-  const key = location.pathname.split("/")[1];
+  const key = location.pathname.split("/").slice(1).join("/");
 
   if (
     (event.key === "Escape" || event.key === "q") &&
@@ -31,6 +36,7 @@ export const handleKeyDown = async (
         uiStore.commandInputValue === "")
     ) {
       resetCommandline();
+      setInput("");
     }
     return;
   }
@@ -46,13 +52,13 @@ export const handleKeyDown = async (
   if (event.shiftKey) {
     switch (event.code) {
       case "Digit1":
-        navigator("/kanban");
+        navigator("/app/kanban");
         return;
       case "Digit2":
         navigator("/timetrack");
         return;
       case "Digit3":
-        navigator("/todo");
+        navigator("/app/todo");
         return;
       case "Digit0":
         navigator("/");
@@ -61,7 +67,7 @@ export const handleKeyDown = async (
   }
 
   if (event.shiftKey && event.key === "?") {
-    openHelpModal();
+    openModal(ModalType.Help);
     return;
   }
 
@@ -69,6 +75,8 @@ export const handleKeyDown = async (
     ShortcutRegistry.getInstance().executeShortcut(key, event);
   } else {
     const topModal = getTopModal();
-    ShortcutRegistry.getInstance().executeShortcut(topModal, event);
+    if (topModal) {
+      ShortcutRegistry.getInstance().executeShortcut(topModal, event);
+    }
   }
 };

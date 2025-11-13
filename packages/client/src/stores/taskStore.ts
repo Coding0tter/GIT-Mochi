@@ -48,7 +48,7 @@ export const getColumnTasks = () => {
     );
   }
 
-  return tasks;
+  return orderBy(tasks, (item) => item.pipelineStatus);
 };
 
 export const updateComments = (

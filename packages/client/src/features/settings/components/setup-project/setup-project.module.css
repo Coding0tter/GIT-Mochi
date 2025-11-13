@@ -1,0 +1,159 @@
+.projectStep {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.projectStep h2 {
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-text);
+  font-size: 1.75rem;
+  font-weight: 600;
+  animation: fadeIn 0.5s ease-out 0.1s backwards;
+}
+
+.projectStep > p {
+  color: var(--color-subtext1);
+  margin-bottom: var(--spacing-lg);
+  animation: fadeIn 0.5s ease-out 0.2s backwards;
+}
+
+.projectList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: var(--spacing-xl);
+  padding-right: var(--spacing-sm);
+}
+
+.projectOption {
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-base);
+  border: 2px solid transparent;
+  border-radius: var(--spacing-sm);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.searchInput {
+  width: 80%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-overlay1);
+  border-radius: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+  background: var(--color-surface0);
+  transition: all 0.3s ease;
+  animation: fadeIn 0.5s ease-out 0.3s backwards;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-blue);
+}
+
+.projectOption:hover {
+  background: var(--color-surface1);
+  transform: translateX(6px);
+}
+
+.projectOption.selected {
+  border-color: var(--color-blue);
+  background: var(--color-surface1);
+}
+
+.projectOption i {
+  font-size: var(--font-size-lg);
+  color: var(--color-blue);
+  width: 30px;
+  transition: transform 0.3s ease;
+}
+
+.projectOption:hover i {
+  transform: scale(1.1);
+}
+
+.projectOption div {
+  flex: 1;
+  text-align: left;
+}
+
+.projectOption strong {
+  display: block;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-xxs);
+}
+
+.projectOption small {
+  color: var(--color-subtext1);
+  font-size: var(--font-size-sm);
+}
+
+.divider {
+  height: 1px;
+  background: var(--color-overlay1);
+  margin: var(--spacing-md) 0;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  animation: fadeIn 0.5s ease-out 0.4s backwards;
+}
+
+.actions button {
+  flex: 1;
+  transition: all 0.3s ease;
+
+  &:disabled {
+    background: var(--color-overlay2);
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    transform: translateY(-2px);
+  }
+
+  &:not(:disabled):active {
+    transform: translateY(0);
+  }
+}
+
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeletonItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: var(--color-surface0);
+}
+
+.skeletonContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}

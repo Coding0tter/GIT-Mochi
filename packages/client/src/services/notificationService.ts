@@ -3,7 +3,7 @@ import { createSignal } from "solid-js";
 export interface Notification {
   id: number;
   title: string;
-  description: string;
+  description?: string;
   type: "success" | "error" | "warning";
   duration: number;
 }
@@ -11,7 +11,7 @@ export interface Notification {
 const [notifications, setNotifications] = createSignal<Notification[]>([]);
 
 export const addNotification = (
-  notification: Omit<Partial<Notification>, "id">
+  notification: Omit<Partial<Notification>, "id">,
 ) => {
   const id = new Date().getTime();
   const newNotification = {

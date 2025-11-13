@@ -1,24 +1,24 @@
+import { copyBranch } from "@client/features/kanban/services/task.service.ts";
+import { sync } from "@client/shared/services/gitlab.service.ts";
 import {
-  createMergeRequestAndBranchForSelectedTaskAsync,
-  openSelectedTaskLink,
-  syncGitlabAsync,
-} from "../services/gitlabService";
+  handleOpenDetailModal,
+  openIssueExternally,
+  openMergeRequestExternally,
+  openPipelineModal,
+} from "@client/shared/services/keyboard-navigation.service.ts";
+import { moveKeyboardSelection } from "@client/shared/stores/keyboard-navigation.store.ts";
 import {
   openCreateModal,
   openDeleteModal,
-  openDetailsModal,
   openEditTaskModal,
-  openPipelineModal,
 } from "../services/modalService";
 import {
   addToSelection,
   Direction,
-  moveSelection,
   moveSelectionToBottom,
   moveSelectionToTop,
 } from "../services/taskNavigationService";
 import {
-  copyBranchToClipboard,
   debugLogTask,
   moveSelectedTasksAsync,
   moveSelectedTasksToEndAsync,
@@ -28,30 +28,31 @@ import { toggleShowDeletedTasksAsync } from "../stores/taskStore";
 import ShortcutRegistry from "./shortcutRegistry";
 import { type KeyboardShortcutMap, KeyboardShortcutCategory } from "./types";
 
+console.log("Registering Kanban shortcuts");
 const shortcuts: KeyboardShortcutMap = {
-  key: "kanban",
+  key: ["kanban", "app/kanban"],
   shortcuts: [
     {
       key: ["k", "ArrowUp"],
-      action: () => moveSelection(Direction.Up),
+      action: () => moveKeyboardSelection(Direction.Up),
       category: KeyboardShortcutCategory.Navigation,
       description: "Move selection up",
     },
     {
       key: ["j", "ArrowDown"],
-      action: () => moveSelection(Direction.Down),
+      action: () => moveKeyboardSelection(Direction.Down),
       category: KeyboardShortcutCategory.Navigation,
       description: "Move selection down",
     },
     {
       key: ["h", "ArrowLeft"],
-      action: () => moveSelection(Direction.Left),
+      action: () => moveKeyboardSelection(Direction.Left),
       category: KeyboardShortcutCategory.Navigation,
       description: "Move selection left",
     },
     {
       key: ["l", "ArrowRight"],
-      action: () => moveSelection(Direction.Right),
+      action: () => moveKeyboardSelection(Direction.Right),
       category: KeyboardShortcutCategory.Navigation,
       description: "Move selection right",
     },
@@ -75,7 +76,7 @@ const shortcuts: KeyboardShortcutMap = {
     },
     {
       key: "o",
-      action: () => openDetailsModal(),
+      action: () => handleOpenDetailModal(),
       category: KeyboardShortcutCategory.TaskManagement,
       description: "Open details of selected task",
     },
@@ -99,7 +100,7 @@ const shortcuts: KeyboardShortcutMap = {
     },
     {
       key: "b",
-      action: () => copyBranchToClipboard(),
+      action: () => copyBranch(),
       category: KeyboardShortcutCategory.Navigation,
       description: "Copy branch name to clipboard",
     },
@@ -135,24 +136,23 @@ const shortcuts: KeyboardShortcutMap = {
     {
       shiftKey: true,
       key: "S",
-      action: async () => await syncGitlabAsync(),
+      action: async () => await sync(),
       category: KeyboardShortcutCategory.GitlabAction,
       description: "Sync with GitLab",
     },
     {
       shiftKey: true,
       key: "O",
-      action: () => openSelectedTaskLink(),
+      action: () => openIssueExternally(),
       category: KeyboardShortcutCategory.GitlabAction,
-      description: "Open selected task in GitLab",
+      description: "Open selected issue in GitLab",
     },
     {
       shiftKey: true,
       key: "M",
-      action: async () =>
-        await createMergeRequestAndBranchForSelectedTaskAsync(),
+      action: () => openMergeRequestExternally(),
       category: KeyboardShortcutCategory.GitlabAction,
-      description: "Create merge request for selected task",
+      description: "Open selected merge_request in GitLab",
     },
     {
       shiftKey: true,

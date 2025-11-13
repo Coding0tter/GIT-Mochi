@@ -4,21 +4,32 @@ import type { Request, Response, NextFunction } from "express";
 
 export const globalErrorHandler = (
   err: MochiError | Error,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ) => {
   if (err instanceof MochiError) {
-    res.status(err.statusCode).json({
-      status: "error",
-      message: err.message,
-    });
     logError(err);
-  } else {
-    res.status(500).json({
-      status: "error",
-      message: "Unexpected error occurred",
+
+    res.status(err.statusCode).json({
+      ok: false,
+      message: err.message,
+      data: err.data ?? null,
     });
-    logError(new MochiError("unhandled error", 500));
+    return;
   }
+
+  const wrapped = new MochiError(
+    "Unexpected error occurred",
+    500,
+    err as Error,
+  );
+  logError(wrapped);
+
+  res.status(500).json({
+    ok: false,
+    message: "Unexpected error occurred",
+    code: "UNEXPECTED",
+    data: null,
+  });
 };

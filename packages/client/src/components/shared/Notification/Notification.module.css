@@ -6,11 +6,13 @@
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
   transform: translateY(20px);
   opacity: 0;
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transition:
+    opacity 0.3s ease-in-out,
+    transform 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xxs);
-  background-color: var(--color-surface1); /* Solid background color */
+  background-color: var(--color-surface1);
 }
 
 .notification.success {

@@ -33,12 +33,14 @@ import {
   useDragDropContext,
   mostIntersecting,
 } from "@thisbeyond/solid-dnd";
+import { getLabelOrder } from "@client/stores/settings.store";
 
 const KanbanBoard = () => {
   const [loading, setLoading] = createSignal<boolean>(true);
 
   onMount(async () => {
     setLoading(true);
+    await getLabelOrder();
     await fetchTasksAsync();
   });
 

@@ -1,13 +1,3 @@
-.setupWizard {
-  min-height: 100vh;
-  background: var(--color-base);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--spacing-xl);
-  position: relative;
-}
-
 .migrationOverlay {
   position: fixed;
   top: 0;
@@ -45,85 +35,7 @@
   }
 }
 
-.header {
-  text-align: center;
-  margin-bottom: var(--spacing-xl);
-  width: 100%;
-  max-width: 600px;
-}
-
-.logo {
-  width: 100px;
-  height: 100px;
-  margin-bottom: var(--spacing-md);
-}
-
-.header h1 {
-  color: var(--color-text);
-  margin-bottom: var(--spacing-lg);
-}
-
-.progress {
-  width: 100%;
-  height: 4px;
-  background: var(--color-overlay0);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.progressBar {
-  height: 100%;
-  background: var(--color-blue);
-  transition: width 0.3s ease;
-}
-
-.content {
-  background: var(--color-surface0);
-  border-radius: var(--spacing-md);
-  padding: var(--spacing-xl);
-  width: 100%;
-  max-width: 600px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-}
-
 /* Welcome Step */
-.welcomeStep {
-  text-align: center;
-}
-
-.welcomeStep h2 {
-  margin-bottom: var(--spacing-md);
-  color: var(--color-text);
-}
-
-.welcomeStep p {
-  color: var(--color-subtext1);
-  margin-bottom: var(--spacing-lg);
-  line-height: 1.6;
-}
-
-.features {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
-}
-
-.feature {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
-  background: var(--color-base);
-  border-radius: var(--spacing-sm);
-  color: var(--color-text);
-}
-
-.feature i {
-  font-size: var(--font-size-lg);
-  color: var(--color-blue);
-  width: 30px;
-}
 
 /* Config Step */
 .configStep h2 {
@@ -193,108 +105,7 @@
   color: var(--color-text);
 }
 
-.userCard {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-lg);
-  background: var(--color-base);
-  border-radius: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
-}
-
-.userAvatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 3px solid var(--color-overlay1);
-}
-
-.userInfo {
-  flex: 1;
-  text-align: left;
-}
-
-.userInfo h3 {
-  color: var(--color-text);
-  margin-bottom: var(--spacing-xs);
-}
-
-.userInfo p {
-  color: var(--color-subtext1);
-  margin: 0;
-}
-
 /* Project Step */
-.projectStep h2 {
-  margin-bottom: var(--spacing-sm);
-  color: var(--color-text);
-}
-
-.projectStep > p {
-  color: var(--color-subtext1);
-  margin-bottom: var(--spacing-lg);
-}
-
-.projectList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  max-height: 400px;
-  overflow-y: auto;
-  margin-bottom: var(--spacing-xl);
-  padding-right: var(--spacing-sm);
-}
-
-.projectOption {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
-  background: var(--color-base);
-  border: 2px solid transparent;
-  border-radius: var(--spacing-sm);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.projectOption:hover {
-  background: var(--color-surface1);
-  transform: translateX(4px);
-}
-
-.projectOption.selected {
-  border-color: var(--color-blue);
-  background: var(--color-surface1);
-}
-
-.projectOption i {
-  font-size: var(--font-size-lg);
-  color: var(--color-blue);
-  width: 30px;
-}
-
-.projectOption div {
-  flex: 1;
-  text-align: left;
-}
-
-.projectOption strong {
-  display: block;
-  color: var(--color-text);
-  margin-bottom: var(--spacing-xxs);
-}
-
-.projectOption small {
-  color: var(--color-subtext1);
-  font-size: var(--font-size-sm);
-}
-
-.divider {
-  height: 1px;
-  background: var(--color-overlay1);
-  margin: var(--spacing-md) 0;
-}
 
 /* Complete Step */
 .completeStep {
@@ -330,15 +141,6 @@
 }
 
 /* Actions */
-.actions {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--spacing-md);
-}
-
-.actions button {
-  flex: 1;
-}
 
 /* Footer */
 .footer {

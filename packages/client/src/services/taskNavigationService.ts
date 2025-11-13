@@ -1,11 +1,9 @@
-import { STATES } from "../constants";
 import {
   keyboardNavigationStore,
-  setSelectedColumnIndex,
   setSelectedTaskIndex,
   setSelectedTaskIndexes,
 } from "../stores/keyboardNavigationStore";
-import { filteredTasks, getColumnTasks } from "../stores/taskStore";
+import { getColumnTasks } from "../stores/taskStore";
 
 export enum Direction {
   Up,
@@ -13,39 +11,6 @@ export enum Direction {
   Left,
   Right,
 }
-
-export const moveSelection = (direction: Direction) => {
-  const columnTasks = getColumnTasks();
-  switch (direction) {
-    case Direction.Up:
-      setSelectedTaskIndex(
-        (prev) => (prev - 1 + columnTasks.length) % columnTasks.length,
-      );
-      setSelectedTaskIndexes([keyboardNavigationStore.selectedTaskIndex]);
-      break;
-    case Direction.Down:
-      setSelectedTaskIndex((prev) => (prev + 1) % columnTasks.length);
-      setSelectedTaskIndexes([keyboardNavigationStore.selectedTaskIndex]);
-
-      break;
-    case Direction.Left:
-      do {
-        setSelectedColumnIndex(
-          (prev) => (prev - 1 + STATES.length) % STATES.length,
-        );
-      } while (filteredTasks().length > 0 && getColumnTasks().length === 0);
-      setSelectedTaskIndexes([0]);
-      setSelectedTaskIndex(0);
-      break;
-    case Direction.Right:
-      do {
-        setSelectedColumnIndex((prev) => (prev + 1) % STATES.length);
-      } while (filteredTasks().length > 0 && getColumnTasks().length === 0);
-      setSelectedTaskIndex(0);
-      setSelectedTaskIndexes([0]);
-      break;
-  }
-};
 
 export const moveSelectionToTop = () => {
   setSelectedTaskIndex(0);

@@ -8,6 +8,7 @@ import {
   LoadingTarget,
   uiStore,
 } from "../../../stores/uiStore";
+import { uiStore as uiStoreV2 } from "@client/shared/stores/uiStore";
 import Badge from "../Badge/Badge";
 import styles from "./StatusBar.module.css";
 
@@ -70,16 +71,17 @@ const StatusBar = () => {
 
   return (
     <div class={styles.statusBar} style={{ "view-transition-name": "footer" }}>
-      <div class={styles.left}>
+      <div>
         {isCalendar() && (
           <div class={`${styles.calendarMode} ${styles[uiStore.calendarMode]}`}>
             {uiStore.calendarMode === CalendarMode.Time && "Time"}
             {uiStore.calendarMode === CalendarMode.Appointment && "Appointment"}
           </div>
         )}
-        {uiStore.loadingTarget === LoadingTarget.SyncGitlab && (
+        {uiStoreV2.syncing && (
           <Badge type="none">
-            <i class="fa-solid fa-sync"></i> Syncing with Gitlab...
+            <i class={"fa-solid fa-sync " + styles.rotate}></i> Syncing with
+            Gitlab...
           </Badge>
         )}
         {uiStore.loadingTarget === LoadingTarget.LoadTasks && (
@@ -88,7 +90,7 @@ const StatusBar = () => {
           </Badge>
         )}
       </div>
-      <div class={styles.right}>
+      <div>
         {trackedDuration() && <Badge type="low">{trackedDuration()}</Badge>}
         <Badge type="none">
           backend:{" "}

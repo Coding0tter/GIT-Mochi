@@ -1,4 +1,5 @@
-import { Schema, model, Document } from "mongoose";
+import type { IUser } from "@server/models/user.model.ts";
+import { Schema, model, Document, type ObjectId } from "mongoose";
 
 export interface ISetting extends Document {
   key: string;

@@ -9,14 +9,6 @@ import { loadGitLabProjectsAsync } from "@client/services/gitlabService";
 import { setProjectAsync } from "@client/services/customProjectService";
 import type { Project } from "@client/stores/uiStore";
 
-enum SetupStep {
-  Welcome = "welcome",
-  GitLabConfig = "gitlab-config",
-  UserVerification = "user-verification",
-  ProjectSelection = "project-selection",
-  Complete = "complete",
-}
-
 const SetupWizard = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = createSignal(SetupStep.Welcome);
@@ -135,32 +127,6 @@ const SetupWizard = () => {
         </div>
       </div>
       <div class={styles.content}>
-        <Show when={currentStep() === SetupStep.Welcome}>
-          <div class={styles.welcomeStep}>
-            <h2>Let's get you started</h2>
-            <p>
-              Mochi is a keyboard-friendly, GitLab-integrated Kanban board that
-              makes task management efficient and intuitive.
-            </p>
-            <div class={styles.features}>
-              <div class={styles.feature}>
-                <i class="fa-solid fa-keyboard"></i>
-                <span>Vim-motions keyboard shortcuts</span>
-              </div>
-              <div class={styles.feature}>
-                <i class="fa-brands fa-gitlab"></i>
-                <span>GitLab integration</span>
-              </div>
-            </div>
-            <Button
-              type="primary"
-              onClick={() => setCurrentStep(SetupStep.GitLabConfig)}
-            >
-              Get Started
-            </Button>
-          </div>
-        </Show>
-
         <Show when={currentStep() === SetupStep.GitLabConfig}>
           <div class={styles.configStep}>
             <h2>Connect to GitLab</h2>
@@ -248,60 +214,7 @@ const SetupWizard = () => {
           </div>
         </Show>
 
-        <Show when={currentStep() === SetupStep.ProjectSelection}>
-          <div class={styles.projectStep}>
-            <h2>Select a Default Project</h2>
-            <p>Choose a project to start with.</p>
-
-            <div class={styles.formGroup}>
-              <input
-                class={styles.searchInput}
-                type="text"
-                placeholder="Search projects by name or ID"
-                value={searchQuery()}
-                onInput={(e) => setSearchQuery(e.currentTarget.value)}
-              />
-            </div>
-
-            <div class={styles.divider} />
-
-            <div class={styles.projectList}>
-              {projects()
-                .filter(
-                  (item) =>
-                    item.name_with_namespace
-                      ?.toLowerCase()
-                      .includes(searchQuery().toLowerCase()) ||
-                    item.id.toString().includes(searchQuery()),
-                )
-                .map((project) => (
-                  <div
-                    class={`${styles.projectOption} ${selectedProject() === project.id ? styles.selected : ""}`}
-                    onClick={() => setSelectedProject(project.id)}
-                  >
-                    <i class="fa-solid fa-folder"></i>
-                    <div>
-                      <strong>
-                        {project.id} - {project.name_with_namespace}
-                      </strong>
-                      {project.description && (
-                        <small>{project.description}</small>
-                      )}
-                    </div>
-                  </div>
-                ))}
-            </div>
-
-            <div class={styles.actions}>
-              <Button type="secondary" onClick={goBack}>
-                Back
-              </Button>
-              <Button type="primary" onClick={completeSetup}>
-                Complete Setup
-              </Button>
-            </div>
-          </div>
-        </Show>
+        <Show when={currentStep() === SetupStep.ProjectSelection}></Show>
 
         <Show when={currentStep() === SetupStep.Complete}>
           <div class={styles.completeStep}>

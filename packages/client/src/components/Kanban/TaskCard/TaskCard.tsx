@@ -34,7 +34,7 @@ const TaskCard = (props: TaskCardProps) => {
     const labels = orderPriorityLabels(task.labels ?? []);
 
     if (labels) {
-      return labels.at(0)?.split("priority/")[1].toLowerCase();
+      return labels.at(0)?.split("priority::")[1]?.toLowerCase();
     }
 
     return "";

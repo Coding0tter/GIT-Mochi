@@ -1,0 +1,184 @@
+.todoItem {
+  display: flex;
+  gap: var(--spacing-sm);
+  background: var(--color-surface0);
+  border: 1px solid var(--color-overlay0);
+  border-radius: var(--spacing-sm);
+  padding: var(--spacing-md);
+  transition: all 0.2s ease;
+}
+
+.todoItem:hover {
+  background: var(--color-surface1);
+  border-color: var(--color-blue);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.todoContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  min-width: 0;
+}
+
+.todoMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.actionBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px var(--spacing-sm);
+  border-radius: 6px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-crust);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.actionIcon {
+  font-size: var(--font-size-md);
+  line-height: 1;
+}
+
+.actionBadgeLabel {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: var(--font-weight-bold);
+}
+
+.todoType {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--color-base);
+  padding: 2px var(--spacing-xs);
+  border-radius: var(--spacing-xs);
+}
+
+.typeIcon {
+  font-size: var(--font-size-md);
+  line-height: 1;
+}
+
+.typeLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.todoIid {
+  font-family: "Courier New", monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-subtext1);
+  background: var(--color-base);
+  padding: 2px var(--spacing-xs);
+  border-radius: 4px;
+  font-weight: var(--font-weight-medium);
+}
+
+.todoDivider {
+  color: var(--color-overlay1);
+  font-size: var(--font-size-sm);
+  user-select: none;
+}
+
+.todoTime {
+  font-size: var(--font-size-xs);
+  color: var(--color-subtext1);
+}
+
+.todoTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.todoAction {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-subtext0);
+}
+
+.authorAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-overlay0);
+}
+
+.authorName {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.actionLabel {
+  color: var(--color-subtext1);
+}
+
+.todoBody {
+  font-size: var(--font-size-sm);
+  color: var(--color-subtext0);
+  line-height: 1.5;
+  padding: var(--spacing-sm);
+  background: var(--color-base);
+  border-radius: var(--spacing-xs);
+  border-left: 3px solid var(--color-overlay1);
+  margin-top: var(--spacing-xs);
+}
+
+.todoActions {
+  display: flex;
+  align-items: flex-start;
+  padding-top: var(--spacing-xxs);
+}
+
+.todoActions button {
+  min-width: auto;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.todoActions button i {
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .todoItem:hover {
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05);
+  }
+}
+
+@media (max-width: 768px) {
+  .todosWrapper {
+    padding: var(--spacing-sm);
+  }
+
+  .todoItem {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .todoActions {
+    align-self: stretch;
+  }
+
+  .todoActions button {
+    width: 100%;
+  }
+}

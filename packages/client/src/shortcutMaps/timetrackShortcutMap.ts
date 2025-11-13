@@ -10,7 +10,7 @@ import ShortcutRegistry from "./shortcutRegistry";
 import { KeyboardShortcutCategory, type KeyboardShortcutMap } from "./types";
 
 const shortcuts: KeyboardShortcutMap = {
-  key: "timetrack",
+  key: ["timetrack"],
   shortcuts: [
     {
       key: ["k", "ArrowUp"],

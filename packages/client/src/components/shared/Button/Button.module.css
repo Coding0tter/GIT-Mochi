@@ -6,7 +6,9 @@
   border-radius: var(--spacing-xs);
   cursor: pointer;
   font-size: var(--font-size-sm);
-  transition: background-color 0.3s ease, transform 0.2s;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s;
 
   &.primary {
     background-color: var(--color-blue);
@@ -17,6 +19,16 @@
 
     &:hover {
       background-color: var(--color-surface0);
+    }
+  }
+
+  &:disabled {
+    background-color: var(--color-overlay0);
+    color: var(--color-subtext0);
+    cursor: not-allowed;
+
+    &:hover {
+      background-color: var(--color-overlay0);
     }
   }
 }

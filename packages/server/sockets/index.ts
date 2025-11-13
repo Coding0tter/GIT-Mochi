@@ -5,9 +5,8 @@ export class SocketHandler {
   private static instance: SocketHandler | null = null;
   private io: Server | null = null;
 
-  private constructor() {} // Private constructor to prevent direct instantiation
+  private constructor() {}
 
-  // Method to get the singleton instance
   public static getInstance(): SocketHandler {
     if (!SocketHandler.instance) {
       SocketHandler.instance = new SocketHandler();
@@ -15,7 +14,6 @@ export class SocketHandler {
     return SocketHandler.instance;
   }
 
-  // Init function to start the WebSocket connection
   public init(server: any) {
     if (this.io) {
       console.log("Socket.IO is already initialized.");
@@ -24,7 +22,7 @@ export class SocketHandler {
 
     this.io = new Server(server, {
       cors: {
-        origin: "*", // You can specify allowed origins here
+        origin: "*",
       },
     });
 
@@ -32,7 +30,6 @@ export class SocketHandler {
       console.log("New connection: " + socket.id);
       logInfo("New connection: " + socket.id);
 
-      // Listen for ping events and respond with pong
       socket.on("ping", () => {
         socket.emit("pong");
       });
@@ -43,7 +40,6 @@ export class SocketHandler {
     });
   }
 
-  // Method to get the io instance
   public getIO(): Server {
     if (!this.io) {
       throw new Error("Socket.IO not initialized");

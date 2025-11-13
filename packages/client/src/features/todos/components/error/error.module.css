@@ -1,0 +1,44 @@
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl);
+  text-align: center;
+  background: var(--color-surface0);
+  border-radius: var(--spacing-md);
+  border: 2px solid var(--color-red);
+  height: 100%;
+}
+
+.errorIcon {
+  font-size: 64px;
+  margin-bottom: var(--spacing-md);
+}
+
+.errorState h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--color-red);
+  font-size: var(--font-size-lg);
+}
+
+.errorState p {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--color-subtext1);
+}
+
+.retryButton {
+  background-color: var(--color-blue);
+  color: var(--color-crust);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--spacing-xs);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: background-color 0.2s ease;
+}
+
+.retryButton:hover {
+  background-color: var(--color-sapphire);
+}

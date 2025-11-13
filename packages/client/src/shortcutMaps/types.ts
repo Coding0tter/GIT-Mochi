@@ -9,7 +9,7 @@ export enum KeyboardShortcutCategory {
 }
 
 export type KeyboardShortcutMap = {
-  key: string;
+  key: string[];
   shortcuts: Shortcut[];
 };
 

@@ -1,0 +1,49 @@
+.column {
+  flex: 1;
+  background: var(--color-base);
+  border-radius: var(--spacing-md);
+  padding: var(--spacing-sm);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  overflow: auto;
+  transition: all 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--color-subtext1, #cbd5f5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.list {
+  flex: 1;
+  min-height: 100px;
+  padding: 4px;
+  border-radius: 8px;
+  transition: background-color 200ms ease;
+}
+
+.list.droppable {
+  background-color: rgba(136, 192, 208, 0.05);
+}
+
+.placeholder {
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 2px dashed rgba(136, 192, 208, 0.5);
+  background: rgba(136, 192, 208, 0.1);
+  min-height: 20px;
+  box-sizing: border-box;
+}
+
+.ghost {
+  opacity: 0.4;
+  pointer-events: none;
+}

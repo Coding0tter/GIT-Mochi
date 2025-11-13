@@ -1,4 +1,4 @@
-import { createEffect, onCleanup } from "solid-js";
+import { createEffect, onCleanup, Show } from "solid-js";
 import type { Notification } from "@client/services/notificationService";
 import styles from "./Notification.module.css";
 
@@ -34,7 +34,9 @@ const NotificationComponent = (props: { notification: Notification }) => {
       }}
     >
       <strong>{props.notification.title}</strong>
-      <p>{props.notification.description}</p>
+      <Show when={props.notification.description}>
+        <p>{props.notification.description}</p>
+      </Show>
     </div>
   );
 };

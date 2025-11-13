@@ -3,10 +3,6 @@ import { settingsService } from "@client/services/settingsService";
 import { createResource, createSignal, For, Suspense } from "solid-js";
 import styles from "./Reviewer.module.css";
 
-type Reviewer = {
-  id: string;
-};
-
 const ReviewerSettings = () => {
   const [input, setInput] = createSignal("");
   const [reviewerIds, { refetch }] = createResource(

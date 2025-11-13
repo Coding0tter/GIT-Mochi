@@ -1,4 +1,6 @@
 import axios, { AxiosError } from "axios";
+import { has } from "lodash";
+import type { IDiscussion, ITask } from "shared/types/task";
 import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
 import { fetchTasksAsync, getColumnTasks } from "../stores/taskStore";
 import {
@@ -7,10 +9,8 @@ import {
   setLoading,
   uiStore,
 } from "../stores/uiStore";
-import { addNotification } from "./notificationService";
 import { openBranchNameModal } from "./modalService";
-import { has } from "lodash";
-import type { IDiscussion, ITask } from "shared/types/task";
+import { addNotification } from "./notificationService";
 
 export const syncGitlabAsync = async () => {
   try {
@@ -113,24 +113,6 @@ export const replyToDiscussionAsync = async (
   }
 };
 
-export const markTodoAsDone = async (id: number) => {
-  try {
-    const res = await axios.post(`/git/mark_as_done`, { id });
-    addNotification({
-      title: "Todo marked as done",
-      description: "The todo has been marked as done",
-      type: "success",
-    });
-    return res;
-  } catch (error) {
-    addNotification({
-      title: "Error",
-      description: "Failed to mark todo as done",
-      type: "error",
-    });
-  }
-};
-
 export const toggleDraft = async (taskId: string) => {
   try {
     const res = await axios.post(`/git/toggle-draft`, { taskId });
@@ -173,13 +155,6 @@ export const assignTaskAsync = async (taskId: string, userId: string) => {
 export const assignTaskForReview = async (taskId: string, userId: string) => {
   const res = await axios.post(`/git/assign-for-review`, { userId, taskId });
   return res;
-};
-
-export const openSelectedTaskLink = () => {
-  window.open(
-    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex].web_url,
-    "_blank",
-  );
 };
 
 export const createMergeRequestAndBranchForSelectedTaskAsync = async () => {

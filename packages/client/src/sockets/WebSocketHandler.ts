@@ -1,3 +1,4 @@
+import { TaskV2Sockets } from "@client/sockets/task.sockets.ts";
 import { TaskSockets } from "@client/sockets/taskSockets";
 import { setConnected } from "@client/stores/uiStore";
 import { Socket, io } from "socket.io-client";
@@ -5,6 +6,8 @@ import { Socket, io } from "socket.io-client";
 export class WebSocketHandler {
   private socket: Socket | null = null;
   private taskSockets: TaskSockets = new TaskSockets();
+  private _taskV2Sockets: TaskV2Sockets = new TaskV2Sockets();
+
   private static instance: WebSocketHandler | null = null;
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 10;
@@ -63,6 +66,7 @@ export class WebSocketHandler {
     this.socket.on("pong", () => {});
 
     this.taskSockets.addListeners(this.socket);
+    this._taskV2Sockets.addListeners(this.socket);
   }
 
   private reconnect() {
@@ -73,7 +77,7 @@ export class WebSocketHandler {
 
     this.reconnectAttempts++;
     console.log(
-      `Reconnecting attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`
+      `Reconnecting attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`,
     );
 
     setTimeout(() => {

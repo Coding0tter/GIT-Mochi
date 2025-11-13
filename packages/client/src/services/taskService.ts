@@ -1,4 +1,10 @@
+import {
+  currentTask,
+  moveTask,
+} from "@client/shared/stores/keyboard-navigation.store.ts";
 import axios from "axios";
+import { orderBy } from "lodash";
+import type { ITask } from "shared/types/task";
 import { STATES } from "../constants";
 import {
   keyboardNavigationStore,
@@ -15,11 +21,9 @@ import {
 } from "../stores/taskStore";
 import { addNotification } from "./notificationService";
 import { Direction } from "./taskNavigationService";
-import { orderBy } from "lodash";
-import type { ITask } from "shared/types/task";
 
 export const debugLogTask = () => {
-  const task = getColumnTasks()[keyboardNavigationStore.selectedTaskIndex];
+  const task = currentTask();
   console.log(task);
 };
 
@@ -44,19 +48,6 @@ export const restoreSelectedTaskAsync = async () => {
       type: "error",
     });
   }
-};
-
-export const copyBranchToClipboard = () => {
-  const task = getColumnTasks()[keyboardNavigationStore.selectedTaskIndex];
-  const branch = task.branch;
-
-  navigator.clipboard.writeText(branch || "");
-
-  addNotification({
-    title: "Copied to clipboard",
-    description: "Branch name has been copied",
-    type: "success",
-  });
 };
 
 export const createTaskAsync = async (task: Partial<ITask>) => {
@@ -107,6 +98,8 @@ export const deleteTasksAsync = async (taskIndexes: number[]) => {
 };
 
 export const moveSelectedTasksAsync = async (direction: Direction) => {
+  await moveTask(direction);
+
   const { selectedColumnIndex, selectedTaskIndexes } = keyboardNavigationStore;
   const tasksToMove = getColumnTasks().filter((_task, index) =>
     selectedTaskIndexes.includes(index),

@@ -1,75 +1,28 @@
-import { STATES } from "../constants";
-import { keyboardNavigationStore } from "../stores/keyboardNavigationStore";
-import {
-  closeModal,
-  handleCloseModal,
-  modalStore,
-  ModalType,
-  openModal,
-  setSelectedAppointmentForModal,
-  setSelectedTaskForModal,
-} from "../stores/modalStore";
-import { getColumnTasks } from "../stores/taskStore";
-import { timeTrackStore } from "../stores/timeTrackStore";
 import type { ITask } from "shared/types/task";
-
-export const openHelpModal = () => {
-  openModal(ModalType.Help);
-};
+import { handleCloseModal } from "../stores/modalStore";
 
 export const openDeleteModal = () => {
-  openModal(ModalType.DeleteTask);
-  setSelectedTaskForModal(
-    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex],
-  );
+  console.log("open detail not implemented");
 };
 
 export const openCreateModal = () => {
-  openModal(ModalType.CreateTask);
-  setSelectedTaskForModal({
-    title: "",
-    description: "",
-    status: STATES.at(0)!.id,
-  });
+  console.log("open create not implemented");
 };
 
 export const openEditTaskModal = () => {
-  openModal(ModalType.CreateTask);
-  setSelectedTaskForModal(
-    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex],
-  );
+  console.log("open edit not implemented");
 };
 
 export const openEditAppointmentModal = () => {
-  openModal(ModalType.EditAppointment);
-  setSelectedAppointmentForModal(
-    timeTrackStore.entries[keyboardNavigationStore.selectedAppointmentIndex],
-  );
-};
-
-export const openDetailsModal = () => {
-  setSelectedTaskForModal(
-    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex],
-  );
-
-  openModal(ModalType.TaskDetails);
+  console.log("open edit appointment not implemented");
 };
 
 export const openPipelineModal = () => {
-  setSelectedTaskForModal(
-    getColumnTasks()[keyboardNavigationStore.selectedTaskIndex],
-  );
-
-  openModal(ModalType.Pipeline);
+  console.log("open pipeline not implemented");
 };
 
 export const openBranchNameModal = (task: ITask) => {
-  setSelectedTaskForModal(task);
-  openModal(ModalType.BranchName);
-};
-
-export const getTopModal = () => {
-  return modalStore.activeModals?.at(-1) ?? ModalType.None;
+  console.log("open branch name not implemented");
 };
 
 export const closeTopModal = () => {

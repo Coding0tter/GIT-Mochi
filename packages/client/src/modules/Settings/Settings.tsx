@@ -1,6 +1,7 @@
 import ReviewerSettings from "@client/components/Settings/Reviewer/Reviewer";
 import styles from "./Settings.module.css";
 import Card from "@client/components/shared/Card/Card";
+import LabelOrderSettings from "@client/components/Settings/LabelOrder/LabelOrder";
 
 const Settings = () => {
   return (
@@ -9,6 +10,9 @@ const Settings = () => {
       <div class={styles.row}>
         <Card>
           <ReviewerSettings />
+        </Card>
+        <Card>
+          <LabelOrderSettings />
         </Card>
       </div>
     </div>

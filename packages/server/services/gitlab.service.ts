@@ -109,7 +109,16 @@ export class GitlabService {
         source_branch: branchName,
         target_branch: "develop",
         title: `Draft: Resolve "${issue.title}"`,
-        description: `Closes #${issue.gitlabIid}`,
+        description: `## Checks before submitting this MR to review
+- [ ] Review completed according to: https://git.latido.at/latido/latido/-/blob/develop/CODEREVIEW.md 
+- [ ] Merge request is not draft
+- [ ] Merge request has appropriate title, summarizing all changes
+- [ ] Merge request contains a release note if customer facing changes has been made
+- [ ] Closes #issuenr in commit message
+- [ ] Commits properly structured that work on their own with meaningful messages
+- [ ] Pipeline is Green
+- [ ] \`!important\` tag in commit message to advise caution during update (eg. dependency on microservice update: \`!important update scheduling first\`) 
+Closes #${issue.gitlabIid}`,
         assignee_id: userId,
         labels: issue.labels?.join(","),
         milestone_id: issue.milestoneId,
@@ -121,8 +130,7 @@ export class GitlabService {
     const changes: Partial<ITask>[] = [];
 
     const openMergeRequests = await this.taskService.getAllAsync({
-      type: "merge_request",
-      status: { $nin: ["closed"] },
+      type: { $in: ["merge_request", "review"] },
       deleted: false,
     });
 
@@ -167,6 +175,7 @@ export class GitlabService {
       if (mergeRequest.state === "merged" || mergeRequest.state === "closed") {
         await this.taskEmitter.updateTaskAsync(mr._id as string, {
           status: "closed",
+          deleted: true,
         });
         changes.push({ ...mr, status: "closed" });
       }

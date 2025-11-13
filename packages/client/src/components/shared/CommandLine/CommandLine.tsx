@@ -26,11 +26,12 @@ import {
   uiStore,
 } from "../../../stores/uiStore";
 import styles from "./CommandLine.module.css";
+import { setInput } from "@client/shared/stores/commandline.store.ts";
 
 const CommandLine = () => {
   createEffect(() => {
     if (uiStore.inputMode === InputMode.Commandline) {
-      setCommandInputValue("");
+      setInput("");
       setDropdownValues([
         ...COMMANDS.map((command) => ({
           value: command,
@@ -64,7 +65,7 @@ const CommandLine = () => {
     setCommandInputValue(input.value);
     setActiveDropdownIndex(0);
     if (uiStore.inputMode === InputMode.Search) {
-      setCommandInputValue(input.value);
+      setInput(input.value);
     }
   };
 

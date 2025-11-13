@@ -1,0 +1,13 @@
+.todosWrapper {
+  padding: var(--spacing-md);
+  height: calc(100% - 30px - var(--spacing-sm));
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.todosContainer {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}

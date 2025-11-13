@@ -1,16 +1,19 @@
-import { modalStore, ModalType } from "@client/stores/modalStore";
+import { modalStore } from "@client/stores/modalStore";
 import ShortcutRegistry from "./shortcutRegistry";
 import { type KeyboardShortcutMap, KeyboardShortcutCategory } from "./types";
 import { TaskDetailsModalService } from "@client/components/modals/TaskDetailsModal/task-details-modal.store";
 import { Direction } from "@client/services/taskNavigationService";
-import { closeTopModal } from "@client/services/modalService";
+import {
+  handleCloseModal,
+  ModalType,
+} from "@client/shared/stores/modal.store.ts";
 
 const shortcuts: KeyboardShortcutMap = {
-  key: ModalType.TaskDetails,
+  key: [ModalType.DetailView],
   shortcuts: [
     {
       key: ["q", "Escape"],
-      action: () => closeTopModal(),
+      action: () => handleCloseModal(),
       category: KeyboardShortcutCategory.TaskDetails,
       description: "Close modal",
     },

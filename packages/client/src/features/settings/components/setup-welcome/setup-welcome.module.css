@@ -1,0 +1,143 @@
+.welcomeStep {
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcomeStep h2 {
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text);
+  font-size: 1.75rem;
+  font-weight: 600;
+  animation: fadeIn 0.5s ease-out 0.1s backwards;
+}
+
+.welcomeStep p {
+  color: var(--color-subtext1);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+  animation: fadeIn 0.5s ease-out 0.2s backwards;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-base);
+  border-radius: var(--spacing-sm);
+  color: var(--color-text);
+  transition: all 0.3s ease;
+  animation: slideInLeft 0.4s ease-out backwards;
+}
+
+.feature:nth-child(1) {
+  animation-delay: 0.3s;
+}
+
+.feature:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.feature:hover {
+  background: var(--color-surface1);
+  transform: translateX(4px);
+}
+
+.feature i {
+  font-size: var(--font-size-lg);
+  color: var(--color-blue);
+  width: 30px;
+  transition: transform 0.3s ease;
+}
+
+.feature:hover i {
+  transform: scale(1.1);
+}
+
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: var(--color-base);
+  border-radius: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  animation: fadeIn 0.5s ease-out 0.5s backwards;
+  transition: all 0.3s ease;
+}
+
+.userCard:hover {
+  background: var(--color-surface1);
+}
+
+.userAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid var(--color-overlay1);
+  transition: all 0.3s ease;
+}
+
+.userCard:hover .userAvatar {
+  border-color: var(--color-blue);
+  transform: scale(1.05);
+}
+
+.userInfo {
+  flex: 1;
+  text-align: left;
+}
+
+.userInfo h3 {
+  color: var(--color-text);
+  margin-bottom: var(--spacing-xs);
+  font-weight: 600;
+}
+
+.userInfo p {
+  color: var(--color-subtext1);
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.welcomeStep button {
+  animation: fadeIn 0.5s ease-out 0.6s backwards;
+  transition: all 0.3s ease;
+}
+
+.welcomeStep button:hover {
+  transform: translateY(-2px);
+}
+
+.welcomeStep button:active {
+  transform: translateY(0);
+}

@@ -20,8 +20,11 @@ export enum LoadingTarget {
   LoadDiscussions,
   Commandline,
   SyncGitlab,
+  Users,
   LoadTasks,
   Todos,
+  Labels,
+  Projects,
   None,
 }
 

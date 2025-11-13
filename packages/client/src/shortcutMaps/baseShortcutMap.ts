@@ -1,15 +1,19 @@
-import { closeTopModal, openHelpModal } from "../services/modalService";
+import {
+  handleCloseModal,
+  ModalType,
+  openModal,
+} from "@client/shared/stores/modal.store.ts";
 import { focusInput } from "../services/uiService";
 import { InputMode } from "../stores/uiStore";
 import ShortcutRegistry from "./shortcutRegistry";
 import { type KeyboardShortcutMap, KeyboardShortcutCategory } from "./types";
 
 const shortcuts: KeyboardShortcutMap = {
-  key: "base",
+  key: ["base"],
   shortcuts: [
     {
       key: ["q", "Escape"],
-      action: () => closeTopModal(),
+      action: () => handleCloseModal(),
       category: KeyboardShortcutCategory.Commands,
       description: "Close modal",
     },
@@ -35,7 +39,7 @@ const shortcuts: KeyboardShortcutMap = {
     {
       shiftKey: true,
       key: "?",
-      action: () => openHelpModal(),
+      action: () => openModal(ModalType.Help),
       category: KeyboardShortcutCategory.Commands,
       description: "Open help",
     },

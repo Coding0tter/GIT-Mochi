@@ -1,4 +1,3 @@
-import { handleCloseModal } from "../stores/modalStore";
 import { InputMode, setInputMode, uiStore } from "../stores/uiStore";
 
 export const focusInput = (inputMode: InputMode) => {

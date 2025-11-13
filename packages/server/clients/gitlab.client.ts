@@ -30,11 +30,11 @@ export class GitlabClient {
     type: "merge_request" | "issue",
     userId: number,
     projectId: string,
-    lastSyncDate: Date | null,
+    lastSyncDate: string | null,
   ) {
     return await fetchAllFromPaginatedApiAsync((pagination) =>
       this.paginatedRequest({
-        endpoint: `/projects/${projectId}/${type}s/?assignee_id=${userId}&page=${pagination.currentPage}&per_page=${pagination.limit}${lastSyncDate ? "&updated_after=" + lastSyncDate.toISOString() : ""}`,
+        endpoint: `/projects/${projectId}/${type}s/?assignee_id=${userId}&page=${pagination.currentPage}&per_page=${pagination.limit}${lastSyncDate ? "&updated_after=" + lastSyncDate : ""}`,
         method: "GET",
       }),
     );
@@ -43,10 +43,10 @@ export class GitlabClient {
   public async getReviews(
     userId: number,
     projectId: string,
-    lastSyncDate: Date | null,
+    lastSyncDate: string | null,
   ) {
     return await this.request({
-      endpoint: `/projects/${projectId}/merge_requests?scope=all&state=opened&reviewer_id=${userId}${lastSyncDate ? "&updated_after=" + lastSyncDate.toISOString() : ""}`,
+      endpoint: `/projects/${projectId}/merge_requests?scope=all&state=opened&reviewer_id=${userId}${lastSyncDate ? "&updated_after=" + lastSyncDate : ""}`,
       method: "GET",
     });
   }
@@ -55,7 +55,7 @@ export class GitlabClient {
     type: "merge_request" | "issue",
     projectId: string,
     existingEntities: number[],
-    lastSyncDate: Date | null,
+    lastSyncDate: string | null,
   ) {
     const remoteEntities: any[] = [];
     const deadTasks: any[] = [];
@@ -67,7 +67,7 @@ export class GitlabClient {
         try {
           const query = chunk.map((iid) => `iids[]=${iid}`).join("&");
           const fetched = await this.request({
-            endpoint: `/projects/${projectId}/${type}s?${query}&per_page=${CHUNK_SIZE + 1}${lastSyncDate ? "&updated_after=" + lastSyncDate.toISOString() : ""}`,
+            endpoint: `/projects/${projectId}/${type}s?${query}&per_page=${CHUNK_SIZE + 1}${lastSyncDate ? "&updated_after=" + lastSyncDate : ""}`,
             method: "GET",
           });
           remoteEntities.push(...fetched);

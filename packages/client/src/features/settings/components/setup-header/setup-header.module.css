@@ -1,0 +1,86 @@
+.header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  width: 100%;
+  max-width: 600px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.logo {
+  width: 100px;
+  height: 100px;
+  margin-bottom: var(--spacing-md);
+  animation: logoFloat 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.header h1 {
+  color: var(--color-text);
+  margin-bottom: var(--spacing-lg);
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.progress {
+  width: 100%;
+  height: 4px;
+  background: var(--color-overlay0);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-blue) 0%,
+    var(--color-sapphire) 100%
+  );
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}

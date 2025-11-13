@@ -62,7 +62,7 @@ const TaskColumn = (props: TaskColumnProps) => {
             return 6;
           },
         )
-      : props.tasks;
+      : orderBy(props.tasks, (task) => task.pipelineStatus);
   };
 
   return (

@@ -9,6 +9,7 @@
   align-items: center;
   justify-content: space-between;
   font-size: var(--font-size-sm);
+  padding: 0;
   z-index: 1000;
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -17,13 +18,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--color-crust);
-  padding: var(--spacing-xxs) var(--spacing-xs);
   border-radius: var(--spacing-xxs);
   font-size: var(--font-size-xs);
   display: inline-block;
-  margin-top: var(--spacing-xxs);
-  margin-right: var(--spacing-xxs);
-  margin-left: var(--spacing-xxs);
+  margin: var(--spacing-xxs);
 
   &.time {
     background-color: var(--color-green);
@@ -31,5 +29,18 @@
 
   &.appointment {
     background-color: var(--color-blue);
+  }
+}
+
+.rotate {
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }

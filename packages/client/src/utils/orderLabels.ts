@@ -1,11 +1,11 @@
 import { sortBy } from "lodash";
 
 const priorityOrder = [
-  "priority/INTERMEDIATE",
-  "priority/STAGING",
-  "priority/HIGH",
-  "priority/MEDIUM",
-  "priority/LOW",
+  "priority::INTERMEDIATE",
+  "priority::STAGING",
+  "priority::HIGH",
+  "priority::MEDIUM",
+  "priority::LOW",
 ];
 
 export const orderPriorityLabels = (labels: string[]) =>

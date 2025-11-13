@@ -5,15 +5,16 @@ import {
   type JSXElement,
   type ParentComponent,
 } from "solid-js";
-import { modalStore } from "../../../stores/modalStore";
 import styles from "./BaseModal.module.css";
 import Button from "../../shared/Button/Button";
+import { modalStore } from "@client/shared/stores/modal.store.ts";
 
 export interface BaseModalProps {
   onClose?: () => void;
   closeText?: string;
   onSubmit?: () => void;
   submitText?: string | (() => string);
+  disableSubmit?: boolean;
 }
 
 const BaseModal: ParentComponent<BaseModalProps> = (props): JSXElement => {
@@ -36,7 +37,11 @@ const BaseModal: ParentComponent<BaseModalProps> = (props): JSXElement => {
         <div class={styles.modalContent}>{props.children}</div>
         <div class={styles.modalButtons}>
           {props.submitText !== undefined && (
-            <Button type="primary" onClick={props.onSubmit!}>
+            <Button
+              disabled={props.disableSubmit}
+              type="primary"
+              onClick={props.onSubmit!}
+            >
               {props.submitText instanceof Function
                 ? props.submitText()
                 : props.submitText}

@@ -1,0 +1,25 @@
+.todosHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--color-overlay0);
+}
+
+.todosHeader h1 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.todoCount {
+  background: var(--color-blue);
+  color: var(--color-crust);
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  border-radius: 20px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  min-width: 32px;
+  text-align: center;
+}

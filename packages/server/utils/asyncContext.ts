@@ -2,6 +2,7 @@ import { AsyncLocalStorage } from "async_hooks";
 
 export enum ContextKeys {
   Project = "currentProject",
+  GitlabToken = "gitlabToken",
 }
 
 export const asyncLocalStorage = new AsyncLocalStorage<Map<string, any>>();

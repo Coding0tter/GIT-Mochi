@@ -1,0 +1,128 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.label {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.inputGroup {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.input {
+  flex: 1;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-surface1);
+  border-radius: 6px;
+  font-size: var(--font-size-sm);
+  background: var(--color-surface0);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input::placeholder {
+  color: var(--color-overlay0);
+}
+
+.input:focus {
+  border-color: var(--color-blue);
+}
+
+.addBtn {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: none;
+  border-radius: 6px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  background: var(--color-blue);
+  color: var(--color-base);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addBtn:hover {
+  background: var(--color-sapphire);
+}
+
+.labelList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-surface0);
+  border: 1px solid var(--color-surface1);
+  border-radius: 6px;
+  transition: background-color 0.15s, box-shadow 0.15s;
+  color: var(--color-text);
+  cursor: grab;
+}
+
+.labelRow:hover {
+  background-color: var(--color-surface1);
+}
+
+.labelRow.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.dragHandle {
+  color: var(--color-overlay0);
+  font-size: var(--font-size-lg);
+  line-height: 1;
+  cursor: grab;
+  user-select: none;
+  display: flex;
+  align-items: center;
+}
+
+.labelRow.dragging .dragHandle {
+  cursor: grabbing;
+}
+
+.labelName {
+  flex: 1;
+  font-size: var(--font-size-sm);
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-red);
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: var(--spacing-lg);
+  height: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.15s;
+}
+
+.removeBtn:hover {
+  background-color: rgba(237, 135, 150, 0.2);
+}
+
+.loading,
+.empty {
+  padding: var(--spacing-sm);
+  text-align: center;
+  color: var(--color-subtext0);
+  font-size: var(--font-size-sm);
+}

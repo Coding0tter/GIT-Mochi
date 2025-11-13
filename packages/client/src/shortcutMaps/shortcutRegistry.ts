@@ -32,7 +32,7 @@ class ShortcutRegistry {
   }
 
   public getShortcutsByKey(key: string) {
-    return ShortcutRegistry.shortcutMaps.find((sc) => sc.key === key);
+    return ShortcutRegistry.shortcutMaps.find((sc) => sc.key.includes(key));
   }
 
   public resetShortcutRegistry() {

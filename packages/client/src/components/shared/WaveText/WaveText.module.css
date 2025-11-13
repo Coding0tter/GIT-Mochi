@@ -1,6 +1,7 @@
 .waveText {
   display: flex;
   overflow: hidden;
+  padding-top: 0.2em;
 
   --color-start: var(--color-blue);
   --color-end: var(--color-sapphire);

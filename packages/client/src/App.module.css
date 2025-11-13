@@ -2,6 +2,48 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.app.halloween::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10000;
+  border: 8px solid transparent;
+  border-image: repeating-linear-gradient(
+    45deg,
+    #ff6b00 0px,
+    #ff6b00 20px,
+    #1a1a1a 20px,
+    #1a1a1a 40px,
+    #6b2fb5 40px,
+    #6b2fb5 60px
+  ) 1;
+  box-shadow:
+    inset 0 0 30px rgba(255, 107, 0, 0.2),
+    inset 0 0 60px rgba(107, 47, 181, 0.15);
+}
+
+.app.halloween::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  pointer-events: none;
+  z-index: 10000;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(255, 107, 0, 0.15) 0%, transparent 3%),
+    radial-gradient(circle at 90% 10%, rgba(107, 47, 181, 0.15) 0%, transparent 3%),
+    radial-gradient(circle at 10% 90%, rgba(107, 47, 181, 0.15) 0%, transparent 3%),
+    radial-gradient(circle at 90% 90%, rgba(255, 107, 0, 0.15) 0%, transparent 3%);
 }
 
 .container {
@@ -12,4 +54,15 @@
   flex-grow: 1;
   height: auto;
   overflow-y: scroll;
+}
+
+.witch {
+  position: fixed;
+  width: 120px;
+  height: auto;
+  z-index: 9999;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(107, 47, 181, 0.5));
+  left: -10vw;
+  top: 50vh;
 }

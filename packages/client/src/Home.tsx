@@ -23,7 +23,7 @@ const Home = () => {
 
         <div class={styles.features}>
           <div
-            onClick={() => handleClick("/kanban")}
+            onClick={() => handleClick("/app/kanban")}
             class={`${styles.featureCard} ${styles.kanban}`}
           >
             <h2>Kanban Board</h2>
@@ -45,7 +45,7 @@ const Home = () => {
           </div>
 
           <div
-            onClick={() => handleClick("/todo")}
+            onClick={() => handleClick("/app/todo")}
             class={`${styles.featureCard} ${styles.todo}`}
           >
             <h2>Todo Tool</h2>
